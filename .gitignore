@@ -1,12 +1,9 @@
-# Secrets and environments
 .env
 .env.*
 !.env.example
 .venv/
 venv/
 .streamlit/secrets.toml
-
-# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -14,19 +11,13 @@ __pycache__/
 .mypy_cache/
 .coverage
 htmlcov/
-
-# Data and databases
 data/raw/*
 data/processed/*
 *.db
 *.sqlite*
-
-# IDE / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# Logs
 *.log
 logs/
