@@ -21,22 +21,25 @@ from prism.reporting.metrics import (
     product_performance,
     region_performance,
 )
+from prism.ui.theme import apply_theme, theme_selector
 
 st.set_page_config(page_title="PRISM", page_icon="◈", layout="wide")
 logger = configure_logging()
 session_id = st.session_state.setdefault("session_id", str(uuid.uuid4()))
 require_access(session_id)
 
-st.title("PRISM")
-st.caption("Product reporting intelligence for practical strategic decisions")
-
 with st.sidebar:
     st.subheader("Workspace")
+    theme = theme_selector()
     demo_label = "Demo data" if settings.enable_demo_mode else "Sample data"
     choices = [demo_label, "Upload file"] if settings.enable_sample_data else ["Upload file"]
     source = st.radio("Choose data", choices, label_visibility="collapsed")
     uploaded = st.file_uploader("CSV or XLSX", type=["csv", "xlsx"]) if source == "Upload file" else None
     st.caption(f"Version {settings.app_version} · {settings.app_env}")
+
+apply_theme(theme)
+st.title("PRISM")
+st.caption("Product reporting intelligence for practical strategic decisions")
 
 try:
     if uploaded is not None:
