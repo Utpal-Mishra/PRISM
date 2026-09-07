@@ -1,6 +1,6 @@
-from pathlib import Path
 import sys
 import uuid
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -18,26 +18,32 @@ require_access(session_id)
 st.title("About PRISM")
 st.caption("Product Reporting Intelligence & Strategy Management")
 st.write(
-    "PRISM converts product reporting data into trusted performance metrics, "
-    "clear business observations, and progressively richer strategic decisions."
+    "PRISM converts uploaded business data into trusted reporting, analytical evidence, "
+    "predictive signals, forecasts and practical strategy recommendations."
 )
 
 st.subheader("Current release")
-st.write(f"Version **{settings.app_version}** adds the production-readiness foundation around the reporting engine.")
+st.write(
+    f"Version **{settings.app_version}** introduces the enterprise intelligence foundation "
+    "for domain-agnostic analysis and decision support."
+)
 
-st.subheader("Eight-module roadmap")
+st.subheader("Intelligence roadmap")
 st.markdown(
     """
 1. Reporting and KPI Engine
-2. Forecasting Engine
-3. Customer Intelligence
-4. Marketing Intelligence
-5. Supply Chain Intelligence
+2. Relationship and Driver Intelligence
+3. Forecasting and Predictive Analytics
+4. Customer and Commercial Intelligence
+5. Supply Chain and Operations Intelligence
 6. Sustainability Intelligence
-7. Scenario Simulator
-8. Strategy Advisor
+7. Scenario and Decision Simulation
+8. Strategy Advisor and Governance
 """
 )
 
 st.subheader("Design principles")
-st.markdown("Trusted data · Minimal interface · Explainable outputs · Practical recommendations · Deployment readiness")
+st.markdown(
+    "Trusted data · Minimal interface · Explainable outputs · Practical recommendations · "
+    "Enterprise readiness"
+)

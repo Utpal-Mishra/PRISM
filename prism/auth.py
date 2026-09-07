@@ -32,5 +32,8 @@ def require_access(session_id: str) -> None:
         else:
             record_audit_event("login_failed", session_id)
             st.error("The access code is not valid.")
-    st.info("Authentication is optional in the public demo and can be enabled through deployment secrets.")
+    st.info(
+        "Authentication is optional in the public demo and can be enabled through "
+        "deployment secrets."
+    )
     st.stop()

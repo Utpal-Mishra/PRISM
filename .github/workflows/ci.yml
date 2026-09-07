@@ -18,3 +18,9 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
       - run: pytest -q
+      - name: Validate GitHub Pages application
+        run: |
+          test -f index.html
+          test -f assets/styles.css
+          test -f assets/app.js
+          node --check assets/app.js

@@ -9,7 +9,12 @@ def apply_sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
     products = st.sidebar.multiselect("Product", sorted(df["product_name"].dropna().unique()))
     minimum = df["order_date"].min().date()
     maximum = df["order_date"].max().date()
-    dates = st.sidebar.date_input("Date range", (minimum, maximum), min_value=minimum, max_value=maximum)
+    dates = st.sidebar.date_input(
+        "Date range",
+        (minimum, maximum),
+        min_value=minimum,
+        max_value=maximum,
+    )
 
     output = df.copy()
     if categories:
