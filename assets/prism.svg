@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#0f1724"/>
-  <path d="M32 8 52 32 32 56 12 32 32 8Z" fill="none" stroke="#78e2c1" stroke-width="4"/>
-  <path d="M32 17 44 32 32 47 20 32 32 17Z" fill="#78e2c1" fill-opacity=".16" stroke="#8ab4ff" stroke-width="2"/>
+  <defs>
+    <linearGradient id="prismAccent" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c8f56b"/>
+      <stop offset="1" stop-color="#78e6aa"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0b1712"/>
+  <path d="M32 8 52 32 32 56 12 32 32 8Z" fill="none" stroke="url(#prismAccent)" stroke-width="4"/>
+  <path d="M32 17 44 32 32 47 20 32 32 17Z" fill="#78e6aa" fill-opacity=".12" stroke="#52d98d" stroke-width="2"/>
 </svg>
