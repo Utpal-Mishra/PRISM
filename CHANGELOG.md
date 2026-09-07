@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 — Shared Product Design System
+
+- Aligned PRISM with the visual language used across The Palm, NEXUS and related portfolio products.
+- Standardised the dark green base (`#07110d`), enterprise surfaces, sage text, green (`#78e6aa`) and lime (`#c8f56b`) accents.
+- Updated navigation, upload controls, KPI cards, panels, tables, inputs, strategy cards and buttons to the shared product treatment.
+- Added a browser chart-theme adapter so Plotly visuals use the same product palette.
+- Updated the PRISM icon, browser/PWA theme colours and legacy Streamlit theme for consistency.
+- Added CI checks for the shared design tokens and chart-theme JavaScript.
+
 ## 0.3.0 — Enterprise Intelligence Foundation
 
 - Reframed PRISM from a fixed sales reporting dashboard into a domain-agnostic reporting, analytics and data-strategy workspace.
