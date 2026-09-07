@@ -1,7 +1,7 @@
-from pathlib import Path
 import platform
 import sys
 import uuid
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -26,7 +26,10 @@ theme = st.segmented_control(
     default=st.session_state.get("theme", "System"),
 )
 st.session_state.theme = theme
-st.info("This browser preference is session-based. The deployment default remains in `.streamlit/config.toml`.")
+st.info(
+    "This browser preference is session-based. The deployment default remains in "
+    "`.streamlit/config.toml`."
+)
 
 st.subheader("Application mode")
 st.toggle("Demo mode", value=settings.enable_demo_mode, disabled=True)
@@ -40,7 +43,10 @@ right.write(f"Python: `{platform.python_version()}`")
 right.write(f"Platform: `{platform.system()}`")
 
 st.subheader("Activity audit")
-st.caption("Audit storage is local and ephemeral on Streamlit Community Cloud until a database is introduced.")
+st.caption(
+    "Audit storage is local and ephemeral on Streamlit Community Cloud until a database "
+    "is introduced."
+)
 audit = read_audit_log()
 st.download_button(
     "Download audit log",

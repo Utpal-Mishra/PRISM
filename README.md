@@ -1,95 +1,112 @@
 # PRISM — Product Reporting Intelligence & Strategy Management
 
-PRISM turns product reporting data into trusted KPIs, quality findings, and practical strategic observations.
+PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is now **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release — v0.2.0 Production-Readiness Foundation
+## Current release candidate — v0.3.0 Enterprise Intelligence Foundation
 
-- CSV/XLSX upload and built-in demonstration data
-- Schema validation and data-quality scoring
-- Executive KPIs and responsive filters
-- Revenue, product, and regional reporting
-- Rule-based strategic observations and CSV export
-- Optional access-code authentication for controlled demos
-- Settings and About pages
-- Structured logging, privacy-conscious audit events, and optional Sentry reporting
-- Tests, Ruff, pre-commit, GitHub Actions, Dependabot, Docker, and Streamlit configuration
-- Standard pull-request workflow and generated GitHub release notes
+- Static GitHub Pages application served from `index.html`
+- Domain-agnostic CSV/XLSX upload with local browser processing
+- Synthetic demonstration dataset enabled by default; no real company or customer data is bundled
+- Automated data profiling, quality scoring, duplicate checks, column-role inference and anomaly screening
+- Relationship discovery through numeric correlations and segment performance analysis
+- Monthly forecasting with trend/seasonality, holdout backtesting and uncertainty ranges
+- Browser-side predictive regression/classification with held-out evaluation, baseline comparison and driver importance
+- Strategy Studio that converts evidence into prioritised recommendations and decision-impact statements
+- CSV exports for analysed data and generated strategy signals
+- Responsive dark enterprise interface designed for desktop and mobile
 
-## Run locally
-
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-streamlit run app/Home.py
-```
-
-## Required columns
-
-`order_id`, `order_date`, `product_id`, `product_name`, `category`, `region`, `customer_id`, `quantity`, `unit_price`, `order_status`
-
-Optional: `discount`.
-
-## Environment variables
-
-Copy `.env.example` to `.env` for local development. Never commit `.env` or `.streamlit/secrets.toml`.
+## Core workflow
 
 ```text
-APP_ENV=production
-ENABLE_DEMO_MODE=true
-ENABLE_AUTHENTICATION=false
-APP_ACCESS_CODE=
-SENTRY_DSN=
+Upload / Synthetic Demo
+    ↓
+Profile & Validate
+    ↓
+Describe & Segment
+    ↓
+Discover Relationships & Exceptions
+    ↓
+Predict Outcomes + Forecast Time Series
+    ↓
+Translate Evidence into Strategy Signals
+    ↓
+Export, Govern, Monitor & Iterate
 ```
 
-The access-code gate is intended for demonstrations, not enterprise identity. Audit logs use ephemeral local storage on Streamlit Community Cloud. See [production-readiness boundaries](docs/production_readiness.md).
+PRISM is intentionally **decision-oriented** rather than dashboard-oriented: each analytical module should help answer what changed, what is related, what may happen next, what can be influenced, and what decision the organisation should evaluate.
+
+## GitHub Pages deployment
+
+The repository root contains the deployable static application:
+
+```text
+index.html
+assets/styles.css
+assets/app.js
+assets/prism.svg
+manifest.webmanifest
+404.html
+.nojekyll
+```
+
+GitHub repository settings:
+
+```text
+Settings → Pages
+Source: Deploy from a branch
+Branch: main
+Folder: /(root)
+```
+
+After a validated release is merged to `main`, GitHub Pages publishes the application at:
+
+```text
+https://utpal-mishra.github.io/PRISM/
+```
+
+No build step, Python process, API server or Streamlit deployment is required for the public application.
+
+## Supported input
+
+Current browser input formats: CSV, XLSX and XLS. The XLSX reader and charting library are loaded from pinned CDN versions; CSV parsing and the analytical engine are implemented in the application itself.
+
+PRISM does not require a fixed schema for its generic intelligence layer. It infers numeric, categorical, identifier and date/time fields from the uploaded file and activates analyses supported by the available evidence.
+
+## Privacy model for the GitHub Pages edition
+
+Uploaded files are read using browser File APIs and analysed in browser memory. PRISM does not send the uploaded dataset to a PRISM application server. This is a useful privacy property for the public static edition, but it is **not the same as enterprise security certification**.
+
+Confidential enterprise use still requires organisation-grade identity, approved hosting, encryption, governed persistent storage, tenant isolation, retention controls, secrets management, data lineage, role-based access, monitoring and formal security review.
+
+Predictive drivers and correlations are associations, not causal proof. Strategy signals are decision-support hypotheses and should be reviewed by accountable domain owners.
+
+## Local static preview
+
+From the repository root:
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/`.
+
+## Legacy Python implementation
+
+The `app/` and `prism/` Python packages remain in the repository as the earlier Streamlit implementation and analytical reference while the browser-native edition stabilises. They are **not required by GitHub Pages** and can be retired or repurposed into future authenticated backend services later.
 
 ## Quality checks
 
 ```bash
 pip install -r requirements-dev.txt
-pre-commit install
-pre-commit run --all-files
 ruff check .
 pytest -q
+node --check assets/app.js
 ```
-
-## Deployment
-
-Deploy on Streamlit Community Cloud using:
-
-```text
-Repository: Utpal-Mishra/PRISM
-Branch: main
-Main file: app/Home.py
-```
-
-See [deployment instructions](docs/deployment.md). Merging a validated release into `main` automatically refreshes the connected Streamlit app.
-
-## Release process
-
-1. Build work on `agent/<scope>`.
-2. Open a pull request into `develop` for integration.
-3. Promote a tested release from `develop` into `main`.
-4. Create a version tag such as `v0.2.0`; GitHub Actions generates the release notes.
-
-## Branches
-
-- `main`: deployable releases
-- `develop`: integration
-- `agent/production-readiness`: v0.2.0 implementation
 
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [GitHub Pages deployment](docs/deployment.md)
 - [Data dictionary](docs/data_dictionary.md)
-- [Deployment](docs/deployment.md)
 - [Production readiness](docs/production_readiness.md)
-- [Decisions](docs/decisions.md)
 - [Changelog](CHANGELOG.md)
-
-## Current limitations
-
-PRISM currently uses in-memory uploaded or generated demonstration data. Prototype authentication and local audit storage must be replaced by enterprise identity and persistent infrastructure before confidential multi-user use. Forecasting and the remaining intelligence modules are scheduled for later releases.
