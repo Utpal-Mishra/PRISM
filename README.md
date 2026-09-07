@@ -1,19 +1,40 @@
 # PRISM — Product Reporting Intelligence & Strategy Management
 
-PRISM turns product reporting data into trusted KPIs, quality findings, and practical strategic observations.
+PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. It turns uploaded tabular data into structured evidence, relationships, forecasts, predictive signals and practical strategy recommendations.
 
-## Current release — v0.2.0 Production-Readiness Foundation
+## Current release candidate — v0.3.0 Enterprise Intelligence Foundation
 
-- CSV/XLSX upload and built-in demonstration data
-- Schema validation and data-quality scoring
-- Executive KPIs and responsive filters
-- Revenue, product, and regional reporting
-- Rule-based strategic observations and CSV export
-- Optional access-code authentication for controlled demos
-- Settings and About pages
-- Structured logging, privacy-conscious audit events, and optional Sentry reporting
-- Tests, Ruff, pre-commit, GitHub Actions, Dependabot, Docker, and Streamlit configuration
-- Standard pull-request workflow and generated GitHub release notes
+- Domain-agnostic CSV/XLSX upload: PRISM profiles the uploaded schema instead of requiring a sales-only structure
+- Synthetic demonstration dataset enabled by default; no real company or customer data is bundled
+- Automated data profiling, quality scoring, duplicate checks, column-role inference and anomaly screening
+- Relationship discovery through numeric correlations and segment performance analysis
+- Monthly forecasting with transparent trend + seasonality, holdout backtesting and uncertainty ranges
+- Predictive regression/classification with held-out evaluation, baseline comparison and driver importance
+- Strategy Studio that converts evidence into prioritised recommendations and decision-impact statements
+- Existing sales/order KPIs remain available when PRISM recognises the original reporting schema
+- CSV exports for analysed data and generated strategy signals
+- Optional access-code authentication, structured logging and privacy-conscious audit events
+- Tests, Ruff, pre-commit, GitHub Actions, Dependabot, Docker and Streamlit configuration
+
+## Core workflow
+
+```text
+Upload / Demo
+    ↓
+Profile & Validate
+    ↓
+Describe & Segment
+    ↓
+Discover Relationships & Exceptions
+    ↓
+Predict Outcomes + Forecast Time Series
+    ↓
+Translate Evidence into Strategy Signals
+    ↓
+Export, Govern, Monitor & Iterate
+```
+
+PRISM is intentionally **decision-oriented** rather than dashboard-oriented: each analytical module should help answer what changed, what is related, what may happen next, what can be influenced, and what decision the organisation should evaluate.
 
 ## Run locally
 
@@ -26,11 +47,17 @@ cp .env.example .env
 streamlit run app/Home.py
 ```
 
-## Required columns
+## Supported input
 
-`order_id`, `order_date`, `product_id`, `product_name`, `category`, `region`, `customer_id`, `quantity`, `unit_price`, `order_status`
+Current input formats: CSV, XLSX and XLS.
 
-Optional: `discount`.
+PRISM v0.3 does not require a fixed schema for its generic intelligence layer. It infers numeric, categorical, identifier and date/time fields from the uploaded file. Business-specific reporting modules can activate when a recognised schema is available.
+
+## Safety and enterprise boundary
+
+The built-in demo is synthetic. Uploaded files are analysed in the active Streamlit session, but the public/demo deployment must **not** be treated as a confidential enterprise data platform. Enterprise production use still requires organisation-grade identity, encryption, persistent governed storage, tenant isolation, retention controls, secrets management, data lineage, role-based access, monitoring and approved deployment infrastructure.
+
+Predictive drivers and correlations are associations, not causal proof. Strategy signals are decision-support hypotheses and should be reviewed by accountable domain owners.
 
 ## Environment variables
 
@@ -43,8 +70,6 @@ ENABLE_AUTHENTICATION=false
 APP_ACCESS_CODE=
 SENTRY_DSN=
 ```
-
-The access-code gate is intended for demonstrations, not enterprise identity. Audit logs use ephemeral local storage on Streamlit Community Cloud. See [production-readiness boundaries](docs/production_readiness.md).
 
 ## Quality checks
 
@@ -66,20 +91,7 @@ Branch: main
 Main file: app/Home.py
 ```
 
-See [deployment instructions](docs/deployment.md). Merging a validated release into `main` automatically refreshes the connected Streamlit app.
-
-## Release process
-
-1. Build work on `agent/<scope>`.
-2. Open a pull request into `develop` for integration.
-3. Promote a tested release from `develop` into `main`.
-4. Create a version tag such as `v0.2.0`; GitHub Actions generates the release notes.
-
-## Branches
-
-- `main`: deployable releases
-- `develop`: integration
-- `agent/production-readiness`: v0.2.0 implementation
+See [deployment instructions](docs/deployment.md). A validated v0.3 release should be promoted through the normal branch/release workflow before it reaches `main`.
 
 ## Documentation
 
@@ -87,9 +99,4 @@ See [deployment instructions](docs/deployment.md). Merging a validated release i
 - [Data dictionary](docs/data_dictionary.md)
 - [Deployment](docs/deployment.md)
 - [Production readiness](docs/production_readiness.md)
-- [Decisions](docs/decisions.md)
 - [Changelog](CHANGELOG.md)
-
-## Current limitations
-
-PRISM currently uses in-memory uploaded or generated demonstration data. Prototype authentication and local audit storage must be replaced by enterprise identity and persistent infrastructure before confidential multi-user use. Forecasting and the remaining intelligence modules are scheduled for later releases.
