@@ -38,7 +38,11 @@ def apply_theme(theme: str) -> None:
         <style>
         .stApp {{
             background:
-                radial-gradient(circle at 78% -8%, color-mix(in srgb, {accent_2} 7%, transparent), transparent 28rem),
+                radial-gradient(
+                    circle at 78% -8%,
+                    color-mix(in srgb, {accent_2} 7%, transparent),
+                    transparent 28rem
+                ),
                 {background};
             color: {text};
         }}
@@ -88,6 +92,11 @@ def apply_theme(theme: str) -> None:
 def theme_selector(key: str = "theme") -> str:
     """Render a session-level theme selector and return its value."""
     current = st.session_state.get(key, "Dark")
-    theme = st.selectbox("Appearance", THEMES, index=THEMES.index(current), key=f"{key}_selector")
+    theme = st.selectbox(
+        "Appearance",
+        THEMES,
+        index=THEMES.index(current),
+        key=f"{key}_selector",
+    )
     st.session_state[key] = theme
     return theme
