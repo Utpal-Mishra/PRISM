@@ -87,7 +87,8 @@ def build_strategy_signals(
                     evidence=f"Forecast indicates {change:.1f}% growth versus the recent baseline.",
                     recommendation=(
                         "Validate capacity, inventory, service levels and budget against the "
-                        "projected growth so operational constraints do not become the limiting factor."
+                        "projected growth so operational constraints do not become the "
+                        "limiting factor."
                     ),
                     decision_impact="Aligns resources and operating plans with expected demand.",
                 )
@@ -106,7 +107,8 @@ def build_strategy_signals(
                     ),
                     recommendation=(
                         "Test whether this driver is controllable, validate it with domain owners, "
-                        "and design an experiment or scenario around it before treating it as causal."
+                        "and design an experiment or scenario around it before treating it "
+                        "as causal."
                     ),
                     decision_impact=(
                         "Focuses analysis effort on variables most associated with the target."
@@ -128,7 +130,8 @@ def build_strategy_signals(
                     ),
                     recommendation=(
                         "Investigate the relationship by segment and time period and check for "
-                        "common drivers before using it in policy, investment or operating decisions."
+                        "common drivers before using it in policy, investment or operating "
+                        "decisions."
                     ),
                     decision_impact=(
                         "Surfaces potentially valuable relationships without overstating causality."
@@ -149,8 +152,8 @@ def build_strategy_signals(
                         f"{float(top_share.iloc[0]):.1f}%."
                     ),
                     recommendation=(
-                        "Stress-test dependency on the dominant segment and identify diversification "
-                        "or retention actions appropriate to the business context."
+                        "Stress-test dependency on the dominant segment and identify "
+                        "diversification or retention actions appropriate to the business context."
                     ),
                     decision_impact=(
                         "Makes concentration exposure explicit for planning and risk management."
@@ -168,8 +171,8 @@ def build_strategy_signals(
                     f"'{row['column']}' has {float(row['outlier_pct']):.1f}% potential outliers."
                 ),
                 recommendation=(
-                    "Separate genuine business exceptions from data errors and create threshold-based "
-                    "monitoring for recurring abnormal behaviour."
+                    "Separate genuine business exceptions from data errors and create "
+                    "threshold-based monitoring for recurring abnormal behaviour."
                 ),
                 decision_impact=(
                     "Improves control of operational exceptions and data-quality incidents."
@@ -202,11 +205,13 @@ def build_strategy_signals(
                     "No material automated risk signal was detected in the current configuration."
                 ),
                 recommendation=(
-                    "Define a decision target, select the KPI or outcome to optimise, and use PRISM's "
-                    "prediction and segmentation views to test the strongest available drivers."
+                    "Define a decision target, select the KPI or outcome to optimise, and use "
+                    "PRISM's prediction and segmentation views to test the strongest available "
+                    "drivers."
                 ),
                 decision_impact=(
-                    "Moves the workflow from descriptive reporting toward decision-oriented analysis."
+                    "Moves the workflow from descriptive reporting toward decision-oriented "
+                    "analysis."
                 ),
             )
         )
