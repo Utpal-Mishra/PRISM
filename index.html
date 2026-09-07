@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0f1a" />
+  <meta name="description" content="PRISM — browser-native reporting, analytics and data strategy workspace." />
+  <title>PRISM — Reporting, Analytics & Data Strategy</title>
+  <link rel="icon" href="./assets/prism.svg" type="image/svg+xml" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="./assets/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="PRISM home">
+        <span class="brand-mark">◈</span>
+        <span><strong>PRISM</strong><small>Data → Decisions</small></span>
+      </a>
+
+      <div class="sidebar-block">
+        <p class="eyebrow">DATA SOURCE</p>
+        <button id="demoButton" class="source-card active" type="button">
+          <span>Synthetic enterprise demo</span><small>Safe generated data</small>
+        </button>
+        <label class="source-card upload-card" for="fileInput">
+          <span>Upload your dataset</span><small>CSV / XLSX · processed locally</small>
+        </label>
+        <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" hidden />
+      </div>
+
+      <div class="sidebar-block privacy-box">
+        <p class="eyebrow">PRIVACY</p>
+        <p>Your uploaded file is analysed in this browser. PRISM does not send the dataset to a PRISM server.</p>
+      </div>
+
+      <nav class="nav-list" aria-label="Analysis views">
+        <button class="nav-item active" data-view="overview">Executive Overview</button>
+        <button class="nav-item" data-view="relationships">Relationships</button>
+        <button class="nav-item" data-view="forecast">Forecast</button>
+        <button class="nav-item" data-view="predict">Predict</button>
+        <button class="nav-item" data-view="strategy">Strategy</button>
+        <button class="nav-item" data-view="quality">Data Quality</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span id="versionLabel">v0.3 · GitHub Pages</span>
+        <a href="https://github.com/Utpal-Mishra/PRISM" target="_blank" rel="noreferrer">Repository ↗</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ENTERPRISE REPORTING, ANALYTICS & DATA STRATEGY</p>
+          <h1>Turn data into evidence, foresight and decisions.</h1>
+          <p class="lede">PRISM profiles what you provide, discovers useful relationships, forecasts measurable outcomes, tests predictive signals and converts findings into decision-ready strategy.</p>
+        </div>
+        <div class="status-group">
+          <span class="status-pill"><span class="status-dot"></span>Browser-native</span>
+          <span class="status-pill muted">Static GitHub Pages app</span>
+        </div>
+      </header>
+
+      <section class="dataset-banner">
+        <div><span class="eyebrow">ACTIVE DATASET</span><strong id="datasetName">PRISM synthetic enterprise dataset</strong></div>
+        <div><span id="datasetMode" class="tag">Synthetic demo</span><span id="rowCountTag" class="tag muted">0 rows</span></div>
+      </section>
+
+      <div id="notice" class="notice hidden" role="status"></div>
+
+      <section id="view-overview" class="view active">
+        <div id="metricGrid" class="metric-grid"></div>
+        <div class="two-column">
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">AUTOMATED INTERPRETATION</p><h2>What PRISM sees</h2></div></div>
+            <div id="overviewInsights" class="insight-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">DATA SHAPE</p><h2>Detected structure</h2></div></div>
+            <div id="typeSummary" class="type-summary"></div>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">DATA PREVIEW</p><h2>First records</h2></div><button id="downloadData" class="secondary-button" type="button">Export analysed CSV</button></div>
+          <div id="previewTable" class="table-wrap"></div>
+        </article>
+      </section>
+
+      <section id="view-relationships" class="view">
+        <div class="section-intro"><div><p class="eyebrow">DISCOVER</p><h2>Relationships & Segments</h2><p>Surface numerical associations and examine how a metric changes across meaningful categories. Correlation is association, not causal proof.</p></div></div>
+        <div class="two-column">
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">TOP ASSOCIATIONS</p><h2>Strongest correlations</h2></div></div>
+            <div id="correlationList" class="rank-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">SEGMENT ANALYSIS</p><h2>Performance by group</h2></div></div>
+            <div class="control-row"><label>Segment<select id="segmentColumn"></select></label><label>Metric<select id="segmentMetric"></select></label></div>
+            <div id="segmentChart" class="chart"></div>
+            <div id="segmentTable" class="table-wrap compact"></div>
+          </article>
+        </div>
+        <article class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">EXCEPTIONS</p><h2>Potential anomalies</h2></div></div>
+          <div id="anomalyTable" class="table-wrap"></div>
+        </article>
+      </section>
+
+      <section id="view-forecast" class="view">
+        <div class="section-intro"><div><p class="eyebrow">FORESIGHT</p><h2>Forecast</h2><p>Build an explainable monthly trend forecast from a detected date field and numerical measure, including a simple holdout backtest and uncertainty band.</p></div></div>
+        <article class="panel">
+          <div class="control-row three"><label>Date field<select id="forecastDate"></select></label><label>Metric<select id="forecastMetric"></select></label><label>Horizon<select id="forecastHorizon"><option value="3">3 months</option><option value="6" selected>6 months</option><option value="12">12 months</option></select></label><button id="runForecast" class="primary-button" type="button">Run forecast</button></div>
+          <div id="forecastMetrics" class="metric-grid small"></div>
+          <div id="forecastChart" class="chart tall"></div>
+          <div id="forecastNarrative" class="insight-list"></div>
+        </article>
+      </section>
+
+      <section id="view-predict" class="view">
+        <div class="section-intro"><div><p class="eyebrow">PREDICT</p><h2>Outcome modelling</h2><p>Test whether available numerical fields contain useful predictive signal for a selected target. The browser model uses a held-out test set and compares against a simple baseline.</p></div></div>
+        <article class="panel">
+          <div class="control-row"><label>Target<select id="predictionTarget"></select></label><button id="runPrediction" class="primary-button" type="button">Train model</button></div>
+          <div id="predictionMetrics" class="metric-grid small"></div>
+          <div class="two-column equal">
+            <div><p class="eyebrow">DRIVER IMPORTANCE</p><div id="driverList" class="rank-list"></div></div>
+            <div><p class="eyebrow">MODEL INTERPRETATION</p><div id="predictionNarrative" class="insight-list"></div></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-strategy" class="view">
+        <div class="section-intro"><div><p class="eyebrow">DECIDE</p><h2>Strategy Studio</h2><p>Translate analytical evidence into prioritised hypotheses, recommended actions and the decision each action is intended to improve.</p></div><button id="downloadStrategy" class="secondary-button" type="button">Export strategy CSV</button></div>
+        <div id="strategyCards" class="strategy-grid"></div>
+      </section>
+
+      <section id="view-quality" class="view">
+        <div class="section-intro"><div><p class="eyebrow">TRUST</p><h2>Data Quality & Schema</h2><p>Review inferred roles, completeness, uniqueness and data risks before relying on downstream analysis.</p></div></div>
+        <div id="qualityMetrics" class="metric-grid small"></div>
+        <article class="panel"><div class="panel-heading"><div><p class="eyebrow">COLUMN INVENTORY</p><h2>Inferred schema</h2></div></div><div id="schemaTable" class="table-wrap"></div></article>
+      </section>
+
+      <footer class="footer-note">PRISM is decision-support software. Automated findings should be reviewed by accountable domain owners before material business decisions.</footer>
+    </main>
+  </div>
+</body>
+</html>

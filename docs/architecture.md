@@ -2,36 +2,42 @@
 
 ## Product goal
 
-PRISM is designed as an enterprise reporting and data-strategy platform rather than a fixed dashboard. The system should accept governed business data, understand the structure available, apply the analytical methods that the evidence supports, and turn the resulting signals into decision-ready outputs.
+PRISM is designed as an enterprise reporting and data-strategy platform rather than a fixed dashboard. It should accept governed business data, understand the available structure, apply analytical methods supported by the evidence, and convert the resulting signals into decision-ready outputs.
 
-## v0.3 logical flow
+## GitHub Pages edition — browser-native architecture
+
+The public PRISM application is a static web application. GitHub Pages serves files; all user-data processing happens inside the browser.
 
 ```text
-Data source
-  ├─ Synthetic PRISM demo
-  └─ CSV / XLSX upload
+GitHub Pages
+  └─ index.html + CSS + JavaScript
         ↓
-Ingestion layer
+Browser File API
+  ├─ Synthetic PRISM demo
+  ├─ CSV upload
+  └─ XLSX / XLS upload
+        ↓
+Client-side ingestion
         ↓
 Schema and quality profiler
   ├─ Numeric / categorical / date inference
   ├─ Missingness / duplicates / constants
   ├─ Identifier detection
-  └─ Outlier screening
+  └─ IQR outlier screening
         ↓
-Reporting and analytics layer
+Browser analytics layer
   ├─ Descriptive metrics
-  ├─ Domain-specific reporting when recognised
   ├─ Segment performance
-  ├─ Relationship discovery
+  ├─ Pearson relationship discovery
   └─ Exception analysis
         ↓
-Foresight layer
-  ├─ Predictive regression / classification
-  ├─ Holdout evaluation + baselines
+Browser foresight layer
+  ├─ Ridge-style numerical regression
+  ├─ Centroid classification
+  ├─ Held-out evaluation + baselines
   ├─ Driver importance
-  ├─ Time-series aggregation
-  └─ Forecast + backtest + uncertainty
+  ├─ Monthly time-series aggregation
+  └─ Trend / seasonal forecast + backtest + uncertainty
         ↓
 Strategy Studio
   ├─ Prioritised signals
@@ -39,28 +45,32 @@ Strategy Studio
   ├─ Recommended actions
   └─ Decision-impact framing
         ↓
-Export / audit / governance
+CSV export
 ```
+
+The public edition does not require a Python process, Streamlit runtime or application server.
 
 ## Design principles
 
 1. **Domain-agnostic first.** Do not require one business schema for generic intelligence.
-2. **Evidence before recommendations.** Every recommendation should point to a measurable signal.
-3. **Prediction is not causation.** Driver importance and correlations remain exploratory until validated.
-4. **Backtest forecasts.** Forecast quality must be visible rather than implied.
-5. **Synthetic by default.** Public demonstrations bundle only dummy data.
-6. **Govern production data.** Confidential use requires enterprise identity, storage, lineage, tenant isolation, retention and security controls beyond the public prototype.
-7. **Composable intelligence.** Reporting, forecasting, prediction and strategy should remain modular services rather than UI-only logic.
+2. **Local data processing for the public edition.** User-uploaded datasets stay in browser memory rather than being posted to a PRISM server.
+3. **Evidence before recommendations.** Every recommendation should point to a measurable signal.
+4. **Prediction is not causation.** Driver importance and correlations remain exploratory until validated.
+5. **Backtest forecasts.** Forecast quality must be visible rather than implied.
+6. **Synthetic by default.** Public demonstrations bundle only generated dummy data.
+7. **Progressive enterprise separation.** Browser-native analytics is appropriate for the public portfolio/product demo; confidential multi-user enterprise deployment needs authenticated services and governed infrastructure.
 
 ## Enterprise target architecture
 
-The Streamlit application is currently the product shell. A production enterprise edition should progressively separate the layers:
+The GitHub Pages application is the public/product demonstration shell. A production enterprise edition should progressively add server-side governed services without discarding the browser experience:
 
-- UI: web application / workspace
-- API: authenticated analytics and strategy services
-- Compute: queued profiling, modelling and forecasting jobs
+- UI: authenticated web workspace derived from the current static interface
+- API: analytics, strategy, metadata and workflow services
+- Compute: queued profiling, modelling, forecasting and scenario jobs
 - Storage: governed warehouse/lakehouse plus metadata catalogue
 - Model registry: versioned forecasting and predictive artefacts
 - Governance: RBAC/SSO, audit logs, lineage, retention and policy enforcement
 - Integrations: Snowflake, Databricks, BigQuery, Redshift, Fabric, S3/Blob, APIs and BI tools
 - Outputs: dashboards, scheduled reports, alerts, strategy briefs and machine-readable recommendations
+
+The legacy Python modules can later become reusable backend services where heavier computation, persistent state, enterprise connectors or governed models are required.
