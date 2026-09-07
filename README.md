@@ -1,8 +1,8 @@
 # PRISM — Product Reporting Intelligence & Strategy Management
 
-PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is now **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
+PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release candidate — v0.3.0 Enterprise Intelligence Foundation
+## Current release candidate — v0.3.1 Shared Product Design System
 
 - Static GitHub Pages application served from `index.html`
 - Domain-agnostic CSV/XLSX upload with local browser processing
@@ -13,7 +13,27 @@ PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace
 - Browser-side predictive regression/classification with held-out evaluation, baseline comparison and driver importance
 - Strategy Studio that converts evidence into prioritised recommendations and decision-impact statements
 - CSV exports for analysed data and generated strategy signals
-- Responsive dark enterprise interface designed for desktop and mobile
+- Responsive dark enterprise interface aligned with the shared **The Palm / NEXUS / XPLORE** product family
+
+## Shared visual language
+
+PRISM uses the same dark-first product family as The Palm and NEXUS: green-black canvas, restrained glass/elevated surfaces, sage secondary text, green interaction states and a scarce lime accent for brand/high-value actions.
+
+Canonical dark tokens include:
+
+```text
+Background  #07110d
+Surface     #0b1712
+Surface 2   #0e1d17
+Border      #1e3229
+Text        #edf7f1
+Muted       #8fa39a
+Green       #78e6aa
+Green 2     #52d98d
+Lime        #c8f56b
+```
+
+The browser charts are also routed through the shared palette so data visualisations do not drift back into a separate blue-themed product identity.
 
 ## Core workflow
 
@@ -42,6 +62,7 @@ The repository root contains the deployable static application:
 ```text
 index.html
 assets/styles.css
+assets/theme.js
 assets/app.js
 assets/prism.svg
 manifest.webmanifest
@@ -100,12 +121,14 @@ The `app/` and `prism/` Python packages remain in the repository as the earlier 
 pip install -r requirements-dev.txt
 ruff check .
 pytest -q
+node --check assets/theme.js
 node --check assets/app.js
 ```
 
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Design system](docs/design_system.md)
 - [GitHub Pages deployment](docs/deployment.md)
 - [Data dictionary](docs/data_dictionary.md)
 - [Production readiness](docs/production_readiness.md)
