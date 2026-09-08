@@ -12,11 +12,16 @@
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script defer src="./assets/theme.js"></script>
+  <script defer src="./assets/mobile.js"></script>
   <script defer src="./assets/app.js"></script>
 </head>
 <body>
+  <button id="menuToggle" class="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
   <div class="app-shell">
-    <aside class="sidebar">
+    <aside id="sidebar" class="sidebar">
       <a class="brand" href="./" aria-label="PRISM home">
         <span class="brand-mark">◈</span>
         <span><strong>PRISM</strong><small>Data → Decisions</small></span>
@@ -48,21 +53,32 @@
       </nav>
 
       <div class="sidebar-footer">
-        <span id="versionLabel">v0.3 · GitHub Pages</span>
+        <span id="versionLabel">v0.3.2 · GitHub Pages</span>
         <a href="https://github.com/Utpal-Mishra/PRISM" target="_blank" rel="noreferrer">Repository ↗</a>
       </div>
     </aside>
 
+    <button id="sidebarBackdrop" class="sidebar-backdrop" type="button" tabindex="-1" aria-label="Close navigation"></button>
+
     <main class="main-content">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">ENTERPRISE REPORTING, ANALYTICS & DATA STRATEGY</p>
-          <h1>Turn data into evidence, foresight and decisions.</h1>
-          <p class="lede">PRISM profiles what you provide, discovers useful relationships, forecasts measurable outcomes, tests predictive signals and converts findings into decision-ready strategy.</p>
-        </div>
-        <div class="status-group">
-          <span class="status-pill"><span class="status-dot"></span>Browser-native</span>
-          <span class="status-pill muted">Static GitHub Pages app</span>
+        <div class="intro-shell">
+          <div class="intro-summary">
+            <p class="eyebrow">ENTERPRISE REPORTING, ANALYTICS & DATA STRATEGY</p>
+            <button id="introToggle" class="intro-toggle" type="button" aria-label="Show introduction" aria-controls="introDetails" aria-expanded="false">
+              <span class="intro-chevron" aria-hidden="true"></span>
+            </button>
+          </div>
+          <div id="introDetails" class="intro-details">
+            <div class="intro-copy">
+              <h1>Turn data into evidence, foresight and decisions.</h1>
+              <p class="lede">PRISM profiles what you provide, discovers useful relationships, forecasts measurable outcomes, tests predictive signals and converts findings into decision-ready strategy.</p>
+            </div>
+            <div class="status-group">
+              <span class="status-pill"><span class="status-dot"></span>Browser-native</span>
+              <span class="status-pill muted">Static GitHub Pages app</span>
+            </div>
+          </div>
         </div>
       </header>
 
