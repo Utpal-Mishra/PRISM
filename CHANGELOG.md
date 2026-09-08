@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2 — Mobile App-Shell Experience
+
+- Replaced the stacked mobile sidebar with an off-canvas navigation drawer opened from a top-left menu control.
+- Added automatic sidebar dismissal after navigation, outside tap, Escape, file selection, or a short period of inactivity.
+- Kept `ENTERPRISE REPORTING, ANALYTICS & DATA STRATEGY` persistently visible in the mobile top bar.
+- Moved the large introduction, supporting copy and runtime status into an accessible slide-down disclosure on mobile.
+- Improved touch target sizes, mobile controls, dataset banner layout, KPI responsiveness, chart sizing and horizontally scrollable tables.
+- Added safe-area handling for modern phones and reduced-motion support for the new navigation transitions.
+- Added CI validation for the mobile CSS and JavaScript assets.
+
 ## 0.3.1 — Shared Product Design System
 
 - Aligned PRISM with the visual language used across The Palm, NEXUS and related portfolio products.
