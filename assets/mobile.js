@@ -2,7 +2,6 @@
   "use strict";
 
   const MOBILE_BREAKPOINT = 820;
-  const SIDEBAR_IDLE_CLOSE_MS = 6500;
 
   document.addEventListener("DOMContentLoaded", () => {
     const body = document.body;
@@ -14,18 +13,27 @@
 
     if (!sidebar || !menuToggle || !sidebarBackdrop || !introToggle || !introDetails) return;
 
-    let sidebarTimer = null;
     const isMobile = () => window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches;
+    const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let lastMobileState = isMobile();
+    let resizeTimer = null;
 
-    function clearSidebarTimer() {
-      if (sidebarTimer) window.clearTimeout(sidebarTimer);
-      sidebarTimer = null;
+    function resizeCharts() {
+      if (!window.Plotly || !window.Plotly.Plots) return;
+      document.querySelectorAll(".chart .js-plotly-plot").forEach((plot) => {
+        if (plot.offsetParent !== null) {
+          try {
+            window.Plotly.Plots.resize(plot);
+          } catch (_) {
+            // Plotly may still be initialising; the app's responsive config remains the fallback.
+          }
+        }
+      });
     }
 
-    function scheduleSidebarClose() {
-      clearSidebarTimer();
-      if (!isMobile() || !body.classList.contains("sidebar-open")) return;
-      sidebarTimer = window.setTimeout(() => closeSidebar({ restoreFocus: false }), SIDEBAR_IDLE_CLOSE_MS);
+    function scheduleChartResize(delay = 80) {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resizeCharts, delay);
     }
 
     function openSidebar() {
@@ -34,11 +42,9 @@
       sidebar.setAttribute("aria-hidden", "false");
       menuToggle.setAttribute("aria-expanded", "true");
       menuToggle.setAttribute("aria-label", "Close navigation");
-      scheduleSidebarClose();
     }
 
     function closeSidebar({ restoreFocus = false } = {}) {
-      clearSidebarTimer();
       body.classList.remove("sidebar-open");
       menuToggle.setAttribute("aria-expanded", "false");
       menuToggle.setAttribute("aria-label", "Open navigation");
@@ -56,33 +62,46 @@
       introDetails.classList.toggle("is-open", open);
       introToggle.setAttribute("aria-expanded", String(open));
       introToggle.setAttribute("aria-label", open ? "Hide introduction" : "Show introduction");
+      scheduleChartResize(220);
     }
 
-    function syncLayout() {
-      if (isMobile()) {
+    function scrollViewToTop() {
+      if (!isMobile()) return;
+      window.scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" });
+    }
+
+    function syncLayout(force = false) {
+      const mobile = isMobile();
+      if (!force && mobile === lastMobileState) {
+        scheduleChartResize();
+        return;
+      }
+
+      lastMobileState = mobile;
+      if (mobile) {
         closeSidebar();
         setIntro(false);
         sidebar.setAttribute("aria-hidden", "true");
       } else {
-        clearSidebarTimer();
         body.classList.remove("sidebar-open");
         sidebar.removeAttribute("aria-hidden");
         menuToggle.setAttribute("aria-expanded", "false");
         setIntro(true);
       }
+      scheduleChartResize(120);
     }
 
     menuToggle.addEventListener("click", toggleSidebar);
     sidebarBackdrop.addEventListener("click", () => closeSidebar({ restoreFocus: true }));
     introToggle.addEventListener("click", () => setIntro(!introDetails.classList.contains("is-open")));
 
-    sidebar.addEventListener("pointerdown", scheduleSidebarClose);
-    sidebar.addEventListener("focusin", scheduleSidebarClose);
-    sidebar.addEventListener("scroll", scheduleSidebarClose, { passive: true });
-
     document.querySelectorAll(".nav-item").forEach((button) => {
       button.addEventListener("click", () => {
-        if (isMobile()) closeSidebar();
+        if (isMobile()) {
+          closeSidebar();
+          scrollViewToTop();
+          scheduleChartResize(140);
+        }
       });
     });
 
@@ -98,12 +117,23 @@
       }
     });
 
-    let resizeTimer = null;
     window.addEventListener("resize", () => {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(syncLayout, 120);
+      resizeTimer = window.setTimeout(() => syncLayout(false), 120);
     });
 
-    syncLayout();
+    window.addEventListener("orientationchange", () => {
+      closeSidebar();
+      window.setTimeout(() => {
+        lastMobileState = isMobile();
+        scheduleChartResize(120);
+      }, 180);
+    });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => scheduleChartResize(120));
+    }
+
+    syncLayout(true);
   });
 })();

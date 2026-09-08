@@ -34,4 +34,8 @@ jobs:
           grep -q -- "#c8f56b" assets/styles.css
           grep -q -- "mobile-menu-toggle" index.html
           grep -q -- "introDetails" index.html
+          grep -q -- "mobile-dock" index.html
+          grep -q -- "viewport-fit=cover" index.html
           grep -q -- "translateX(-106%)" assets/mobile.css
+          grep -q -- "safe-area-inset-bottom" assets/mobile.css
+          grep -q -- "Plotly.Plots.resize" assets/mobile.js

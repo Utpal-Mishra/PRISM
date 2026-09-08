@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.3 — Adaptive Phone Experience
+
+- Added a persistent Palm-style mobile bottom dock for one-tap access to Overview, Relationships, Forecast, Predict, Strategy and Data Quality.
+- Added `viewport-fit=cover` and safe-area-aware spacing for modern iPhone and Android devices, including gesture/navigation areas.
+- Improved narrow-screen responsiveness across KPI cards, panels, controls, strategy cards, status elements and phone-sized typography.
+- Added 44px+ touch targets and 16px mobile select controls to reduce accidental taps and prevent unwanted iOS form zoom.
+- Improved mobile data tables with momentum scrolling, a sticky first column and better narrow-width handling.
+- Added Plotly chart resize handling for viewport changes, orientation changes and view transitions.
+- Improved landscape-phone behaviour and extra-small device handling down to approximately 320px widths.
+- Removed the timed mobile drawer auto-close so navigation remains under explicit user control.
+- Expanded CI validation for the adaptive mobile dock, safe-area CSS and responsive chart handling.
+
 ## 0.3.2 — Mobile App-Shell Experience
 
 - Replaced the stacked mobile sidebar with an off-canvas navigation drawer opened from a top-left menu control.

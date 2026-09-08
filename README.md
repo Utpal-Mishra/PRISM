@@ -2,7 +2,7 @@
 
 PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release candidate — v0.3.1 Shared Product Design System
+## Current release candidate — v0.3.3 Adaptive Phone Experience
 
 - Static GitHub Pages application served from `index.html`
 - Domain-agnostic CSV/XLSX upload with local browser processing
@@ -14,6 +14,7 @@ PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace
 - Strategy Studio that converts evidence into prioritised recommendations and decision-impact statements
 - CSV exports for analysed data and generated strategy signals
 - Responsive dark enterprise interface aligned with the shared **The Palm / NEXUS / XPLORE** product family
+- Adaptive phone shell with off-canvas utilities, collapsible context, a persistent bottom analysis dock, safe-area support and responsive charts/tables
 
 ## Shared visual language
 
@@ -34,6 +35,12 @@ Lime        #c8f56b
 ```
 
 The browser charts are also routed through the shared palette so data visualisations do not drift back into a separate blue-themed product identity.
+
+## Mobile experience
+
+At phone widths, PRISM changes information architecture instead of merely scaling the desktop page. Dataset controls and privacy information live in an off-canvas drawer, the long product introduction collapses into the sticky top bar, and the six analytical views remain available from a Palm-inspired bottom dock. Cards, controls, tables and Plotly charts reflow across common phone widths and landscape orientation while respecting modern device safe areas.
+
+The mobile shell deliberately preserves browser zoom and accessibility behaviour. Select controls use mobile-safe sizing, touch targets are at least approximately 44px, wide data tables remain horizontally scrollable with a sticky first column, and responsive chart resizing runs after view, viewport and orientation changes.
 
 ## Core workflow
 
@@ -62,7 +69,9 @@ The repository root contains the deployable static application:
 ```text
 index.html
 assets/styles.css
+assets/mobile.css
 assets/theme.js
+assets/mobile.js
 assets/app.js
 assets/prism.svg
 manifest.webmanifest
@@ -122,6 +131,7 @@ pip install -r requirements-dev.txt
 ruff check .
 pytest -q
 node --check assets/theme.js
+node --check assets/mobile.js
 node --check assets/app.js
 ```
 
