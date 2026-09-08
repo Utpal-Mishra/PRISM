@@ -16,7 +16,8 @@
     const isMobile = () => window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches;
     const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let lastMobileState = isMobile();
-    let resizeTimer = null;
+    let layoutTimer = null;
+    let chartTimer = null;
 
     function resizeCharts() {
       if (!window.Plotly || !window.Plotly.Plots) return;
@@ -32,8 +33,8 @@
     }
 
     function scheduleChartResize(delay = 80) {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(resizeCharts, delay);
+      window.clearTimeout(chartTimer);
+      chartTimer = window.setTimeout(resizeCharts, delay);
     }
 
     function openSidebar() {
@@ -118,8 +119,8 @@
     });
 
     window.addEventListener("resize", () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => syncLayout(false), 120);
+      window.clearTimeout(layoutTimer);
+      layoutTimer = window.setTimeout(() => syncLayout(false), 120);
     });
 
     window.addEventListener("orientationchange", () => {
