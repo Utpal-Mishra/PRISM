@@ -22,10 +22,16 @@ jobs:
         run: |
           test -f index.html
           test -f assets/styles.css
+          test -f assets/mobile.css
           test -f assets/theme.js
+          test -f assets/mobile.js
           test -f assets/app.js
           node --check assets/theme.js
+          node --check assets/mobile.js
           node --check assets/app.js
           grep -q -- "#07110d" assets/styles.css
           grep -q -- "#78e6aa" assets/styles.css
           grep -q -- "#c8f56b" assets/styles.css
+          grep -q -- "mobile-menu-toggle" index.html
+          grep -q -- "introDetails" index.html
+          grep -q -- "translateX(-106%)" assets/mobile.css
