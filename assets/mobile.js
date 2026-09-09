@@ -356,11 +356,31 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const button = document.getElementById("downloadEvidence");
-    if (button) button.addEventListener("click", downloadEvidencePack);
-
     const container = document.getElementById("overviewInsights");
     if (!container) return;
+
+    const heading = container.closest(".panel")?.querySelector(".panel-heading");
+    if (heading && !document.getElementById("downloadEvidence")) {
+      const titleBlock = heading.querySelector("div");
+      const summary = document.createElement("p");
+      summary.id = "evidencePackSummary";
+      summary.className = "panel-meta";
+      titleBlock?.appendChild(summary);
+
+      const button = document.createElement("button");
+      button.id = "downloadEvidence";
+      button.className = "secondary-button";
+      button.type = "button";
+      button.textContent = "Download Evidence Pack";
+      button.addEventListener("click", downloadEvidencePack);
+      heading.appendChild(button);
+    }
+
+    const existingButton = document.getElementById("downloadEvidence");
+    if (existingButton && !existingButton.dataset.evidenceBound) {
+      existingButton.dataset.evidenceBound = "true";
+      existingButton.addEventListener("click", downloadEvidencePack);
+    }
     let pending = false;
     const observer = new MutationObserver(() => {
       if (pending) return;
