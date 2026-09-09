@@ -1,0 +1,83 @@
+/* PRISM v0.3.4 — compact overview KPI layout for phones.
+   Keeps desktop and analytical sub-view metric grids unchanged. */
+
+@media (max-width: 560px) {
+  #view-overview > .metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  #view-overview > .metric-grid .metric-card {
+    min-width: 0;
+    min-height: 82px;
+    padding: 9px;
+    border-radius: 12px;
+  }
+
+  #view-overview > .metric-grid .metric-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 7.5px;
+    line-height: 1.2;
+    letter-spacing: .055em;
+  }
+
+  #view-overview > .metric-grid .metric-value {
+    margin-top: 7px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(19px, 6.2vw, 24px);
+    line-height: 1;
+  }
+
+  #view-overview > .metric-grid .metric-note {
+    margin-top: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0;
+    line-height: 1.15;
+  }
+
+  #view-overview > .metric-grid .metric-note::after {
+    color: #71887c;
+    font-size: 7.5px;
+    line-height: 1.15;
+  }
+
+  #view-overview > .metric-grid .metric-card:nth-child(1) .metric-note::after { content: "Records"; }
+  #view-overview > .metric-grid .metric-card:nth-child(2) .metric-note::after { content: "Fields"; }
+  #view-overview > .metric-grid .metric-card:nth-child(3) .metric-note::after { content: "Quality"; }
+  #view-overview > .metric-grid .metric-card:nth-child(4) .metric-note::after { content: "Measures"; }
+  #view-overview > .metric-grid .metric-card:nth-child(5) .metric-note::after { content: "Time"; }
+  #view-overview > .metric-grid .metric-card:nth-child(6) .metric-note::after { content: "Segments"; }
+
+  #view-overview > .metric-grid .metric-card:nth-child(3) {
+    border-color: rgba(120,230,170,.30);
+    background: linear-gradient(180deg, rgba(16,43,29,.96), rgba(9,24,17,.96));
+  }
+
+  #view-overview > .metric-grid .metric-card:nth-child(3) .metric-value {
+    color: var(--accent);
+  }
+}
+
+/* Very narrow phones retain readable cards using a 2 × 3 grid. */
+@media (max-width: 340px) {
+  #view-overview > .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #view-overview > .metric-grid .metric-card {
+    min-height: 80px;
+  }
+
+  #view-overview > .metric-grid .metric-label,
+  #view-overview > .metric-grid .metric-note::after {
+    font-size: 8px;
+  }
+}
