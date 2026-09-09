@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.4 — Compact Mobile KPI Overview
+
+- Reworked the six Executive Overview KPI cards into a compact 3 × 2 grid on standard phone widths.
+- Added a 2 × 3 fallback for very narrow devices below 341px so values remain readable.
+- Reduced KPI card height, padding and mobile typography to surface analytical content sooner.
+- Replaced long KPI helper text with concise mobile labels: Records, Fields, Quality, Measures, Time and Segments.
+- Added a subtle accent treatment to Data Quality while leaving desktop and downstream analytical metric grids unchanged.
+
 ## 0.3.3 — Adaptive Phone Experience
 
 - Added a persistent Palm-style mobile bottom dock for one-tap access to Overview, Relationships, Forecast, Predict, Strategy and Data Quality.
