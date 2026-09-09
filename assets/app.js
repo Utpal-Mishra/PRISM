@@ -10,7 +10,6 @@
     prediction: null,
     segment: null,
     strategy: [],
-    evidence: [],
     sourceName: "PRISM synthetic enterprise dataset",
     sourceMode: "Synthetic demo",
   };
@@ -31,7 +30,6 @@
       "forecastMetrics", "forecastChart", "forecastNarrative", "predictionTarget",
       "runPrediction", "predictionMetrics", "driverList", "predictionNarrative",
       "downloadStrategy", "strategyCards", "qualityMetrics", "schemaTable",
-      "downloadEvidence", "evidencePackSummary",
     ].forEach((id) => { els[id] = byId(id); });
 
     document.querySelectorAll(".nav-item").forEach((button) => {
@@ -45,17 +43,6 @@
     els.runPrediction.addEventListener("click", runPrediction);
     els.downloadData.addEventListener("click", downloadCurrentData);
     els.downloadStrategy.addEventListener("click", downloadStrategy);
-    els.downloadEvidence.addEventListener("click", downloadEvidencePack);
-    els.overviewInsights.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-evidence-id]");
-      if (!button) return;
-      const detail = byId(`evidence-${button.dataset.evidenceId}`);
-      if (!detail) return;
-      const expanded = button.getAttribute("aria-expanded") === "true";
-      button.setAttribute("aria-expanded", String(!expanded));
-      button.textContent = expanded ? "View evidence" : "Hide evidence";
-      detail.classList.toggle("hidden", expanded);
-    });
 
     loadDemo();
   }
@@ -221,7 +208,6 @@
     state.prediction = null;
     state.segment = null;
     state.strategy = [];
-    state.evidence = [];
     updateDatasetHeader();
     populateControls();
     renderAll();
