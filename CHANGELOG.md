@@ -1,16 +1,5 @@
 # Changelog
 
-## 0.4.0 — Evidence Foundation
-
-- Added stable evidence IDs and structured evidence records for Executive Overview findings.
-- Added inspectable evidence details covering dataset identity, source fields, row count, method, calculation context, assumptions, confidence basis and limitations.
-- Added a clearly labelled **Download Evidence Pack** JSON export with the naming convention `PRISM_EVIDENCE_<DATASET>_<YYYYMMDD-HHMM>.json`.
-- Added descriptive vs association evidence labels and explicit non-causal limitations for correlation findings.
-- Preserved browser-local processing for uploaded datasets; evidence generation and export remain client-side.
-- Added responsive evidence metadata layouts for phone and desktop views.
-- Kept defensive handling for unavailable evidence and unsupported analytical certainty.
-
-
 ## 0.3.4 — Compact Mobile KPI Overview
 
 - Reworked the six Executive Overview KPI cards into a compact 3 × 2 grid on standard phone widths.
