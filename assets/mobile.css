@@ -432,6 +432,19 @@
     padding: 15px;
   }
 
+  .evidence-meta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .evidence-detail {
+    padding: 10px;
+  }
+
+  .evidence-toggle {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
   .panel-heading,
   .section-intro {
     flex-direction: column;
