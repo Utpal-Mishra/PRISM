@@ -372,7 +372,6 @@
       button.className = "secondary-button";
       button.type = "button";
       button.textContent = "Download Evidence Pack";
-      button.addEventListener("click", downloadEvidencePack);
       heading.appendChild(button);
     }
 
