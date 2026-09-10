@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.0 — Enterprise Semantic Layer
+
+- Added an in-browser Business Model panel that converts detected schema roles into business-readable measures, dimensions, identifiers, time fields, probable entities and attributes.
+- Added explainable KPI concept detection for revenue, units, margin, cost, spend, inventory, returns, price, discount, lead time, satisfaction, carbon, customer, product, supplier, region, channel, segment and order concepts.
+- Added user-correctable semantic roles and concepts with browser-session persistence scoped to the active dataset.
+- Added probable analytical relationships between measures, dimensions/entities and time fields, explicitly labelled as heuristic and non-causal.
+- Added defensive empty-state handling when no usable schema is available.
+- Added a responsive mobile/desktop semantic model editor and summary.
+- Added **Download Semantic Model** JSON export using `PRISM_SEMANTIC_<DATASET>_<YYYYMMDD-HHMM>.json`, including dataset identity, inference method, limitations, evidence IDs, field mappings, corrections and proposed relationships.
+- Preserved local-first static processing; no uploaded dataset or semantic correction is sent to a PRISM server.
+
+## 0.4.0 — Evidence Foundation
+
+- Added stable evidence IDs and structured evidence records for Executive Overview findings.
+- Added inspectable evidence details covering dataset identity, source fields, row count, method, calculation context, assumptions, confidence basis and limitations.
+- Added a clearly labelled **Download Evidence Pack** JSON export with the naming convention `PRISM_EVIDENCE_<DATASET>_<YYYYMMDD-HHMM>.json`.
+- Added descriptive vs association evidence labels and explicit non-causal limitations for correlation findings.
+- Preserved browser-local processing for uploaded datasets; evidence generation and export remain client-side.
+- Added responsive evidence metadata layouts for phone and desktop views.
+- Kept defensive handling for unavailable evidence and unsupported analytical certainty.
+
 ## 0.3.4 — Compact Mobile KPI Overview
 
 - Reworked the six Executive Overview KPI cards into a compact 3 × 2 grid on standard phone widths.
