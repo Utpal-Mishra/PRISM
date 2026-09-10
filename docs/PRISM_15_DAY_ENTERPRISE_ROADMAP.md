@@ -90,7 +90,7 @@ A user can inspect and export the evidence behind an overview insight without ma
 
 ## Day 2 — Enterprise Semantic Layer
 
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-10
 
 ### Objective
 Move PRISM from column-type detection to business meaning detection.
