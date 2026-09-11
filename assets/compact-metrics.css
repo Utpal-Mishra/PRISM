@@ -1,4 +1,4 @@
-/* PRISM v0.3.4 — compact overview KPI layout for phones.
+/* PRISM v0.3.5 — compact overview + semantic layouts for phones.
    Keeps desktop and analytical sub-view metric grids unchanged. */
 
 @media (max-width: 560px) {
@@ -64,6 +64,47 @@
   #view-overview > .metric-grid .metric-card:nth-child(3) .metric-value {
     color: var(--accent);
   }
+
+  /* Enterprise Semantic Layer: keep the five role counters compact on mobile.
+     Three columns gives a 3 + 2 layout instead of a tall two-column stack. */
+  #semanticBusinessModel .semantic-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin: 10px 0 13px;
+  }
+
+  #semanticBusinessModel .semantic-stat {
+    min-width: 0;
+    min-height: 66px;
+    padding: 9px 10px;
+    border-radius: 10px;
+  }
+
+  #semanticBusinessModel .semantic-stat span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 8px;
+  }
+
+  #semanticBusinessModel .semantic-stat strong {
+    margin-top: 6px;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* KPI concepts are intentionally rectangular rather than pill-shaped.
+     They remain compact and scan like business taxonomy tags. */
+  #semanticBusinessModel .semantic-kpis {
+    gap: 6px;
+    margin: 7px 0 14px;
+  }
+
+  #semanticBusinessModel .semantic-chip {
+    padding: 7px 10px;
+    border-radius: 7px;
+    line-height: 1.15;
+  }
 }
 
 /* Very narrow phones retain readable cards using a 2 × 3 grid. */
@@ -79,5 +120,9 @@
   #view-overview > .metric-grid .metric-label,
   #view-overview > .metric-grid .metric-note::after {
     font-size: 8px;
+  }
+
+  #semanticBusinessModel .semantic-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
