@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 — Automated Analytical Investigation
+
+- Added a browser-local KPI movement investigation engine that compares the latest two detected monthly periods for a selected numerical KPI.
+- Added automatic investigation controls for KPI and time-field selection with defensive empty states when usable dates, measures or multiple periods are unavailable.
+- Added ranked contributing slices across suitable categorical dimensions, with contribution share shown against the net KPI movement.
+- Added a visible investigation path from KPI movement → where the movement is concentrated → main contributor → interpretation.
+- Added stable investigation and evidence IDs plus method, source fields, row counts, assumptions, confidence basis, limitations and explicit `causal-not-established` classification.
+- Added a 5% notable-movement threshold as a prioritisation cue while retaining below-threshold results for transparency.
+- Added a responsive desktop/mobile investigation experience with compact KPI cards, investigation steps, ranked slices and supporting evidence.
+- Added **Download Investigation Pack** JSON export using `PRISM_INVESTIGATION_<DATASET>_<YYYYMMDD-HHMM>.json`.
+- Preserved local-first handling by parsing uploaded CSV/XLSX data in-browser; no uploaded dataset is sent to a PRISM server.
+- Extended CI to syntax-check the investigation module and verify the export label, naming convention and non-causal language.
+
 ## 0.5.0 — Enterprise Semantic Layer
 
 - Added an in-browser Business Model panel that converts detected schema roles into business-readable measures, dimensions, identifiers, time fields, probable entities and attributes.
