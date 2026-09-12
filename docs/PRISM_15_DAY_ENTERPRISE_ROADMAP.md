@@ -128,7 +128,7 @@ KPI change → where → what segment → main contributor → supporting signal
 
 ## Day 4 — Statistical Evidence Layer
 
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-12
 
 ### Objective
 Add method-appropriate statistical evidence and clearly label evidence strength.

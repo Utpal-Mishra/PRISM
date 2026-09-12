@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0 — Statistical Evidence Layer
+
+- Added a browser-local statistical evidence panel to the Relationships view.
+- Added Pearson and Spearman numerical association tests with sample size, p-value, effect size, 95% uncertainty interval and explicit `causal-not-established` classification.
+- Added Welch two-sample t-testing for compatible binary group comparisons, including group summaries, mean difference, approximate 95% confidence interval and standardized effect size.
+- Added Pearson chi-square categorical association testing with expected-count adequacy checks and Cramer's V effect size.
+- Added defensive refusal states when selected data do not satisfy minimum sample, variation, binary-group or chi-square expected-count requirements.
+- Added evidence-strength labels that consider both statistical detectability and effect magnitude rather than treating p-values as practical importance.
+- Added visible assumptions, limitations, method version, stable `STAT-*` test IDs and linked `EVD-*` evidence IDs.
+- Added responsive mobile layouts for statistical controls, summary cards and method/limitation panels.
+- Added **Download Statistical Evidence Pack** JSON export using `PRISM_STATISTICAL_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, method, fields, sample size, effect, uncertainty, assumptions, limitations and evidence metadata.
+- Preserved local-first static processing for CSV/XLSX uploads; statistical calculations and exports remain browser-local.
+- Extended CI to syntax-check the statistical module and verify method coverage, export naming and non-causal language.
+
 ## 0.6.0 — Automated Analytical Investigation
 
 - Added a browser-local KPI movement investigation engine that compares the latest two detected monthly periods for a selected numerical KPI.
