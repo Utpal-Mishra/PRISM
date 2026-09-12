@@ -27,10 +27,12 @@ jobs:
           test -f assets/mobile.js
           test -f assets/app.js
           test -f assets/investigation.js
+          test -f assets/statistical.js
           node --check assets/theme.js
           node --check assets/mobile.js
           node --check assets/app.js
           node --check assets/investigation.js
+          node --check assets/statistical.js
           grep -q -- "#07110d" assets/styles.css
           grep -q -- "#78e6aa" assets/styles.css
           grep -q -- "#c8f56b" assets/styles.css
@@ -39,9 +41,17 @@ jobs:
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "investigation.js" index.html
+          grep -q -- "statistical.js" index.html
           grep -q -- "Download Investigation Pack" assets/investigation.js
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
           grep -q -- "causal" assets/investigation.js
+          grep -q -- "Download Statistical Evidence Pack" assets/statistical.js
+          grep -q -- "PRISM_STATISTICAL_" assets/statistical.js
+          grep -q -- "Spearman" assets/statistical.js
+          grep -q -- "Welch" assets/statistical.js
+          grep -q -- "chi-square" assets/statistical.js
+          grep -q -- "Cramer's V" assets/statistical.js
+          grep -q -- "causal-not-established" assets/statistical.js
           grep -q -- "translateX(-106%)" assets/mobile.css
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js
