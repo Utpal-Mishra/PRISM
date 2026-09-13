@@ -28,11 +28,13 @@ jobs:
           test -f assets/app.js
           test -f assets/investigation.js
           test -f assets/statistical.js
+          test -f assets/drivers.js
           node --check assets/theme.js
           node --check assets/mobile.js
           node --check assets/app.js
           node --check assets/investigation.js
           node --check assets/statistical.js
+          node --check assets/drivers.js
           grep -q -- "#07110d" assets/styles.css
           grep -q -- "#78e6aa" assets/styles.css
           grep -q -- "#c8f56b" assets/styles.css
@@ -42,6 +44,7 @@ jobs:
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "investigation.js" index.html
           grep -q -- "statistical.js" index.html
+          grep -q -- "drivers.js" index.html
           grep -q -- "Download Investigation Pack" assets/investigation.js
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
           grep -q -- "causal" assets/investigation.js
@@ -52,6 +55,11 @@ jobs:
           grep -q -- "chi-square" assets/statistical.js
           grep -q -- "Cramer's V" assets/statistical.js
           grep -q -- "causal-not-established" assets/statistical.js
+          grep -q -- "Download Driver Analysis" assets/drivers.js
+          grep -q -- "PRISM_DRIVER_" assets/drivers.js
+          grep -q -- "Price-volume-interaction" assets/drivers.js
+          grep -q -- "IQR screening" assets/drivers.js
+          grep -q -- "causal-not-established" assets/drivers.js
           grep -q -- "translateX(-106%)" assets/mobile.css
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js

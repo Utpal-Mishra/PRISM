@@ -148,7 +148,7 @@ Every statistical statement explains method, sample size, effect, uncertainty an
 
 ## Day 5 — Driver & Root-Cause Engine
 
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-13
 
 ### Objective
 Explain what contributed to a KPI movement.
