@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.0 — Driver & Root-Cause Engine
+
+- Added a browser-local driver analysis panel that explains where KPI movement is concentrated across business dimensions.
+- Added ranked contribution analysis with slice delta and contribution share against the net KPI movement.
+- Added a price-volume-interaction bridge when compatible quantity and unit-price fields are detected, with explicit warning that interaction is not pure product mix.
+- Added latest-period IQR outlier screening and a standardised latest-change signal relative to recent period-to-period movement.
+- Added stable `DRV-*` analysis IDs and linked `EVD-*` evidence records covering methods, source fields, calculations, assumptions and limitations.
+- Added explicit `causal-not-established` classification throughout the UI and export so contribution is not presented as causal root-cause proof.
+- Added defensive handling for insufficient periods, history, categorical dimensions, price/quantity fields and sample sizes.
+- Added responsive desktop/mobile layouts for KPI movement, ranked contributors, supporting signals and evidence.
+- Added **Download Driver Analysis** JSON export using `PRISM_DRIVER_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, method, drivers, decomposition, anomaly/change signals and evidence metadata.
+- Preserved local-first static processing for CSV/XLSX uploads; driver analysis and exports remain browser-local.
+
 ## 0.7.0 — Statistical Evidence Layer
 
 - Added a browser-local statistical evidence panel to the Relationships view.
