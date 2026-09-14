@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.9.0 — Forecast Intelligence
+
+- Upgraded the Forecast view from a single trend model to browser-local evidence-based model comparison.
+- Added four transparent candidates: Seasonal naive, Drift, Linear trend, and Trend + seasonality.
+- Added terminal holdout backtesting with MAE, RMSE, WAPE, MAPE where valid, and forecast bias.
+- Added model selection using lowest holdout WAPE when scale-normalised error is valid, with MAE fallback and a visible selection rationale.
+- Added approximate 95% planning ranges derived from holdout RMSE and widened by forecast horizon.
+- Added stable `FCT-*` forecast IDs and linked `EVD-*` predictive-evidence records with methods, source fields, assumptions and limitations.
+- Added explicit `predictive; causal-not-established` classification so forecast patterns are not presented as causal claims.
+- Added defensive handling requiring at least 12 usable monthly observations for model comparison.
+- Added responsive candidate-comparison tables and mobile download controls.
+- Added **Download Forecast Pack** JSON export using `PRISM_FORECAST_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, model comparison, backtest metrics, uncertainty, evidence IDs and method metadata.
+- Preserved browser-local handling for CSV/XLSX uploads; forecasting and export remain local in the static edition.
+- Extended CI to syntax-check Forecast Intelligence and validate candidate methods, error metrics, export naming and non-causal language.
+
 ## 0.8.0 — Driver & Root-Cause Engine
 
 - Added a browser-local driver analysis panel that explains where KPI movement is concentrated across business dimensions.
