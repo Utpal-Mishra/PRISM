@@ -167,7 +167,7 @@ Show a ranked “what moved the KPI” explanation, not merely correlations.
 
 ## Day 6 — Forecast Intelligence
 
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-14
 
 ### Objective
 Upgrade forecasting from a single method to evidence-based model selection and backtesting.

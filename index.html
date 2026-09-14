@@ -20,6 +20,7 @@
   <script defer src="./assets/investigation.js"></script>
   <script defer src="./assets/statistical.js"></script>
   <script defer src="./assets/drivers.js"></script>
+  <script defer src="./assets/forecast-intelligence.js"></script>
 </head>
 <body>
   <button id="menuToggle" class="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
@@ -59,7 +60,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <span id="versionLabel">v0.8.0 · GitHub Pages</span>
+        <span id="versionLabel">v0.9.0 · GitHub Pages</span>
         <a href="https://github.com/Utpal-Mishra/PRISM" target="_blank" rel="noreferrer">Repository ↗</a>
       </div>
     </aside>
@@ -134,9 +135,9 @@
       </section>
 
       <section id="view-forecast" class="view">
-        <div class="section-intro"><div><p class="eyebrow">FORESIGHT</p><h2>Forecast</h2><p>Build an explainable monthly trend forecast from a detected date field and numerical measure, including a simple holdout backtest and uncertainty band.</p></div></div>
+        <div class="section-intro"><div><p class="eyebrow">FORESIGHT</p><h2>Forecast Intelligence</h2><p>Compare transparent browser-suitable forecasting methods on a holdout period, select the strongest candidate, quantify error and uncertainty, and explain why the model was selected.</p></div></div>
         <article class="panel">
-          <div class="control-row three"><label>Date field<select id="forecastDate"></select></label><label>Metric<select id="forecastMetric"></select></label><label>Horizon<select id="forecastHorizon"><option value="3">3 months</option><option value="6" selected>6 months</option><option value="12">12 months</option></select></label><button id="runForecast" class="primary-button" type="button">Run forecast</button></div>
+          <div class="control-row three"><label>Date field<select id="forecastDate"></select></label><label>Metric<select id="forecastMetric"></select></label><label>Horizon<select id="forecastHorizon"><option value="3">3 months</option><option value="6" selected>6 months</option><option value="12">12 months</option></select></label><button id="runForecast" class="primary-button" type="button">Compare & forecast</button></div>
           <div id="forecastMetrics" class="metric-grid small"></div>
           <div id="forecastChart" class="chart tall"></div>
           <div id="forecastNarrative" class="insight-list"></div>
