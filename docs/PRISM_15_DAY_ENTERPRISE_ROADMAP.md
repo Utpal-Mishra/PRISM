@@ -7,7 +7,6 @@
 **Product direction:** Data → Evidence → Explanation → Prediction → Scenario → Strategy → Decision → Action → Outcome → Learning
 
 ## Roadmap intent
-
 This sprint moves PRISM from a browser-native analytical workspace toward an evidence-backed enterprise decision-intelligence platform. Each day delivers a practical vertical slice, not a claim of full production maturity.
 
 ### Non-negotiable product principles
@@ -29,50 +28,35 @@ Working UI vertical slice; analytical/structured object; explainability/evidence
 ---
 ## Day 1 — Evidence Foundation
 **Status:** ☑ Completed — 2026-09-09
-
 ## Day 2 — Enterprise Semantic Layer
 **Status:** ☑ Completed — 2026-09-10
-
 ## Day 3 — Automated Analytical Investigation
 **Status:** ☑ Completed — 2026-09-11
-
 ## Day 4 — Statistical Evidence Layer
 **Status:** ☑ Completed — 2026-09-12
-
 ## Day 5 — Driver & Root-Cause Engine
 **Status:** ☑ Completed — 2026-09-13
-
 ## Day 6 — Forecast Intelligence
 **Status:** ☑ Completed — 2026-09-14
-
 ## Day 7 — Scenario & What-If Studio
 **Status:** ☑ Completed — 2026-09-15
 
-### Objective
-Let users test alternative assumptions and compare decision scenarios.
-
-### Delivered
-- User-adjustable KPI, driver and percentage-change assumption.
-- Baseline vs scenario comparison using a transparent single-driver linear response sensitivity model.
-- Approximate impact range and uncertainty-based risk indicator.
-- Stable `SCN-*` IDs and linked `EVD-*` evidence metadata.
-- Browser-local save/compare support for recent scenarios.
-- Defensive refusal for insufficient paired observations or inadequate driver variation.
-- Explicit `scenario sensitivity; causal-not-established` classification.
-- **Download Scenario Comparison** using `PRISM_SCENARIO_<DATASET>_<YYYYMMDD-HHMM>.json`.
-
-### UX target
-“What if X changes?” becomes an evidence-backed comparison rather than a manual spreadsheet exercise.
-
----
 ## Day 8 — Strategy Engine 2.0
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-16
 
 ### Objective
 Convert analytical findings into structured, decision-ready strategy objects.
 
-### Build
-A strategy object should contain problem, evidence, hypothesis, recommended action, alternatives, expected impact, confidence, risk, cost/effort proxy, dependency, KPI to monitor, owner and review date. Add **Download Strategy Pack**.
+### Delivered
+- Structured `STR-*` proposal containing problem, evidence, hypothesis, recommended action and alternative.
+- Expected-impact guardrail that refuses to invent impact from observational evidence and directs validation through Scenario Studio or controlled testing.
+- Confidence, risk, cost/effort proxy, dependencies and KPI-to-monitor metadata.
+- Accountable owner and review-date inputs with explicit human-review status.
+- Linked `EVD-*` evidence record, method version, assumptions and limitations.
+- Explicit `decision-support synthesis; causal-not-established` classification.
+- Browser-local persistence and defensive insufficient-data handling.
+- Responsive desktop/mobile strategy proposal cards.
+- **Download Strategy Pack** using `PRISM_STRATEGY_<DATASET>_<YYYYMMDD-HHMM>.json`.
 
 ---
 ## Day 9 — Decision Register
