@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0 — Strategy Engine 2.0
+
+- Replaced generic narrative strategy cards with structured, decision-ready strategy proposals.
+- Added stable `STR-*` strategy IDs and linked `EVD-*` evidence IDs.
+- Added explicit problem, evidence, hypothesis, recommended action, alternative, expected-impact statement, confidence, risk, cost/effort proxy, dependencies, KPI, owner, review date and approval status fields.
+- Added human-accountability guardrails: unassigned owners are visibly flagged and proposals remain `Proposed — human review required`.
+- Added explicit `decision-support synthesis; causal-not-established` classification and refuses to assert expected impact from observational evidence.
+- Added defensive handling for insufficient records or unusable KPI fields.
+- Added browser-local strategy persistence without transmitting uploaded dataset contents.
+- Added responsive mobile controls and proposal cards.
+- Added **Download Strategy Pack** JSON export using `PRISM_STRATEGY_<DATASET>_<YYYYMMDD-HHMM>.json`, including dataset, method, evidence, assumptions, limitations and accountability metadata.
+
 ## 1.0.0 — Scenario & What-If Studio
 
 - Added a browser-local Scenario & What-If Studio for testing user-adjustable driver assumptions against selected KPIs.
