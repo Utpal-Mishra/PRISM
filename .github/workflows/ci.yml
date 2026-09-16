@@ -23,7 +23,7 @@ jobs:
           test -f index.html
           test -f assets/styles.css
           test -f assets/mobile.css
-          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
+          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
           grep -q -- "#07110d" assets/styles.css
           grep -q -- "#78e6aa" assets/styles.css
           grep -q -- "#c8f56b" assets/styles.css
@@ -31,6 +31,7 @@ jobs:
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "scenario.js" index.html
+          grep -q -- "strategy-engine.js" index.html
           grep -q -- "view-scenario" index.html
           grep -q -- "Download Investigation Pack" assets/investigation.js
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
@@ -42,6 +43,14 @@ jobs:
           grep -q -- "PRISM_FORECAST_" assets/forecast-intelligence.js
           grep -q -- "Download Scenario Comparison" assets/scenario.js
           grep -q -- "PRISM_SCENARIO_" assets/scenario.js
+          grep -q -- "Download Strategy Pack" assets/strategy-engine.js
+          grep -q -- "PRISM_STRATEGY_" assets/strategy-engine.js
+          grep -q -- "STR-" assets/strategy-engine.js
+          grep -q -- "EVD-" assets/strategy-engine.js
+          grep -q -- "human review required" assets/strategy-engine.js
+          grep -q -- "causal-not-established" assets/strategy-engine.js
+          grep -q -- "Impact is not asserted" assets/strategy-engine.js
+          grep -q -- "localStorage" assets/strategy-engine.js
           grep -q -- "localStorage" assets/scenario.js
           grep -q -- "impactRange" assets/scenario.js
           grep -q -- "riskIndicator" assets/scenario.js
