@@ -40,33 +40,24 @@ Working UI vertical slice; analytical/structured object; explainability/evidence
 **Status:** ☑ Completed — 2026-09-14
 ## Day 7 — Scenario & What-If Studio
 **Status:** ☑ Completed — 2026-09-15
-
 ## Day 8 — Strategy Engine 2.0
 **Status:** ☑ Completed — 2026-09-16
 
-### Objective
-Convert analytical findings into structured, decision-ready strategy objects.
-
-### Delivered
-- Structured `STR-*` proposal containing problem, evidence, hypothesis, recommended action and alternative.
-- Expected-impact guardrail that refuses to invent impact from observational evidence and directs validation through Scenario Studio or controlled testing.
-- Confidence, risk, cost/effort proxy, dependencies and KPI-to-monitor metadata.
-- Accountable owner and review-date inputs with explicit human-review status.
-- Linked `EVD-*` evidence record, method version, assumptions and limitations.
-- Explicit `decision-support synthesis; causal-not-established` classification.
-- Browser-local persistence and defensive insufficient-data handling.
-- Responsive desktop/mobile strategy proposal cards.
-- **Download Strategy Pack** using `PRISM_STRATEGY_<DATASET>_<YYYYMMDD-HHMM>.json`.
-
----
 ## Day 9 — Decision Register
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-17
 
 ### Objective
 Create organisational memory for why important decisions were made.
 
-### Build
-Decision ID, owner, linked evidence/strategy IDs, alternatives, selected action, expected outcome, status, review date, browser-local persistence, and **Download Decision Record**.
+### Delivered
+- Accountable `DEC-*` records created from a reviewed Strategy Engine 2.0 proposal.
+- Required decision owner, selected action and review date with refusal of unaccountable records.
+- Linked `STR-*` strategy and `EVD-*` evidence IDs plus problem, hypothesis, confidence, risk and method context.
+- Alternatives considered, selected action, expected outcome/validation target, KPI, status and review date.
+- Browser-local persistence for up to 50 decision records and explicit local clear control.
+- Explicit `organisational decision record; human-approved action; causal-not-established` classification and causal limitations.
+- Responsive desktop/mobile Decision Register navigation, form and organisational-memory cards.
+- **Download Decision Record** using `PRISM_DECISION_<DATASET>_<YYYYMMDD-HHMM>.json` with evidence, method, accountability, assumptions and limitations.
 
 ---
 ## Day 10 — Recommendation → Outcome Feedback Loop

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0 — Decision Register
+
+- Added a browser-local Decision Register that converts a reviewed Strategy Engine 2.0 proposal into an accountable `DEC-*` organisational decision record.
+- Requires a named owner, selected action and review date before a decision can be recorded; PRISM refuses unaccountable records.
+- Preserves traceability through linked `STR-*` strategy and `EVD-*` evidence IDs, plus problem, hypothesis, confidence, risk and method metadata.
+- Records alternatives considered, selected action, expected outcome/validation target, KPI to monitor, status and review date.
+- Explicitly classifies records as `organisational decision record; human-approved action; causal-not-established`; expected outcomes are not treated as proof of causal impact.
+- Persists up to 50 recent decisions in browser-local storage and provides a local clear action; uploaded datasets remain browser-local.
+- Added responsive desktop/mobile Decision Register navigation, accountable-decision form and decision-memory cards.
+- Added **Download Decision Record** JSON export using `PRISM_DECISION_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, strategy, evidence, method, assumptions, limitations and accountability metadata.
+- Extended CI to syntax-check and contract-test Decision Register traceability, export naming, local persistence, owner requirement and non-causal language.
+
 ## 1.1.0 — Strategy Engine 2.0
 
 - Replaced generic narrative strategy cards with structured, decision-ready strategy proposals.
