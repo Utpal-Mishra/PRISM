@@ -61,13 +61,22 @@ Create organisational memory for why important decisions were made.
 
 ---
 ## Day 10 — Recommendation → Outcome Feedback Loop
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-18
 
 ### Objective
 Evaluate whether a recommendation or decision achieved the expected outcome.
 
-### Build
-Expected vs actual KPI, evaluation period, variance, transparent effectiveness score, learning metadata, and **Download Outcome Review**.
+### Delivered
+- Browser-local `OUT-*` outcome reviews linked to accountable `DEC-*`, upstream `STR-*`, and `EVD-*` evidence IDs.
+- Required expected KPI, actual KPI and explicit evaluation-period dates; missing values are not inferred.
+- Absolute and percentage variance plus a transparent bounded expectation-alignment score.
+- Score definition explicitly states that closeness to expectation is not causal effectiveness.
+- User-recorded learning metadata so domain-owner interpretation can feed future decision cycles.
+- New `EVD-OUT-*` observation evidence with method, calculations, assumptions and limitations.
+- Explicit `outcome evaluation; observational before/after comparison; causal-not-established` classification.
+- Defensive date validation and explicit warning about concurrent changes, seasonality and external factors.
+- Responsive desktop/mobile Outcome Feedback view with browser-local persistence.
+- **Download Outcome Review** using `PRISM_OUTCOME_<DATASET>_<YYYYMMDD-HHMM>.json`.
 
 ---
 ## Day 11 — Enterprise Data Connectors Foundation
