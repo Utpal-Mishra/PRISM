@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.4.0 — Enterprise Data Connectors Foundation
+
+- Added a versioned connector adapter contract for Local file, SQL, REST API and cloud-file patterns.
+- Added explicit Local vs Connected execution modes, browser-local non-secret configuration, refresh cadence, provenance and configuration-readiness health metadata.
+- Added `EVD-CONN-*` configuration evidence with method, assumptions and limitations; connector readiness is not represented as remote availability or analytical evidence.
+- Added secret redaction and explicit safeguards that the static edition neither persists/exports secrets nor transmits uploaded data.
+- Added responsive desktop/mobile Data Connectors navigation and controls.
+- Added **Download Connector Configuration** using `PRISM_CONNECTOR_<DATASET>_<YYYYMMDD-HHMM>.json`.
+
+## 1.3.0 — Recommendation → Outcome Feedback Loop
+
+- Added browser-local `OUT-*` reviews linked to `DEC-*`, `STR-*` and `EVD-*` traceability.
+- Added expected-versus-actual KPI variance, explicit evaluation periods, bounded expectation-alignment scoring and domain-owner learning notes.
+- Added `EVD-OUT-*` observation evidence and explicit `causal-not-established` limitations.
+- Added **Download Outcome Review** using `PRISM_OUTCOME_<DATASET>_<YYYYMMDD-HHMM>.json`.
+
 ## 1.2.0 — Decision Register
 
 - Added a browser-local Decision Register that converts a reviewed Strategy Engine 2.0 proposal into an accountable `DEC-*` organisational decision record.
