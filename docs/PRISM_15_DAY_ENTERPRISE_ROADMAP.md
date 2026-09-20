@@ -42,51 +42,27 @@ Working UI vertical slice; analytical/structured object; explainability/evidence
 **Status:** ☑ Completed — 2026-09-15
 ## Day 8 — Strategy Engine 2.0
 **Status:** ☑ Completed — 2026-09-16
-
 ## Day 9 — Decision Register
 **Status:** ☑ Completed — 2026-09-17
-
-### Objective
-Create organisational memory for why important decisions were made.
-
-### Delivered
-- Accountable `DEC-*` records created from a reviewed Strategy Engine 2.0 proposal.
-- Required decision owner, selected action and review date with refusal of unaccountable records.
-- Linked `STR-*` strategy and `EVD-*` evidence IDs plus problem, hypothesis, confidence, risk and method context.
-- Alternatives considered, selected action, expected outcome/validation target, KPI, status and review date.
-- Browser-local persistence for up to 50 decision records and explicit local clear control.
-- Explicit `organisational decision record; human-approved action; causal-not-established` classification and causal limitations.
-- Responsive desktop/mobile Decision Register navigation, form and organisational-memory cards.
-- **Download Decision Record** using `PRISM_DECISION_<DATASET>_<YYYYMMDD-HHMM>.json` with evidence, method, accountability, assumptions and limitations.
-
----
 ## Day 10 — Recommendation → Outcome Feedback Loop
 **Status:** ☑ Completed — 2026-09-18
 
-### Objective
-Evaluate whether a recommendation or decision achieved the expected outcome.
-
-### Delivered
-- Browser-local `OUT-*` outcome reviews linked to accountable `DEC-*`, upstream `STR-*`, and `EVD-*` evidence IDs.
-- Required expected KPI, actual KPI and explicit evaluation-period dates; missing values are not inferred.
-- Absolute and percentage variance plus a transparent bounded expectation-alignment score.
-- Score definition explicitly states that closeness to expectation is not causal effectiveness.
-- User-recorded learning metadata so domain-owner interpretation can feed future decision cycles.
-- New `EVD-OUT-*` observation evidence with method, calculations, assumptions and limitations.
-- Explicit `outcome evaluation; observational before/after comparison; causal-not-established` classification.
-- Defensive date validation and explicit warning about concurrent changes, seasonality and external factors.
-- Responsive desktop/mobile Outcome Feedback view with browser-local persistence.
-- **Download Outcome Review** using `PRISM_OUTCOME_<DATASET>_<YYYYMMDD-HHMM>.json`.
-
 ---
 ## Day 11 — Enterprise Data Connectors Foundation
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-19
 
 ### Objective
 Create an extensible connector architecture without compromising local-first operation.
 
-### Build
-Connector adapter contract, source configuration, mock SQL/REST/cloud-file patterns, local vs connected mode, health/refresh metadata and secret-free configuration export.
+### Delivered
+- Versioned connector adapter contract covering Local file, SQL, REST API and cloud-file patterns.
+- Explicit **Local** vs **Connected** execution mode labels; uploaded data remains browser-local unless an explicit runtime is configured.
+- Browser-local non-secret source configuration and refresh cadence metadata.
+- Configuration-readiness health state that does not pretend to test remote availability in the static edition.
+- Provenance metadata, last-checked timestamp and `EVD-CONN-*` configuration evidence with method, assumptions and limitations.
+- Secret-denylist redaction plus explicit `secrets_exported: false`, `secrets_persisted: false`, and `uploaded_data_transmitted: false` metadata.
+- Responsive desktop/mobile Data Connectors navigation and controls.
+- **Download Connector Configuration** using `PRISM_CONNECTOR_<DATASET>_<YYYYMMDD-HHMM>.json`.
 
 ---
 ## Day 12 — Dataset & Metric Registry
