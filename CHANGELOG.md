@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0 — Data Lineage
+
+- Added a browser-local lineage engine that assembles governed `Source → Field → Metric → Evidence → Strategy → Decision` traceability from existing PRISM registry, strategy and decision records.
+- Added an interactive responsive lineage workspace with selectable nodes, incoming/outgoing trace links and recorded metadata inspection.
+- Added defensive refusal when governed registry metadata is unavailable; PRISM does not invent missing lineage.
+- Added explicit provenance classification and limitations so recorded trace/support links are not presented as causal influence or semantic validation.
+- Added **Download Lineage** using `PRISM_LINEAGE_<DATASET>_<YYYYMMDD-HHMM>.json` with graph, method, evidence, assumptions, limitations and local-first privacy metadata.
+- Extended CI to validate lineage syntax, graph contract, upstream storage keys, export naming and non-causal language.
+
 ## 1.5.0 — Dataset & Metric Registry
 
 - Added a browser-local governed registry for trusted datasets (`DS-*`) and metrics (`MET-*`).
