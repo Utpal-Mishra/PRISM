@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 — Dataset & Metric Registry
+
+- Added a browser-local governed registry for trusted datasets (`DS-*`) and metrics (`MET-*`).
+- Added dataset description, accountable owner, steward, refresh cadence and certification metadata with defensive refusal of unaccountable records.
+- Added metric business definition, documented formula, source fields, aliases, owner and certification metadata with minimum-definition validation.
+- Added `EVD-REG-*` governance evidence containing method, assumptions and limitations; certification is governance metadata and is not represented as proof of analytical correctness or causality.
+- Added a responsive desktop/mobile Registry workspace with browser-local persistence; the static registry is not represented as an enterprise system of record.
+- Added **Download Registry** using `PRISM_REGISTRY_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, metric, evidence, method and governance metadata.
+- Extended CI to validate Registry syntax, export naming, source-field metadata, accountability, local persistence and non-causal language.
+
 ## 1.4.0 — Enterprise Data Connectors Foundation
 
 - Added a versioned connector adapter contract for Local file, SQL, REST API and cloud-file patterns.
