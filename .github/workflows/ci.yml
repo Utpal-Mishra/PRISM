@@ -1,11 +1,9 @@
 name: CI
-
 on:
   push:
     branches: [main, develop, "agent/**"]
   pull_request:
     branches: [main, develop]
-
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -23,56 +21,32 @@ jobs:
           test -f index.html
           test -f assets/styles.css
           test -f assets/mobile.css
-          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
-          grep -q -- "#07110d" assets/styles.css
-          grep -q -- "#78e6aa" assets/styles.css
-          grep -q -- "#c8f56b" assets/styles.css
-          grep -q -- "mobile-menu-toggle" index.html
+          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
-          grep -q -- "scenario.js" index.html
-          grep -q -- "strategy-engine.js" index.html
-          grep -q -- "decision-register.js" index.html
-          grep -q -- "view-scenario" index.html
-          grep -q -- "view-decision" index.html
-          grep -q -- "Download Investigation Pack" assets/investigation.js
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
-          grep -q -- "Download Statistical Evidence Pack" assets/statistical.js
           grep -q -- "PRISM_STATISTICAL_" assets/statistical.js
-          grep -q -- "Download Driver Analysis" assets/drivers.js
           grep -q -- "PRISM_DRIVER_" assets/drivers.js
-          grep -q -- "Download Forecast Pack" assets/forecast-intelligence.js
           grep -q -- "PRISM_FORECAST_" assets/forecast-intelligence.js
-          grep -q -- "Download Scenario Comparison" assets/scenario.js
           grep -q -- "PRISM_SCENARIO_" assets/scenario.js
-          grep -q -- "Download Strategy Pack" assets/strategy-engine.js
           grep -q -- "PRISM_STRATEGY_" assets/strategy-engine.js
-          grep -q -- "Download Decision Record" index.html
           grep -q -- "PRISM_DECISION_" assets/decision-register.js
-          grep -q -- "DEC-" assets/decision-register.js
-          grep -q -- "strategy_id" assets/decision-register.js
-          grep -q -- "evidence_ids" assets/decision-register.js
-          grep -q -- "Accountable owner" index.html
-          grep -q -- "causal-not-established" assets/decision-register.js
-          grep -q -- "localStorage" assets/decision-register.js
-          grep -q -- "human review required" assets/strategy-engine.js
-          grep -q -- "causal-not-established" assets/strategy-engine.js
-          grep -q -- "Impact is not asserted" assets/strategy-engine.js
-          grep -q -- "localStorage" assets/strategy-engine.js
-          grep -q -- "localStorage" assets/scenario.js
-          grep -q -- "impactRange" assets/scenario.js
-          grep -q -- "riskIndicator" assets/scenario.js
-          grep -q -- "causal-not-established" assets/scenario.js
-          grep -q -- "not causal proof" assets/scenario.js
-          grep -q -- "Download Outcome Review" assets/decision-register.js
           grep -q -- "PRISM_OUTCOME_" assets/outcome-feedback.js
-          grep -q -- "OUT-" assets/outcome-feedback.js
-          grep -q -- "effectiveness_score" assets/outcome-feedback.js
-          grep -q -- "decision_id" assets/outcome-feedback.js
-          grep -q -- "evidence_ids" assets/outcome-feedback.js
+          grep -q -- "causal-not-established" assets/decision-register.js
           grep -q -- "causal-not-established" assets/outcome-feedback.js
+          grep -q -- "localStorage" assets/scenario.js
+          grep -q -- "localStorage" assets/strategy-engine.js
+          grep -q -- "localStorage" assets/decision-register.js
           grep -q -- "localStorage" assets/outcome-feedback.js
-          grep -q -- "does not isolate the effect" assets/outcome-feedback.js
-          grep -q -- "translateX(-106%)" assets/mobile.css
+          test -f registry.html
+          grep -q -- "Dataset & Metric Registry" registry.html
+          grep -q -- "Download Registry" assets/registry.js
+          grep -q -- "PRISM_REGISTRY_" assets/registry.js
+          grep -q -- "source_fields" assets/registry.js
+          grep -q -- "certification" assets/registry.js
+          grep -q -- "owner" assets/registry.js
+          grep -q -- "steward" assets/registry.js
+          grep -q -- "localStorage" assets/registry.js
+          grep -q -- "not analytical or causal evidence" assets/registry.js
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js

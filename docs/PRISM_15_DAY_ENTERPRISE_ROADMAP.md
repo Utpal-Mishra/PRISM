@@ -66,13 +66,18 @@ Create an extensible connector architecture without compromising local-first ope
 
 ---
 ## Day 12 — Dataset & Metric Registry
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-20
 
 ### Objective
 Create controlled definitions for trusted datasets and KPIs.
 
-### Build
-Dataset ID/description/owner/steward/cadence/certification plus metric name/definition/formula/source fields/aliases and **Download Registry**.
+### Delivered
+- Browser-local governed `DS-*` dataset definitions with description, accountable owner, steward, refresh cadence and certification.
+- Governed `MET-*` metric definitions with business definition, documented formula, source fields, aliases, owner and certification.
+- Defensive validation that refuses incomplete or unaccountable registry records.
+- `EVD-REG-*` governance evidence with method, assumptions and limitations; certification is governance metadata, not proof of analytical correctness or causality.
+- Responsive desktop/mobile Registry workspace with browser-local persistence; the static registry is not represented as an enterprise system of record.
+- **Download Registry** using `PRISM_REGISTRY_<DATASET>_<YYYYMMDD-HHMM>.json` with dataset, metric, evidence, method and governance metadata.
 
 ---
 ## Day 13 — Data Lineage
