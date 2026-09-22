@@ -96,13 +96,20 @@ Trace decision outputs through metrics, transformations and data sources.
 
 ---
 ## Day 14 — Enterprise Governance
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-22
 
 ### Objective
 Introduce the governance model required for eventual enterprise use.
 
-### Build
-Viewer/analyst/manager/admin roles, static permission simulation, approval states, audit schema, PII/data classification foundation, model-governance metadata and **Download Audit Log**.
+### Delivered
+- Viewer, Analyst, Manager and Admin role simulation with explicit permission capabilities.
+- Approval-state guardrails that reserve approve/reject transitions for Manager/Admin roles and require an accountable actor.
+- Data-classification foundation covering Public, Internal, Confidential and Restricted / PII, with mandatory handling/lawful-basis note for Restricted / PII records.
+- Model-governance metadata covering model/method, intended use, risk tier and mandatory human approval.
+- Browser-local `AUD-*` audit events and `EVD-GOV-*` governance evidence with method, assumptions and limitations.
+- Explicit static-edition boundaries: role simulation is not production RBAC; local audit events are not immutable; governance metadata is not analytical or causal proof.
+- Responsive desktop/mobile Governance workspace with defensive validation and local-only persistence.
+- **Download Audit Log** using `PRISM_AUDIT_<DATASET>_<YYYYMMDD-HHMM>.json` with governance controls, audit events, evidence/method metadata and local-first security assertions.
 
 ---
 ## Day 15 — AI Analytical Copilot
