@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.0 — Enterprise Governance
+
+- Added Viewer, Analyst, Manager and Admin role simulation with explicit permission capabilities and approval-transition guardrails.
+- Added accountable governance controls for asset, approval state, data classification, Restricted/PII handling basis, model/method intended use and risk tier.
+- Added browser-local `AUD-*` audit events and `EVD-GOV-*` governance evidence with method, assumptions and limitations.
+- Added explicit static-edition boundaries: simulated permissions are not SSO/RBAC, local audit history is not immutable, and classification metadata requires organisational policy validation.
+- Added responsive desktop/mobile Enterprise Governance workspace and defensive refusal of unaccountable approvals or incomplete Restricted/PII handling metadata.
+- Added **Download Audit Log** using `PRISM_AUDIT_<DATASET>_<YYYYMMDD-HHMM>.json` with controls, audit events, evidence/method metadata, limitations and local-first security assertions.
+- Extended CI to validate governance syntax, role contract, approval controls, PII foundation, export naming, local persistence and non-causal language.
+
 ## 1.6.0 — Data Lineage
 
 - Added a browser-local lineage engine that assembles governed `Source → Field → Metric → Evidence → Strategy → Decision` traceability from existing PRISM registry, strategy and decision records.
