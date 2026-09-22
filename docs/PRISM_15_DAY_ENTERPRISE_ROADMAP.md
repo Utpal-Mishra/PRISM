@@ -81,13 +81,18 @@ Create controlled definitions for trusted datasets and KPIs.
 
 ---
 ## Day 13 — Data Lineage
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-09-21
 
 ### Objective
 Trace decision outputs through metrics, transformations and data sources.
 
-### Build
-Source → field → metric → evidence → strategy → decision graph, interactive lineage view and lineage JSON export.
+### Delivered
+- Deterministic browser-local `Source → Field → Metric → Evidence → Strategy → Decision` graph assembled from governed registry, strategy and decision records.
+- Interactive responsive lineage workspace with selectable nodes, metadata inspection and incoming/outgoing trace links.
+- Defensive refusal when governed registry metadata is absent; missing lineage is shown as incomplete rather than invented.
+- Explicit provenance/support classification and limitations so trace links are not represented as causal influence or semantic validation.
+- Local-first privacy metadata with no uploaded-data transmission in the static edition.
+- **Download Lineage** using `PRISM_LINEAGE_<DATASET>_<YYYYMMDD-HHMM>.json` with graph, method, evidence, assumptions and limitations.
 
 ---
 ## Day 14 — Enterprise Governance
