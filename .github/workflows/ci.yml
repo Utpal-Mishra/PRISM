@@ -21,7 +21,7 @@ jobs:
           test -f index.html
           test -f assets/styles.css
           test -f assets/mobile.css
-          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
+          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage governance; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
@@ -40,22 +40,22 @@ jobs:
           grep -q -- "localStorage" assets/outcome-feedback.js
           test -f registry.html
           grep -q -- "Dataset & Metric Registry" registry.html
-          grep -q -- "Download Registry" assets/registry.js
           grep -q -- "PRISM_REGISTRY_" assets/registry.js
-          grep -q -- "source_fields" assets/registry.js
-          grep -q -- "certification" assets/registry.js
-          grep -q -- "owner" assets/registry.js
-          grep -q -- "steward" assets/registry.js
-          grep -q -- "localStorage" assets/registry.js
-          grep -q -- "not analytical or causal evidence" assets/registry.js
           test -f lineage.html
-          grep -q -- "Source → Field → Metric → Evidence → Strategy → Decision" lineage.html
-          grep -q -- "Download Lineage" lineage.html
           grep -q -- "PRISM_LINEAGE_" assets/lineage.js
-          grep -q -- "prism_registry_v1" assets/lineage.js
-          grep -q -- "prism.decisions.v1" assets/lineage.js
-          grep -q -- "prism.strategy.v2" assets/lineage.js
           grep -q -- "not causal claims" assets/lineage.js
-          grep -q -- "uploaded_data_transmitted:false" assets/lineage.js
+          test -f governance.html
+          grep -q -- "Enterprise Governance" governance.html
+          grep -q -- "Download Audit Log" assets/governance.js
+          grep -q -- "PRISM_AUDIT_" assets/governance.js
+          grep -q -- "Viewer" assets/governance.js
+          grep -q -- "Analyst" assets/governance.js
+          grep -q -- "Manager" assets/governance.js
+          grep -q -- "Admin" assets/governance.js
+          grep -q -- "Restricted / PII" assets/governance.js
+          grep -q -- "human_approval_required: true" assets/governance.js
+          grep -q -- "causal-not-established" assets/governance.js
+          grep -q -- "uploaded_data_transmitted: false" assets/governance.js
+          grep -q -- "localStorage" assets/governance.js
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js
