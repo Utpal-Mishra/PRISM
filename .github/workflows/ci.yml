@@ -21,7 +21,7 @@ jobs:
           test -f index.html
           test -f assets/styles.css
           test -f assets/mobile.css
-          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage governance; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
+          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage governance copilot; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
@@ -57,5 +57,14 @@ jobs:
           grep -q -- "causal-not-established" assets/governance.js
           grep -q -- "uploaded_data_transmitted: false" assets/governance.js
           grep -q -- "localStorage" assets/governance.js
+          test -f copilot.html
+          grep -q -- "AI Analytical Copilot" copilot.html
+          grep -q -- "Download Analysis Brief" assets/copilot.js
+          grep -q -- "PRISM_BRIEF_" assets/copilot.js
+          grep -q -- "insufficient_evidence" assets/copilot.js
+          grep -q -- "evidence_id" assets/copilot.js
+          grep -q -- "causal-not-established" assets/copilot.js
+          grep -q -- "uploaded_data_transmitted:false" assets/copilot.js
+          grep -q -- "provider_adapter" assets/copilot.js
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js
