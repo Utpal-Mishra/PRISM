@@ -57,5 +57,10 @@ jobs:
           grep -q -- "causal-not-established" assets/governance.js
           grep -q -- "uploaded_data_transmitted: false" assets/governance.js
           grep -q -- "localStorage" assets/governance.js
+          grep -q -- "AI Analytical Copilot" assets/copilot.js
+          grep -q -- "PRISM_ANALYSIS_" assets/copilot.js
+          grep -q -- "evidence-first" assets/copilot.js
+          grep -q -- "causal-not-established" assets/copilot.js
+          grep -q -- "uploaded_data_transmitted: false" assets/copilot.js
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js
