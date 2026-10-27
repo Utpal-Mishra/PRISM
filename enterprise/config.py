@@ -62,6 +62,10 @@ class EnterpriseSettings(BaseSettings):
             raise ValueError("Production PRISM requires PostgreSQL.")
         if not self.oidc_issuer or not self.oidc_audience:
             raise ValueError("Production PRISM requires OIDC issuer and audience.")
+        if not self.oidc_issuer.startswith("https://"):
+            raise ValueError("Production PRISM requires an HTTPS OIDC issuer.")
+        if self.oidc_jwks_url and not self.oidc_jwks_url.startswith("https://"):
+            raise ValueError("Production PRISM requires an HTTPS OIDC JWKS URL.")
         if len(self.audit_hmac_key.get_secret_value()) < 32:
             raise ValueError(
                 "Production PRISM requires an audit HMAC key of at least 32 characters."
