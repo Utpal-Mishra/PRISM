@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import urllib.request
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Annotated
@@ -24,19 +25,30 @@ class Principal:
     claims: dict[str, object]
 
 
+def _require_https_url(value: str, label: str) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise RuntimeError(f"{label} must be an absolute HTTPS URL.")
+    if parsed.username or parsed.password:
+        raise RuntimeError(f"{label} must not contain URL credentials.")
+    return value
+
+
 @lru_cache(maxsize=8)
 def _discover_jwks_uri(issuer: str) -> str:
+    issuer = _require_https_url(issuer, "OIDC issuer")
     discovery_url = f"{issuer.rstrip('/')}/.well-known/openid-configuration"
-    with urllib.request.urlopen(discovery_url, timeout=5) as response:  # noqa: S310
+    with urllib.request.urlopen(discovery_url, timeout=5) as response:  # nosec B310
         payload = json.loads(response.read().decode("utf-8"))
     jwks_uri = payload.get("jwks_uri")
     if not jwks_uri or not isinstance(jwks_uri, str):
         raise RuntimeError("OIDC provider discovery did not return jwks_uri.")
-    return jwks_uri
+    return _require_https_url(jwks_uri, "OIDC JWKS URL")
 
 
 def _verify_token(token: str, settings: EnterpriseSettings) -> Principal:
     jwks_url = settings.oidc_jwks_url or _discover_jwks_uri(settings.oidc_issuer)
+    jwks_url = _require_https_url(jwks_url, "OIDC JWKS URL")
     signing_key = PyJWKClient(jwks_url, timeout=5).get_signing_key_from_jwt(token)
     claims = jwt.decode(
         token,
