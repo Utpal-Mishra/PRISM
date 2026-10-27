@@ -18,6 +18,20 @@ PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace
 - Responsive dark enterprise interface aligned with the shared **The Palm / NEXUS / XPLORE** product family
 - Adaptive phone shell with off-canvas utilities, collapsible context, a persistent bottom analysis dock, safe-area support and responsive charts/tables
 
+
+## Enterprise P0 foundation
+
+PRISM now contains a separate enterprise server boundary under `enterprise/`. The public v1.8.0 GitHub Pages application remains the browser-local demonstration experience; it is **not** the confidential enterprise runtime.
+
+The enterprise foundation provides OIDC authentication, authoritative tenant/workspace memberships, server-side RBAC/data clearance, PostgreSQL persistence with Row Level Security, governed evidence/decision records, tamper-evident audit history, AES-256-GCM field encryption, security middleware, schema migrations, container packaging and security CI/SBOM controls.
+
+For enterprise setup and release gates, see:
+- [Enterprise hosting](docs/enterprise_hosting.md)
+- [Production readiness](docs/production_readiness.md)
+- [Repository security controls](docs/repository_controls.md)
+
+A production tenant still requires environment activation of an approved identity provider, managed PostgreSQL, HTTPS ingress, secret/KMS-backed keys and the documented GitHub `main` protection ruleset.
+
 ## Shared visual language
 
 PRISM uses the same dark-first product family as The Palm and NEXUS: green-black canvas, restrained glass/elevated surfaces, sage secondary text, green interaction states and a scarce lime accent for brand/high-value actions.
@@ -114,7 +128,7 @@ PRISM does not require a fixed schema for its generic intelligence layer. It inf
 
 Uploaded files are read using browser File APIs and analysed in browser memory. PRISM does not send the uploaded dataset to a PRISM application server. This is a useful privacy property for the public static edition, but it is **not the same as enterprise security certification**.
 
-Confidential enterprise use still requires organisation-grade identity, approved hosting, encryption, governed persistent storage, tenant isolation, retention controls, secrets management, data lineage, role-based access, monitoring and formal security review.
+Confidential enterprise use must use the separate authenticated PRISM Enterprise runtime. Its P0 security boundary now implements identity, tenant isolation, persistent governed storage, RBAC/data clearance, encryption and tamper-evident auditing; production activation still requires approved hosting, managed secrets/keys, repository protection, monitoring, retention controls and formal security review.
 
 Predictive drivers and correlations are associations, not causal proof. Strategy signals are decision-support hypotheses and should be reviewed by accountable domain owners.
 
