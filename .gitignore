@@ -21,3 +21,9 @@ data/processed/*
 Thumbs.db
 *.log
 logs/
+.env.enterprise
+prism_enterprise.db
+prism_enterprise.db-*
+*.pem
+*.key
+sbom.cdx.json
