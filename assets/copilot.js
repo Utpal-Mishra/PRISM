@@ -282,8 +282,10 @@
     document.getElementById("view-copilot")?.classList.add("active");
     document.querySelectorAll(".nav-item").forEach((n) => n.classList.toggle("active", n.dataset.view === "copilot"));
     document.body.classList.remove("sidebar-open");
-    document.getElementById("sidebar")?.setAttribute("aria-hidden", "true");
+    if (window.matchMedia("(max-width: 820px)").matches) document.getElementById("sidebar")?.setAttribute("aria-hidden", "true");
     document.getElementById("menuToggle")?.setAttribute("aria-expanded", "false");
+    const count = document.getElementById("copilotEvidenceCount");
+    if (count) { const n = collectEvidence().length; count.textContent = `${n} evidence record${n === 1 ? "" : "s"} available`; }
     window.scrollTo({top:0, behavior:"smooth"});
     document.getElementById("copilotQuestion")?.focus({preventScroll:true});
   }
