@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
@@ -29,13 +30,19 @@ def role_allows(actual: str, required: str) -> bool:
 
 
 def clearance_allows(actual: str, required: str) -> bool:
-    return CLEARANCE_RANK.get(actual.lower(), 0) >= CLEARANCE_RANK.get(required.lower(), 10**9)
+    return CLEARANCE_RANK.get(actual.lower(), 0) >= CLEARANCE_RANK.get(
+        required.lower(), 10**9
+    )
+
+
+PrincipalDep = Annotated[Principal, Depends(get_principal)]
+DbDep = Annotated[Session, Depends(get_db)]
 
 
 def get_workspace_access(
     workspace_id: str,
-    principal: Principal = Depends(get_principal),
-    db: Session = Depends(get_db),
+    principal: PrincipalDep,
+    db: DbDep,
 ) -> WorkspaceAccess:
     row = db.execute(
         select(EnterpriseUser, Membership, Workspace)
@@ -68,8 +75,11 @@ def get_workspace_access(
     )
 
 
+WorkspaceAccessDep = Annotated[WorkspaceAccess, Depends(get_workspace_access)]
+
+
 def require_role(required: str):
-    def dependency(access: WorkspaceAccess = Depends(get_workspace_access)) -> WorkspaceAccess:
+    def dependency(access: WorkspaceAccessDep) -> WorkspaceAccess:
         if not role_allows(access.role, required):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -81,7 +91,7 @@ def require_role(required: str):
 
 
 def require_clearance(required: str):
-    def dependency(access: WorkspaceAccess = Depends(get_workspace_access)) -> WorkspaceAccess:
+    def dependency(access: WorkspaceAccessDep) -> WorkspaceAccess:
         if not clearance_allows(access.data_clearance, required):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
