@@ -1,7 +1,7 @@
 # PRISM — 15-Day Enterprise Evidence-to-Strategy Roadmap
 
 **Roadmap ID:** PRISM-RM-15D-20260909  
-**Version:** 1.1  
+**Version:** 1.2  
 **Start date:** 2026-09-09  
 **Target end date:** 2026-09-23  
 **Product direction:** Data → Evidence → Explanation → Prediction → Scenario → Strategy → Decision → Action → Outcome → Learning
@@ -113,13 +113,25 @@ Introduce the governance model required for eventual enterprise use.
 
 ---
 ## Day 15 — AI Analytical Copilot
-**Status:** ☐ Planned
+**Status:** ☑ Completed — 2026-10-27
 
 ### Objective
 Add an AI-ready analytical interaction layer grounded in PRISM evidence rather than unsupported claims.
 
-### Build
-Evidence-first query contract, deterministic local answer composer, future provider adapter, evidence-ID citations, insufficient-evidence refusal and **Download Analysis Brief**.
+### Delivered
+- Evidence-first question contract that only answers from traceable PRISM evidence available in the active browser workspace or governed browser-local records.
+- Deterministic local answer composer with intent routing for KPI movement/drivers, relationships, forecast, strategy, decisions, outcomes, data quality and governed definitions.
+- `EVD-*` citation validation and clickable evidence navigation back into the supporting PRISM workspace where the evidence is available.
+- Defensive insufficient-evidence refusal rather than unsupported answer generation.
+- Shared evidence collection across active analytical modules plus persisted Strategy (`STR-*`), Decision (`DEC-*`), Outcome (`OUT-*`), Registry and Governance records.
+- Explicit descriptive/associative/predictive/governance classifications with `causal-not-established` guardrails where applicable.
+- Future provider-adapter contract that requires provider answers to return citations matching valid PRISM evidence IDs before PRISM accepts them as grounded.
+- Browser-local operation with `uploaded_data_transmitted: false` in the static Copilot analysis artifact.
+- Responsive **AI Copilot** workspace accessible from PRISM navigation without replacing existing analytical views.
+- **Download Analysis Brief** using `PRISM_ANALYSIS_<DATASET>_<YYYYMMDD-HHMM>.json` with query, answer, evidence citations, method, assumptions and limitations.
+
+### 15-day programme status
+The original Evidence-to-Strategy programme is now **15/15 complete**. Further work is treated as post-programme production hardening and later enterprise evolution rather than unfinished scope in the original build.
 
 ---
 # Post-15-day continuation
