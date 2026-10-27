@@ -3,7 +3,16 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from enterprise.db import Base
@@ -31,20 +40,30 @@ class Workspace(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
     tenant_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+        String(36),
+        ForeignKey("tenants.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
-    __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_workspace_tenant_name"),)
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "name", name="uq_workspace_tenant_name"),
+    )
 
 
 class EnterpriseUser(Base):
     __tablename__ = "enterprise_users"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
-    external_subject: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    external_subject: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
     email: Mapped[str | None] = mapped_column(String(320))
     display_name: Mapped[str | None] = mapped_column(String(255))
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
@@ -56,17 +75,33 @@ class Membership(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
     user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("enterprise_users.id", ondelete="CASCADE"), nullable=False, index=True
+        String(36),
+        ForeignKey("enterprise_users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     workspace_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
+        String(36),
+        ForeignKey("workspaces.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     role: Mapped[str] = mapped_column(String(32), nullable=False, default="viewer")
-    data_clearance: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
+    data_clearance: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="internal",
+    )
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
-    __table_args__ = (UniqueConstraint("user_id", "workspace_id", name="uq_membership_user_workspace"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "workspace_id",
+            name="uq_membership_user_workspace",
+        ),
+    )
 
 
 class TenantScopedRecord:
@@ -81,7 +116,11 @@ class EvidenceRecord(TenantScopedRecord, Base):
 
     id: Mapped[str] = mapped_column(String(96), primary_key=True)
     evidence_class: Mapped[str] = mapped_column(String(64), nullable=False)
-    classification: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
+    classification: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="internal",
+    )
     payload: Mapped[dict] = mapped_column(JSON, nullable=False)
 
 
@@ -134,5 +173,10 @@ class AuditEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
     __table_args__ = (
-        Index("ix_audit_tenant_workspace_created", "tenant_id", "workspace_id", "created_at"),
+        Index(
+            "ix_audit_tenant_workspace_created",
+            "tenant_id",
+            "workspace_id",
+            "created_at",
+        ),
     )
