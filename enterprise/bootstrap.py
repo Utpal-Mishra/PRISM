@@ -29,7 +29,11 @@ def bootstrap(tenant_name: str, workspace_name: str, subject: str, email: str | 
 
         user = db.scalar(select(EnterpriseUser).where(EnterpriseUser.external_subject == subject))
         if user is None:
-            user = EnterpriseUser(external_subject=subject, email=email, display_name=email or subject)
+            user = EnterpriseUser(
+                external_subject=subject,
+                email=email,
+                display_name=email or subject,
+            )
             db.add(user)
             db.flush()
 
