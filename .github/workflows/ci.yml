@@ -8,8 +8,8 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12"
           cache: pip
@@ -62,5 +62,16 @@ jobs:
           grep -q -- "evidence-first" assets/copilot.js
           grep -q -- "causal-not-established" assets/copilot.js
           grep -q -- "uploaded_data_transmitted: false" assets/copilot.js
+          grep -q -- "MAX_UPLOAD_BYTES" assets/app.js
+          grep -q -- "MAX_UPLOAD_ROWS" assets/app.js
+          grep -q -- "MAX_UPLOAD_COLUMNS" assets/app.js
+          grep -q -- "CSV cell exceeds" assets/app.js
+          grep -q -- "Content-Security-Policy" index.html
+          grep -q -- "Public demo boundary" index.html
+          python -m py_compile enterprise/*.py enterprise/migrations/*.py enterprise/migrations/versions/*.py
+          grep -q -- "tenant_id" enterprise/models.py
+          grep -q -- "workspace_id" enterprise/models.py
+          grep -q -- "OIDC" enterprise/auth.py
+          grep -q -- "ROW LEVEL SECURITY" enterprise/migrations/versions/0001_enterprise_foundation.py
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js
