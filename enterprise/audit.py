@@ -15,25 +15,44 @@ from enterprise.tenancy import WorkspaceAccess
 GENESIS_HASH = "0" * 64
 
 
-def _canonical_event(
-    access: WorkspaceAccess,
+def _audit_timestamp(value: datetime) -> str:
+    """Return one stable representation across PostgreSQL and SQLite test storage."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    else:
+        value = value.astimezone(UTC)
+    return value.isoformat(timespec="microseconds").replace("+00:00", "Z")
+
+
+def _event_payload(
+    tenant_id: str,
+    workspace_id: str,
+    actor_subject: str,
     event_type: str,
     object_type: str,
     object_id: str | None,
     detail: dict,
     created_at: datetime,
-) -> bytes:
-    payload = {
-        "tenant_id": access.tenant_id,
-        "workspace_id": access.workspace_id,
-        "actor_subject": access.principal.subject,
+) -> dict:
+    return {
+        "tenant_id": tenant_id,
+        "workspace_id": workspace_id,
+        "actor_subject": actor_subject,
         "event_type": event_type,
         "object_type": object_type,
         "object_id": object_id,
         "detail": detail,
-        "created_at": created_at.isoformat(),
+        "created_at": _audit_timestamp(created_at),
     }
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+
+
+def _canonical(payload: dict) -> bytes:
+    return json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
 
 
 def append_audit_event(
@@ -67,15 +86,21 @@ def append_audit_event(
     )
     previous_hash = previous.event_hash if previous else GENESIS_HASH
     created_at = datetime.now(UTC)
-    message = previous_hash.encode("ascii") + _canonical_event(
-        access,
+    payload = _event_payload(
+        access.tenant_id,
+        access.workspace_id,
+        access.principal.subject,
         event_type,
         object_type,
         object_id,
         detail or {},
         created_at,
     )
-    event_hash = hmac.new(secret, message, hashlib.sha256).hexdigest()
+    event_hash = hmac.new(
+        secret,
+        previous_hash.encode("ascii") + _canonical(payload),
+        hashlib.sha256,
+    ).hexdigest()
     event = AuditEvent(
         tenant_id=access.tenant_id,
         workspace_id=access.workspace_id,
@@ -98,26 +123,26 @@ def verify_audit_chain(
 ) -> bool:
     settings = settings or get_settings()
     secret = settings.audit_hmac_key.get_secret_value().encode("utf-8")
+    if len(secret) < 32:
+        return False
+
     previous_hash = GENESIS_HASH
     for event in sorted(events, key=lambda item: (item.created_at, item.id)):
         if event.previous_hash != previous_hash:
             return False
-        payload = {
-            "tenant_id": event.tenant_id,
-            "workspace_id": event.workspace_id,
-            "actor_subject": event.actor_subject,
-            "event_type": event.event_type,
-            "object_type": event.object_type,
-            "object_id": event.object_id,
-            "detail": event.detail,
-            "created_at": event.created_at.isoformat(),
-        }
-        canonical = json.dumps(
-            payload, sort_keys=True, separators=(",", ":"), default=str
-        ).encode("utf-8")
+        payload = _event_payload(
+            event.tenant_id,
+            event.workspace_id,
+            event.actor_subject,
+            event.event_type,
+            event.object_type,
+            event.object_id,
+            event.detail,
+            event.created_at,
+        )
         expected = hmac.new(
             secret,
-            previous_hash.encode("ascii") + canonical,
+            previous_hash.encode("ascii") + _canonical(payload),
             hashlib.sha256,
         ).hexdigest()
         if not hmac.compare_digest(expected, event.event_hash):
