@@ -21,7 +21,7 @@ jobs:
           test -f index.html
           test -f assets/styles.css
           test -f assets/mobile.css
-          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage governance; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
+          for f in theme mobile app investigation statistical drivers forecast-intelligence scenario strategy-engine decision-register outcome-feedback connectors registry lineage governance copilot; do test -f "assets/$f.js"; node --check "assets/$f.js"; done
           grep -q -- "mobile-dock" index.html
           grep -q -- "viewport-fit=cover" index.html
           grep -q -- "PRISM_INVESTIGATION_" assets/investigation.js
