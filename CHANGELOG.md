@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.9.0 — Enterprise P0 Foundation
+
+- Added a separate authenticated PRISM Enterprise FastAPI runtime while preserving GitHub Pages as the public/browser-local demonstration surface.
+- Added production OIDC/OAuth token verification with issuer/audience/time/sub validation and HTTPS-only discovery/JWKS endpoints.
+- Added authoritative tenant, workspace, enterprise-user and membership persistence with server-side Viewer/Analyst/Manager/Admin RBAC and data-classification clearance enforcement.
+- Added PostgreSQL production requirement, tenant/workspace transaction context and forced Row Level Security for governed tenant-scoped records.
+- Added Alembic enterprise schema migration foundation for evidence, strategy, decision, outcome, encrypted-secret and audit records.
+- Added HMAC-chained tamper-evident audit records plus PostgreSQL append-only protection.
+- Added AES-256-GCM field encryption with key versioning and fail-closed production secret requirements.
+- Added enterprise security middleware, dedicated non-root container packaging and a PostgreSQL-backed local enterprise deployment contract.
+- Hardened browser-demo ingestion with upload size/shape/cell limits, bounded workbook parsing, CSV formula-injection neutralisation and an explicit confidential-data boundary.
+- Added repository security ownership and vulnerability policy, CodeQL, dependency auditing, Bandit, committed-secret scanning and CycloneDX SBOM generation.
+- Added enterprise P0 regression tests and upgraded vulnerable legacy/reference dependencies to security-compatible versions.
+- Pinned GitHub workflow actions by immutable SHA and documented the required `main` repository protection ruleset as a release-blocking platform setting.
+
 ## 1.8.0 — AI Analytical Copilot
 
 - Completed Day 15 of the PRISM enterprise Evidence-to-Strategy roadmap, closing the original programme at 15/15 stages.
@@ -13,8 +28,6 @@
 - Added **Download Analysis Brief** using `PRISM_ANALYSIS_<DATASET>_<YYYYMMDD-HHMM>.json` with query, answer, citations, evidence snapshot, method, assumptions and limitations.
 - Preserved the static-edition privacy boundary: Copilot runs locally by default and exports `uploaded_data_transmitted: false`.
 - Extended CI to syntax-check and contract-test the Copilot module, export naming, evidence-first behaviour, causal language and local-first privacy assertion.
-
-# Changelog
 
 ## 1.7.0 — Enterprise Governance
 
