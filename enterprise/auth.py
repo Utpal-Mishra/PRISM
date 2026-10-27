@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 import urllib.request
-from urllib.parse import urlparse
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Annotated
+from urllib.parse import urlparse
 
 import jwt
 from fastapi import Depends, Header, HTTPException, status
