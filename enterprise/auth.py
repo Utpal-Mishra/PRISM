@@ -4,6 +4,7 @@ import json
 import urllib.request
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, Header, HTTPException, status
@@ -53,12 +54,30 @@ def _verify_token(token: str, settings: EnterpriseSettings) -> Principal:
     )
 
 
+CredentialsDep = Annotated[
+    HTTPAuthorizationCredentials | None,
+    Depends(bearer),
+]
+SettingsDep = Annotated[EnterpriseSettings, Depends(get_settings)]
+DevSubjectDep = Annotated[
+    str | None,
+    Header(alias="X-PRISM-Dev-Subject"),
+]
+DevEmailDep = Annotated[
+    str | None,
+    Header(alias="X-PRISM-Dev-Email"),
+]
+
+
 def get_principal(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
-    dev_subject: str | None = Header(default=None, alias="X-PRISM-Dev-Subject"),
-    dev_email: str | None = Header(default=None, alias="X-PRISM-Dev-Email"),
-    settings: EnterpriseSettings = Depends(get_settings),
+    credentials: CredentialsDep = None,
+    dev_subject: DevSubjectDep = None,
+    dev_email: DevEmailDep = None,
+    settings: SettingsDep = None,
 ) -> Principal:
+    if settings is None:
+        settings = get_settings()
+
     if credentials is not None:
         try:
             return _verify_token(credentials.credentials, settings)
