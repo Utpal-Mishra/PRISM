@@ -52,7 +52,7 @@ class EnterpriseSettings(BaseSettings):
         return [value.strip() for value in self.trusted_hosts.split(",") if value.strip()]
 
     @model_validator(mode="after")
-    def validate_production_boundary(self) -> "EnterpriseSettings":
+    def validate_production_boundary(self) -> EnterpriseSettings:
         if self.environment != "production":
             return self
 
@@ -63,13 +63,17 @@ class EnterpriseSettings(BaseSettings):
         if not self.oidc_issuer or not self.oidc_audience:
             raise ValueError("Production PRISM requires OIDC issuer and audience.")
         if len(self.audit_hmac_key.get_secret_value()) < 32:
-            raise ValueError("Production PRISM requires an audit HMAC key of at least 32 characters.")
+            raise ValueError(
+                "Production PRISM requires an audit HMAC key of at least 32 characters."
+            )
 
         encoded = self.data_encryption_key_b64.get_secret_value()
         try:
             decoded = base64.urlsafe_b64decode(encoded.encode("ascii"))
         except Exception as exc:
-            raise ValueError("PRISM_DATA_ENCRYPTION_KEY_B64 must be urlsafe-base64.") from exc
+            raise ValueError(
+                "PRISM_DATA_ENCRYPTION_KEY_B64 must be urlsafe-base64."
+            ) from exc
         if len(decoded) != 32:
             raise ValueError("Production PRISM requires a 32-byte AES-256 key.")
         return self
