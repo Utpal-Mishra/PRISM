@@ -8,9 +8,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from enterprise.audit import append_audit_event, verify_audit_chain
 from enterprise.config import get_settings
 from enterprise.db import get_db
-from enterprise.models import DecisionRecord, EvidenceRecord
+from enterprise.models import AuditEvent, DecisionRecord, EvidenceRecord
+from enterprise.security import install_security_middleware
 from enterprise.tenancy import (
     WorkspaceAccess,
     clearance_allows,
@@ -25,6 +27,7 @@ app = FastAPI(
     docs_url=None if settings.environment == "production" else "/docs",
     redoc_url=None,
 )
+install_security_middleware(app, settings)
 
 
 class EvidenceCreate(BaseModel):
@@ -114,6 +117,14 @@ def create_evidence(
         payload=body.payload,
     )
     db.add(record)
+    append_audit_event(
+        db,
+        access,
+        event_type="evidence_created",
+        object_type="evidence",
+        object_id=record.id,
+        detail={"classification": body.classification, "evidence_class": body.evidence_class},
+    )
     db.commit()
     return {"evidence_id": record.id}
 
@@ -135,5 +146,45 @@ def create_decision(
         payload=body.payload,
     )
     db.add(record)
+    append_audit_event(
+        db,
+        access,
+        event_type="decision_created",
+        object_type="decision",
+        object_id=record.id,
+        detail={"owner": body.owner, "status": body.status},
+    )
     db.commit()
     return {"decision_id": record.id}
+
+
+@app.get("/v1/workspaces/{workspace_id}/audit")
+def list_audit_events(
+    access: WorkspaceAccess = Depends(require_role("admin")),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    events = db.scalars(
+        select(AuditEvent)
+        .where(
+            AuditEvent.tenant_id == access.tenant_id,
+            AuditEvent.workspace_id == access.workspace_id,
+        )
+        .order_by(AuditEvent.created_at.asc(), AuditEvent.id.asc())
+        .limit(1000)
+    ).all()
+    return {
+        "chain_valid": verify_audit_chain(list(events)),
+        "events": [
+            {
+                "audit_id": event.id,
+                "event_type": event.event_type,
+                "object_type": event.object_type,
+                "object_id": event.object_id,
+                "actor_subject": event.actor_subject,
+                "previous_hash": event.previous_hash,
+                "event_hash": event.event_hash,
+                "created_at": event.created_at,
+            }
+            for event in events
+        ],
+    }
