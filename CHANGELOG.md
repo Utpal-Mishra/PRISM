@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.8.0 — AI Analytical Copilot
+
+- Completed Day 15 of the PRISM enterprise Evidence-to-Strategy roadmap, closing the original programme at 15/15 stages.
+- Added an evidence-first **AI Analytical Copilot** workspace that answers only from traceable PRISM evidence already available in the active browser workspace or governed browser-local records.
+- Added deterministic intent routing across KPI movement/drivers, relationships, forecast, strategy, decisions, outcomes, data quality and governed definitions.
+- Added strict `EVD-*` citation validation, evidence-count visibility and evidence navigation back to supporting workspace records when available.
+- Added defensive refusal when PRISM lacks enough relevant traceable evidence instead of fabricating an answer.
+- Added cross-module grounding from active analytical evidence plus persisted Strategy, Decision, Outcome, Registry and Governance records.
+- Added a future provider-adapter contract; externally composed answers are accepted only when they return citations matching valid PRISM evidence IDs.
+- Added explicit causal guardrails and human-accountability language to Copilot outputs.
+- Added **Download Analysis Brief** using `PRISM_ANALYSIS_<DATASET>_<YYYYMMDD-HHMM>.json` with query, answer, citations, evidence snapshot, method, assumptions and limitations.
+- Preserved the static-edition privacy boundary: Copilot runs locally by default and exports `uploaded_data_transmitted: false`.
+- Extended CI to syntax-check and contract-test the Copilot module, export naming, evidence-first behaviour, causal language and local-first privacy assertion.
+
+# Changelog
+
 ## 1.7.0 — Enterprise Governance
 
 - Added Viewer, Analyst, Manager and Admin role simulation with explicit permission capabilities and approval-transition guardrails.
