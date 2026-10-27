@@ -39,13 +39,22 @@ Browser foresight layer
   ├─ Monthly time-series aggregation
   └─ Trend / seasonal forecast + backtest + uncertainty
         ↓
-Strategy Studio
-  ├─ Prioritised signals
-  ├─ Evidence statements
-  ├─ Recommended actions
-  └─ Decision-impact framing
+Evidence / decision layer
+  ├─ Strategy Engine 2.0 (STR-*)
+  ├─ Decision Register (DEC-*)
+  ├─ Outcome Feedback (OUT-*)
+  ├─ Dataset & Metric Registry
+  ├─ Data Lineage
+  └─ Enterprise Governance metadata
         ↓
-CSV export
+AI Analytical Copilot
+  ├─ Evidence-first question routing
+  ├─ EVD-* citation validation
+  ├─ Deterministic local answer composer
+  ├─ Insufficient-evidence refusal
+  └─ Future provider-adapter contract
+        ↓
+Governed JSON / CSV exports
 ```
 
 The public edition does not require a Python process, Streamlit runtime or application server.
@@ -74,3 +83,14 @@ The GitHub Pages application is the public/product demonstration shell. A produc
 - Outputs: dashboards, scheduled reports, alerts, strategy briefs and machine-readable recommendations
 
 The legacy Python modules can later become reusable backend services where heavier computation, persistent state, enterprise connectors or governed models are required.
+
+
+## AI Copilot boundary
+
+The v1.8.0 static Copilot is deliberately evidence-bound. It does not act as a general-purpose chatbot and does not silently transmit uploaded data. The default composer runs in-browser and may use only evidence present in the active PRISM workspace or governed records persisted in browser-local storage. Answers must cite valid `EVD-*` identifiers; unsupported questions are refused.
+
+A future provider adapter may connect a governed model service, but provider output remains subject to the same evidence-citation validation before PRISM accepts it as grounded.
+
+## Later AI-team orchestration
+
+The planned v2.x operating model introduces a PRISM Control Plane above specialist Data, Analytics, Data Science, Strategy and Governance AI teams, later extending to Database, Finance, Business, Operations, Product, Development and Marketing. These teams must share the same semantic definitions, Evidence Graph, Decision Cases, governance controls and human approval boundary rather than operating as isolated agents.
