@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
@@ -33,15 +33,29 @@ install_security_middleware(app, settings)
 class EvidenceCreate(BaseModel):
     evidence_id: str | None = Field(default=None, max_length=96)
     evidence_class: str = Field(min_length=1, max_length=64)
-    classification: str = Field(default="internal", pattern="^(public|internal|confidential|restricted)$")
+    classification: str = Field(
+        default="internal",
+        pattern="^(public|internal|confidential|restricted)$",
+    )
     payload: dict[str, Any]
 
 
 class DecisionCreate(BaseModel):
     decision_id: str | None = Field(default=None, max_length=96)
     owner: str = Field(min_length=1, max_length=255)
-    status: str = Field(default="approved_for_bounded_validation", max_length=64)
+    status: str = Field(
+        default="approved_for_bounded_validation",
+        max_length=64,
+    )
     payload: dict[str, Any]
+
+
+DbDep = Annotated[Session, Depends(get_db)]
+AccessDep = Annotated[WorkspaceAccess, Depends(get_workspace_access)]
+ViewerAccessDep = Annotated[WorkspaceAccess, Depends(require_role("viewer"))]
+AnalystAccessDep = Annotated[WorkspaceAccess, Depends(require_role("analyst"))]
+ManagerAccessDep = Annotated[WorkspaceAccess, Depends(require_role("manager"))]
+AdminAccessDep = Annotated[WorkspaceAccess, Depends(require_role("admin"))]
 
 
 @app.get("/health/live")
@@ -50,13 +64,13 @@ def live() -> dict[str, str]:
 
 
 @app.get("/health/ready")
-def ready(db: Session = Depends(get_db)) -> dict[str, str]:
+def ready(db: DbDep) -> dict[str, str]:
     db.execute(text("SELECT 1"))
     return {"status": "ready"}
 
 
 @app.get("/v1/workspaces/{workspace_id}/me")
-def workspace_me(access: WorkspaceAccess = Depends(get_workspace_access)) -> dict[str, str | None]:
+def workspace_me(access: AccessDep) -> dict[str, str | None]:
     return {
         "workspace_id": access.workspace_id,
         "tenant_id": access.tenant_id,
@@ -69,8 +83,8 @@ def workspace_me(access: WorkspaceAccess = Depends(get_workspace_access)) -> dic
 
 @app.get("/v1/workspaces/{workspace_id}/evidence")
 def list_evidence(
-    access: WorkspaceAccess = Depends(require_role("viewer")),
-    db: Session = Depends(get_db),
+    access: ViewerAccessDep,
+    db: DbDep,
 ) -> list[dict[str, Any]]:
     rows = db.scalars(
         select(EvidenceRecord)
@@ -94,11 +108,14 @@ def list_evidence(
     ]
 
 
-@app.post("/v1/workspaces/{workspace_id}/evidence", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/v1/workspaces/{workspace_id}/evidence",
+    status_code=status.HTTP_201_CREATED,
+)
 def create_evidence(
     body: EvidenceCreate,
-    access: WorkspaceAccess = Depends(require_role("analyst")),
-    db: Session = Depends(get_db),
+    access: AnalystAccessDep,
+    db: DbDep,
 ) -> dict[str, str]:
     if not clearance_allows(access.data_clearance, body.classification):
         raise HTTPException(
@@ -123,17 +140,23 @@ def create_evidence(
         event_type="evidence_created",
         object_type="evidence",
         object_id=record.id,
-        detail={"classification": body.classification, "evidence_class": body.evidence_class},
+        detail={
+            "classification": body.classification,
+            "evidence_class": body.evidence_class,
+        },
     )
     db.commit()
     return {"evidence_id": record.id}
 
 
-@app.post("/v1/workspaces/{workspace_id}/decisions", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/v1/workspaces/{workspace_id}/decisions",
+    status_code=status.HTTP_201_CREATED,
+)
 def create_decision(
     body: DecisionCreate,
-    access: WorkspaceAccess = Depends(require_role("manager")),
-    db: Session = Depends(get_db),
+    access: ManagerAccessDep,
+    db: DbDep,
 ) -> dict[str, str]:
     decision_id = body.decision_id or f"DEC-{uuid.uuid4().hex.upper()}"
     record = DecisionRecord(
@@ -152,7 +175,10 @@ def create_decision(
         event_type="decision_created",
         object_type="decision",
         object_id=record.id,
-        detail={"owner": body.owner, "status": body.status},
+        detail={
+            "owner": body.owner,
+            "status": body.status,
+        },
     )
     db.commit()
     return {"decision_id": record.id}
@@ -160,8 +186,8 @@ def create_decision(
 
 @app.get("/v1/workspaces/{workspace_id}/audit")
 def list_audit_events(
-    access: WorkspaceAccess = Depends(require_role("admin")),
-    db: Session = Depends(get_db),
+    access: AdminAccessDep,
+    db: DbDep,
 ) -> dict[str, Any]:
     events = db.scalars(
         select(AuditEvent)
