@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: prism
+      POSTGRES_USER: prism
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - prism_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prism -d prism"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.enterprise
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PRISM_ENVIRONMENT: development
+      PRISM_DATABASE_URL: postgresql+psycopg://prism:${POSTGRES_PASSWORD}@postgres:5432/prism
+      PRISM_ALLOW_DEV_AUTH: "true"
+      PRISM_TRUSTED_HOSTS: localhost,127.0.0.1,api
+      PRISM_AUDIT_HMAC_KEY: ${PRISM_AUDIT_HMAC_KEY:?PRISM_AUDIT_HMAC_KEY must be set}
+      PRISM_DATA_ENCRYPTION_KEY_B64: ${PRISM_DATA_ENCRYPTION_KEY_B64:?PRISM_DATA_ENCRYPTION_KEY_B64 must be set}
+      PRISM_DATA_ENCRYPTION_KEY_VERSION: ${PRISM_DATA_ENCRYPTION_KEY_VERSION:-v1}
+    ports:
+      - "8080:8080"
+
+volumes:
+  prism_pgdata:

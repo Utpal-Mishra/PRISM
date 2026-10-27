@@ -149,6 +149,9 @@
     if (!file) return;
     els.demoButton.classList.remove("active");
     try {
+      if (file.size > MAX_UPLOAD_BYTES) {
+        throw new Error(`File exceeds the ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB browser-demo limit.`);
+      }
       let rows;
       const lower = file.name.toLowerCase();
       if (lower.endsWith(".csv")) {
@@ -156,13 +159,26 @@
       } else if (lower.endsWith(".xlsx") || lower.endsWith(".xls")) {
         if (!window.XLSX) throw new Error("The XLSX parser has not loaded. Refresh and try again, or upload CSV.");
         const buffer = await file.arrayBuffer();
-        const workbook = window.XLSX.read(buffer, { type: "array", cellDates: true });
+        const workbook = window.XLSX.read(buffer, {
+          type: "array",
+          cellDates: true,
+          sheetRows: MAX_UPLOAD_ROWS + 2,
+        });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        if (!sheet) throw new Error("The workbook does not contain a readable first sheet.");
+        const range = sheet["!ref"] ? window.XLSX.utils.decode_range(sheet["!ref"]) : null;
+        if (range) {
+          const columnCount = range.e.c - range.s.c + 1;
+          const rowCount = range.e.r - range.s.r;
+          if (columnCount > MAX_UPLOAD_COLUMNS) throw new Error(`Workbook has ${columnCount} columns; maximum is ${MAX_UPLOAD_COLUMNS}.`);
+          if (rowCount > MAX_UPLOAD_ROWS) throw new Error(`Workbook exceeds the ${MAX_UPLOAD_ROWS.toLocaleString()} row limit.`);
+        }
         rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
       } else {
         throw new Error("Unsupported format. Use CSV, XLSX or XLS.");
       }
       if (!rows.length) throw new Error("No data rows were found in the selected file.");
+      validateUploadRows(rows);
       state.sourceName = file.name;
       state.sourceMode = "Local upload";
       analyseDataset(rows);
@@ -188,14 +204,41 @@
       } else if ((ch === "\n" || ch === "\r") && !quoted) {
         if (ch === "\r" && input[i + 1] === "\n") i += 1;
         row.push(cell); cell = "";
-        if (row.some((v) => String(v).trim() !== "")) rows.push(row);
+        if (row.some((v) => String(v).trim() !== "")) {
+          if (row.length > MAX_UPLOAD_COLUMNS) throw new Error(`CSV exceeds the ${MAX_UPLOAD_COLUMNS} column limit.`);
+          if (rows.length >= MAX_UPLOAD_ROWS + 1) throw new Error(`CSV exceeds the ${MAX_UPLOAD_ROWS.toLocaleString()} row limit.`);
+          rows.push(row);
+        }
         row = [];
-      } else cell += ch;
+      } else {
+        cell += ch;
+        if (cell.length > MAX_CELL_CHARS) throw new Error(`CSV cell exceeds the ${MAX_CELL_CHARS.toLocaleString()} character limit.`);
+      }
     }
     if (cell.length || row.length) { row.push(cell); rows.push(row); }
     if (rows.length < 2) return [];
     const headers = rows[0].map((h, i) => String(h || `column_${i + 1}`).trim());
     return rows.slice(1).map((values) => Object.fromEntries(headers.map((h, i) => [h, values[i] ?? ""])));
+  }
+
+  function validateUploadRows(rows) {
+    if (rows.length > MAX_UPLOAD_ROWS) {
+      throw new Error(`Dataset exceeds the ${MAX_UPLOAD_ROWS.toLocaleString()} row limit.`);
+    }
+    const columns = rows.length ? Object.keys(rows[0]) : [];
+    if (columns.length > MAX_UPLOAD_COLUMNS) {
+      throw new Error(`Dataset has ${columns.length} columns; maximum is ${MAX_UPLOAD_COLUMNS}.`);
+    }
+    for (const row of rows) {
+      if (Object.keys(row).length > MAX_UPLOAD_COLUMNS) {
+        throw new Error(`Dataset exceeds the ${MAX_UPLOAD_COLUMNS} column limit.`);
+      }
+      for (const value of Object.values(row)) {
+        if (typeof value === "string" && value.length > MAX_CELL_CHARS) {
+          throw new Error(`A cell exceeds the ${MAX_CELL_CHARS.toLocaleString()} character limit.`);
+        }
+      }
+    }
   }
 
   function analyseDataset(inputRows) {
@@ -830,7 +873,8 @@
     if (!rows.length) return "";
     const columns = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
     const quote = (v) => {
-      const s = v === null || v === undefined ? "" : String(v);
+      let s = v === null || v === undefined ? "" : String(v);
+      if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
       return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     return `${columns.map(quote).join(",")}\n${rows.map((r) => columns.map((c) => quote(r[c])).join(",")).join("\n")}`;
