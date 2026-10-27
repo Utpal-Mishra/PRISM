@@ -2,7 +2,7 @@
 
 PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release candidate — v0.3.3 Adaptive Phone Experience
+## Current release — v1.8.0 Evidence-First AI Analytical Copilot
 
 - Static GitHub Pages application served from `index.html`
 - Domain-agnostic CSV/XLSX upload with local browser processing
@@ -11,7 +11,9 @@ PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace
 - Relationship discovery through numeric correlations and segment performance analysis
 - Monthly forecasting with trend/seasonality, holdout backtesting and uncertainty ranges
 - Browser-side predictive regression/classification with held-out evaluation, baseline comparison and driver importance
-- Strategy Studio that converts evidence into prioritised recommendations and decision-impact statements
+- Strategy Engine 2.0 that converts evidence into auditable proposals, with accountable Decision Register and Outcome Feedback
+- Dataset & Metric Registry, Data Lineage and Enterprise Governance foundations
+- Evidence-first AI Analytical Copilot with `EVD-*` citations, refusal on insufficient evidence and downloadable analysis briefs
 - CSV exports for analysed data and generated strategy signals
 - Responsive dark enterprise interface aligned with the shared **The Palm / NEXUS / XPLORE** product family
 - Adaptive phone shell with off-canvas utilities, collapsible context, a persistent bottom analysis dock, safe-area support and responsive charts/tables
@@ -55,9 +57,15 @@ Discover Relationships & Exceptions
     ↓
 Predict Outcomes + Forecast Time Series
     ↓
-Translate Evidence into Strategy Signals
+Translate Evidence into Strategy
     ↓
-Export, Govern, Monitor & Iterate
+Record Decisions & Outcomes
+    ↓
+Govern Definitions, Lineage & Approvals
+    ↓
+Ask PRISM with Evidence Citations
+    ↓
+Export, Review, Learn & Iterate
 ```
 
 PRISM is intentionally **decision-oriented** rather than dashboard-oriented: each analytical module should help answer what changed, what is related, what may happen next, what can be influenced, and what decision the organisation should evaluate.
@@ -133,6 +141,7 @@ pytest -q
 node --check assets/theme.js
 node --check assets/mobile.js
 node --check assets/app.js
+node --check assets/copilot.js
 ```
 
 ## Documentation
@@ -143,3 +152,10 @@ node --check assets/app.js
 - [Data dictionary](docs/data_dictionary.md)
 - [Production readiness](docs/production_readiness.md)
 - [Changelog](CHANGELOG.md)
+
+
+## AI Analytical Copilot
+
+PRISM v1.8.0 completes the original 15-stage enterprise Evidence-to-Strategy roadmap with a browser-local analytical Copilot. The Copilot is intentionally not a generic chatbot: it composes answers from traceable PRISM evidence and requires valid `EVD-*` citations. If the current workspace does not contain sufficient relevant evidence, it refuses the question and directs the user to the analytical module that should be run first.
+
+The static edition uses a deterministic local composer by default and does not transmit the uploaded dataset. A provider-adapter contract exists for future authenticated enterprise deployments, but provider output is accepted as grounded only when its citations map back to evidence already known by PRISM.
