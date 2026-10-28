@@ -21,7 +21,11 @@ Production requirements:
 - secrets injected from an approved secrets manager rather than files or source control;
 - encryption and audit keys with controlled rotation/versioning;
 - database backups, restore testing and managed encryption at rest;
-- migration execution as a controlled deployment step: `alembic upgrade head`.
+- migration execution as a controlled deployment step: `alembic upgrade head`;
+- one or more `python -m enterprise.worker` worker processes;
+- explicit connector/AI-provider egress allowlists;
+- protected Prometheus scraping via `PRISM_METRICS_TOKEN`;
+- managed database PITR/backups plus tested restore procedures.
 
 The service refuses production configuration that lacks PostgreSQL, OIDC, a strong audit HMAC key or a valid AES-256 field-encryption key.
 
@@ -42,3 +46,15 @@ docker compose -f compose.enterprise.yml up api
 ```
 
 Development header authentication is permitted only when `PRISM_ALLOW_DEV_AUTH=true` and the environment is not production. Production configuration rejects that setting.
+
+## P1 operations
+
+The API and worker use the same container image. Durable work is stored in PostgreSQL, so workers can be horizontally replicated without a separate message broker for the current P1 workload.
+
+Before production deployment, set the P1 environment controls documented in `.env.enterprise.example`, especially connector allowlists, metrics token, quotas and SLO targets.
+
+Operational runbooks:
+- [Enterprise operations](enterprise_operations.md)
+- [Disaster recovery](disaster_recovery.md)
+
+The repository provides an executable backup/restore drill. Production still requires the managed database provider's encrypted automated backups/PITR, monitoring and alerting.

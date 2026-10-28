@@ -73,5 +73,19 @@ jobs:
           grep -q -- "workspace_id" enterprise/models.py
           grep -q -- "OIDC" enterprise/auth.py
           grep -q -- "ROW LEVEL SECURITY" enterprise/migrations/versions/0001_enterprise_foundation.py
+          grep -q -- "0002_scale_reliability" enterprise/migrations/versions/0002_enterprise_scale_reliability.py
+          grep -q -- "job_lease_seconds" enterprise/config.py
+          grep -q -- "SKIP LOCKED" docs/enterprise_operations.md
+          grep -q -- "rest_https" enterprise/connectors.py
+          grep -q -- "default_transaction_read_only" enterprise/connectors.py
+          grep -q -- "retrying" enterprise/tasks.py
+          grep -q -- "workspace_daily_job_quota" enterprise/config.py
+          grep -q -- "prism_http_requests_total" enterprise/observability.py
+          grep -q -- "retention_purge" enterprise/tasks.py
+          grep -q -- "deletion_execute" enterprise/tasks.py
+          grep -q -- "provider_retention_acknowledged" enterprise/ai_providers.py
+          test -f scripts/backup_postgres.sh
+          test -f scripts/restore_postgres.sh
+          test -f scripts/load_smoke.py
           grep -q -- "safe-area-inset-bottom" assets/mobile.css
           grep -q -- "Plotly.Plots.resize" assets/mobile.js

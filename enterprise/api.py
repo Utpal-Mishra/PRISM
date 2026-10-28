@@ -1,17 +1,41 @@
 from __future__ import annotations
 
 import uuid
-from typing import Annotated, Any
+from datetime import UTC, datetime
+from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from enterprise.ai_providers import (
+    AIProviderPolicyError,
+    rotate_provider_secret,
+    validate_provider_policy,
+)
 from enterprise.audit import append_audit_event, verify_audit_chain
 from enterprise.config import get_settings
-from enterprise.db import get_db
-from enterprise.models import AuditEvent, DecisionRecord, EvidenceRecord
+from enterprise.connectors import (
+    ConnectorError,
+    store_connector_credential,
+    validate_connector,
+)
+from enterprise.db import SessionLocal, get_db
+from enterprise.jobs import enqueue_job
+from enterprise.models import (
+    AIProviderConfig,
+    AuditEvent,
+    Connector,
+    ConnectorRun,
+    DecisionRecord,
+    DeletionRequest,
+    EvidenceRecord,
+    JobRecord,
+    RetentionPolicy,
+)
+from enterprise.observability import install_observability
+from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.security import install_security_middleware
 from enterprise.tenancy import (
     WorkspaceAccess,
@@ -27,6 +51,7 @@ app = FastAPI(
     docs_url=None if settings.environment == "production" else "/docs",
     redoc_url=None,
 )
+install_observability(app, settings)
 install_security_middleware(app, settings)
 
 
@@ -50,12 +75,130 @@ class DecisionCreate(BaseModel):
     payload: dict[str, Any]
 
 
+class ConnectorCredentialInput(BaseModel):
+    username: str | None = Field(default=None, max_length=320)
+    password: SecretStr | None = None
+    bearer_token: SecretStr | None = None
+    headers: dict[str, SecretStr] = Field(default_factory=dict)
+
+
+class ConnectorCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    connector_type: Literal["rest_https", "postgresql"]
+    endpoint_host: str = Field(min_length=1, max_length=255)
+    configuration: dict[str, Any]
+    credential: ConnectorCredentialInput
+
+
+class ConnectorRunCreate(BaseModel):
+    operation: dict[str, Any]
+
+
+class RetentionPolicyInput(BaseModel):
+    record_type: Literal[
+        "evidence",
+        "strategy",
+        "decision",
+        "outcome",
+        "connector_run",
+    ]
+    retention_days: int = Field(ge=1, le=3650)
+    enabled: bool = True
+
+
+class AIProviderInput(BaseModel):
+    provider: str = Field(min_length=1, max_length=64)
+    model: str = Field(min_length=1, max_length=128)
+    endpoint_host: str = Field(min_length=1, max_length=255)
+    data_policy: dict[str, Any]
+    api_key: SecretStr | None = None
+
+
+class AIProviderCredentialInput(BaseModel):
+    api_key: SecretStr
+
+
+class DeletionRequestInput(BaseModel):
+    request_type: Literal[
+        "evidence",
+        "connector",
+        "workspace_analytical_records",
+    ]
+    target_id: str | None = Field(default=None, max_length=96)
+    reason: str = Field(min_length=8, max_length=500)
+
+
 DbDep = Annotated[Session, Depends(get_db)]
 AccessDep = Annotated[WorkspaceAccess, Depends(get_workspace_access)]
 ViewerAccessDep = Annotated[WorkspaceAccess, Depends(require_role("viewer"))]
 AnalystAccessDep = Annotated[WorkspaceAccess, Depends(require_role("analyst"))]
 ManagerAccessDep = Annotated[WorkspaceAccess, Depends(require_role("manager"))]
 AdminAccessDep = Annotated[WorkspaceAccess, Depends(require_role("admin"))]
+
+
+def _credential_dict(value: ConnectorCredentialInput) -> dict:
+    secret: dict[str, Any] = {}
+    if value.username:
+        secret["username"] = value.username
+    if value.password:
+        secret["password"] = value.password.get_secret_value()
+    if value.bearer_token:
+        secret["bearer_token"] = value.bearer_token.get_secret_value()
+    if value.headers:
+        secret["headers"] = {
+            key: item.get_secret_value()
+            for key, item in value.headers.items()
+        }
+    return secret
+
+
+def _consume_limit(
+    access: WorkspaceAccess,
+    *,
+    action: str,
+    limit: int,
+    window_seconds: int,
+) -> None:
+    with SessionLocal.begin() as control_db:
+        try:
+            enforce(
+                control_db,
+                access,
+                action=action,
+                limit=limit,
+                window_seconds=window_seconds,
+            )
+        except UsageLimitExceeded as exc:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "code": "workspace_usage_limit_exceeded",
+                    "action": action,
+                    "limit": exc.decision.limit,
+                    "retry_after_seconds": exc.decision.retry_after_seconds,
+                },
+                headers={
+                    "Retry-After": str(exc.decision.retry_after_seconds),
+                },
+            ) from exc
+
+
+def _limit_write(access: WorkspaceAccess) -> None:
+    _consume_limit(
+        access,
+        action="api_write",
+        limit=settings.rate_limit_per_minute,
+        window_seconds=60,
+    )
+
+
+def _limit_job(access: WorkspaceAccess) -> None:
+    _consume_limit(
+        access,
+        action="jobs",
+        limit=settings.workspace_daily_job_quota,
+        window_seconds=86400,
+    )
 
 
 @app.get("/health/live")
@@ -117,6 +260,7 @@ def create_evidence(
     access: AnalystAccessDep,
     db: DbDep,
 ) -> dict[str, str]:
+    _limit_write(access)
     if not clearance_allows(access.data_clearance, body.classification):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -158,6 +302,7 @@ def create_decision(
     access: ManagerAccessDep,
     db: DbDep,
 ) -> dict[str, str]:
+    _limit_write(access)
     decision_id = body.decision_id or f"DEC-{uuid.uuid4().hex.upper()}"
     record = DecisionRecord(
         id=decision_id,
@@ -182,6 +327,591 @@ def create_decision(
     )
     db.commit()
     return {"decision_id": record.id}
+
+
+@app.get("/v1/workspaces/{workspace_id}/connectors")
+def list_connectors(
+    access: ViewerAccessDep,
+    db: DbDep,
+) -> list[dict[str, Any]]:
+    rows = db.scalars(
+        select(Connector)
+        .where(
+            Connector.tenant_id == access.tenant_id,
+            Connector.workspace_id == access.workspace_id,
+        )
+        .order_by(Connector.name.asc())
+    ).all()
+    return [
+        {
+            "connector_id": row.id,
+            "name": row.name,
+            "connector_type": row.connector_type,
+            "endpoint_host": row.endpoint_host,
+            "configuration": row.configuration,
+            "status": row.status,
+            "has_active_credential": bool(row.active_credential_id),
+            "updated_at": row.updated_at,
+        }
+        for row in rows
+    ]
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/connectors",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_connector(
+    body: ConnectorCreate,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    try:
+        validate_connector(
+            body.connector_type,
+            body.endpoint_host.lower(),
+            body.configuration,
+            settings,
+        )
+    except ConnectorError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    connector = Connector(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        name=body.name,
+        connector_type=body.connector_type,
+        endpoint_host=body.endpoint_host.lower(),
+        configuration=body.configuration,
+        status="active",
+    )
+    db.add(connector)
+    db.flush()
+    store_connector_credential(
+        db,
+        access,
+        connector,
+        _credential_dict(body.credential),
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="connector_created",
+        object_type="connector",
+        object_id=connector.id,
+        detail={
+            "name": connector.name,
+            "connector_type": connector.connector_type,
+            "endpoint_host": connector.endpoint_host,
+        },
+    )
+    db.commit()
+    return {"connector_id": connector.id}
+
+
+@app.post("/v1/workspaces/{workspace_id}/connectors/{connector_id}/rotate")
+def rotate_connector_credential(
+    connector_id: str,
+    body: ConnectorCredentialInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | int]:
+    _limit_write(access)
+    connector = db.scalar(
+        select(Connector).where(
+            Connector.id == connector_id,
+            Connector.tenant_id == access.tenant_id,
+            Connector.workspace_id == access.workspace_id,
+        )
+    )
+    if connector is None:
+        raise HTTPException(status_code=404, detail="Connector was not found.")
+    credential = store_connector_credential(
+        db,
+        access,
+        connector,
+        _credential_dict(body),
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="connector_credential_rotated",
+        object_type="connector",
+        object_id=connector.id,
+        detail={"credential_version": credential.credential_version},
+    )
+    db.commit()
+    return {
+        "connector_id": connector.id,
+        "credential_version": credential.credential_version,
+        "status": "rotated",
+    }
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/connectors/{connector_id}/runs",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def queue_connector_run(
+    connector_id: str,
+    body: ConnectorRunCreate,
+    access: AnalystAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    _limit_job(access)
+    connector = db.scalar(
+        select(Connector).where(
+            Connector.id == connector_id,
+            Connector.tenant_id == access.tenant_id,
+            Connector.workspace_id == access.workspace_id,
+            Connector.status == "active",
+        )
+    )
+    if connector is None:
+        raise HTTPException(status_code=404, detail="Active connector was not found.")
+
+    run = ConnectorRun(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        connector_id=connector.id,
+        status="queued",
+    )
+    db.add(run)
+    db.flush()
+    job = enqueue_job(
+        db,
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        job_type="connector_run",
+        payload={
+            "connector_id": connector.id,
+            "run_id": run.id,
+            "operation": body.operation,
+        },
+        settings=settings,
+    )
+    run.job_id = job.id
+    append_audit_event(
+        db,
+        access,
+        event_type="connector_run_queued",
+        object_type="connector_run",
+        object_id=run.id,
+        detail={"connector_id": connector.id, "job_id": job.id},
+    )
+    db.commit()
+    return {"run_id": run.id, "job_id": job.id}
+
+
+@app.get("/v1/workspaces/{workspace_id}/jobs/{job_id}")
+def get_job(
+    job_id: str,
+    access: ViewerAccessDep,
+    db: DbDep,
+) -> dict[str, Any]:
+    job = db.scalar(
+        select(JobRecord).where(
+            JobRecord.id == job_id,
+            JobRecord.tenant_id == access.tenant_id,
+            JobRecord.workspace_id == access.workspace_id,
+        )
+    )
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job was not found.")
+    return {
+        "job_id": job.id,
+        "job_type": job.job_type,
+        "status": job.status,
+        "attempts": job.attempts,
+        "max_attempts": job.max_attempts,
+        "error_code": job.error_code,
+        "result": job.result,
+        "created_at": job.created_at,
+        "started_at": job.started_at,
+        "completed_at": job.completed_at,
+    }
+
+
+@app.post("/v1/workspaces/{workspace_id}/retention-policies")
+def upsert_retention_policy(
+    body: RetentionPolicyInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, Any]:
+    _limit_write(access)
+    policy = db.scalar(
+        select(RetentionPolicy).where(
+            RetentionPolicy.tenant_id == access.tenant_id,
+            RetentionPolicy.workspace_id == access.workspace_id,
+            RetentionPolicy.record_type == body.record_type,
+        )
+    )
+    if policy is None:
+        policy = RetentionPolicy(
+            tenant_id=access.tenant_id,
+            workspace_id=access.workspace_id,
+            created_by=access.user_id,
+            record_type=body.record_type,
+            retention_days=body.retention_days,
+            enabled=body.enabled,
+        )
+        db.add(policy)
+        db.flush()
+    else:
+        policy.retention_days = body.retention_days
+        policy.enabled = body.enabled
+
+    append_audit_event(
+        db,
+        access,
+        event_type="retention_policy_updated",
+        object_type="retention_policy",
+        object_id=policy.id,
+        detail={
+            "record_type": policy.record_type,
+            "retention_days": policy.retention_days,
+            "enabled": policy.enabled,
+        },
+    )
+    db.commit()
+    return {
+        "policy_id": policy.id,
+        "record_type": policy.record_type,
+        "retention_days": policy.retention_days,
+        "enabled": policy.enabled,
+    }
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/retention-policies/{policy_id}/run",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def queue_retention_policy(
+    policy_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    _limit_job(access)
+    policy = db.scalar(
+        select(RetentionPolicy).where(
+            RetentionPolicy.id == policy_id,
+            RetentionPolicy.tenant_id == access.tenant_id,
+            RetentionPolicy.workspace_id == access.workspace_id,
+            RetentionPolicy.enabled.is_(True),
+        )
+    )
+    if policy is None:
+        raise HTTPException(status_code=404, detail="Active retention policy was not found.")
+    job = enqueue_job(
+        db,
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        job_type="retention_purge",
+        payload={"policy_id": policy.id},
+        settings=settings,
+    )
+    db.commit()
+    return {"job_id": job.id}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/deletion-requests",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_deletion_request(
+    body: DeletionRequestInput,
+    access: ManagerAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    if body.request_type in {"evidence", "connector"} and not body.target_id:
+        raise HTTPException(
+            status_code=400,
+            detail="This deletion request type requires a target_id.",
+        )
+    request = DeletionRequest(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        request_type=body.request_type,
+        target_id=body.target_id,
+        reason=body.reason,
+        status="pending",
+    )
+    db.add(request)
+    db.flush()
+    append_audit_event(
+        db,
+        access,
+        event_type="deletion_request_created",
+        object_type="deletion_request",
+        object_id=request.id,
+        detail={
+            "request_type": request.request_type,
+            "target_id": request.target_id,
+        },
+    )
+    db.commit()
+    return {"deletion_request_id": request.id, "status": request.status}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/deletion-requests/{request_id}/approve",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def approve_deletion_request(
+    request_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    _limit_job(access)
+    request = db.scalar(
+        select(DeletionRequest).where(
+            DeletionRequest.id == request_id,
+            DeletionRequest.tenant_id == access.tenant_id,
+            DeletionRequest.workspace_id == access.workspace_id,
+            DeletionRequest.status == "pending",
+        )
+    )
+    if request is None:
+        raise HTTPException(status_code=404, detail="Pending deletion request was not found.")
+
+    request.status = "approved"
+    request.approved_by = access.user_id
+    request.approved_at = datetime.now(UTC)
+    job = enqueue_job(
+        db,
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        job_type="deletion_execute",
+        payload={"deletion_request_id": request.id},
+        settings=settings,
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="deletion_request_approved",
+        object_type="deletion_request",
+        object_id=request.id,
+        detail={"job_id": job.id},
+    )
+    db.commit()
+    return {
+        "deletion_request_id": request.id,
+        "job_id": job.id,
+        "status": request.status,
+    }
+
+
+@app.get("/v1/workspaces/{workspace_id}/ai-providers")
+def list_ai_providers(
+    access: ViewerAccessDep,
+    db: DbDep,
+) -> list[dict[str, Any]]:
+    rows = db.scalars(
+        select(AIProviderConfig)
+        .where(
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+        .order_by(AIProviderConfig.provider.asc(), AIProviderConfig.model.asc())
+    ).all()
+    return [
+        {
+            "provider_config_id": row.id,
+            "provider": row.provider,
+            "model": row.model,
+            "endpoint_host": row.endpoint_host,
+            "enabled": row.enabled,
+            "data_policy": row.data_policy,
+            "has_credential": bool(row.credential_id),
+        }
+        for row in rows
+    ]
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_ai_provider(
+    body: AIProviderInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = AIProviderConfig(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        provider=body.provider,
+        model=body.model,
+        endpoint_host=body.endpoint_host.lower(),
+        enabled=False,
+        data_policy=body.data_policy,
+    )
+    db.add(provider)
+    db.flush()
+    if body.api_key is not None:
+        rotate_provider_secret(
+            db,
+            access,
+            provider,
+            body.api_key.get_secret_value(),
+        )
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_registered",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={
+            "provider": provider.provider,
+            "model": provider.model,
+            "endpoint_host": provider.endpoint_host,
+            "enabled": False,
+        },
+    )
+    db.commit()
+    return {
+        "provider_config_id": provider.id,
+        "enabled": provider.enabled,
+    }
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/rotate",
+)
+def rotate_ai_provider_credential(
+    provider_id: str,
+    body: AIProviderCredentialInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    secret = rotate_provider_secret(
+        db,
+        access,
+        provider,
+        body.api_key.get_secret_value(),
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_credential_rotated",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={"credential_id": secret.id},
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "status": "rotated"}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/enable",
+)
+def enable_ai_provider(
+    provider_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    if not provider.credential_id:
+        raise HTTPException(
+            status_code=400,
+            detail="AI provider requires an encrypted credential before enablement.",
+        )
+    try:
+        validate_provider_policy(
+            provider.endpoint_host,
+            provider.data_policy,
+            settings,
+        )
+    except AIProviderPolicyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    provider.enabled = True
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_enabled",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={
+            "provider": provider.provider,
+            "model": provider.model,
+            "allowed_data_classes": provider.data_policy.get(
+                "allowed_data_classes",
+                [],
+            ),
+        },
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "enabled": provider.enabled}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/disable",
+)
+def disable_ai_provider(
+    provider_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    provider.enabled = False
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_disabled",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={"provider": provider.provider, "model": provider.model},
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "enabled": provider.enabled}
 
 
 @app.get("/v1/workspaces/{workspace_id}/audit")

@@ -1,3 +1,14 @@
+x-prism-environment: &prism-environment
+  PRISM_ENVIRONMENT: development
+  PRISM_DATABASE_URL: postgresql+psycopg://prism:${POSTGRES_PASSWORD}@postgres:5432/prism
+  PRISM_ALLOW_DEV_AUTH: "true"
+  PRISM_TRUSTED_HOSTS: localhost,127.0.0.1,api
+  PRISM_CONNECTOR_ALLOWED_HOSTS: ${PRISM_CONNECTOR_ALLOWED_HOSTS:-api.example.com}
+  PRISM_METRICS_TOKEN: ${PRISM_METRICS_TOKEN:?PRISM_METRICS_TOKEN must be set}
+  PRISM_AUDIT_HMAC_KEY: ${PRISM_AUDIT_HMAC_KEY:?PRISM_AUDIT_HMAC_KEY must be set}
+  PRISM_DATA_ENCRYPTION_KEY_B64: ${PRISM_DATA_ENCRYPTION_KEY_B64:?PRISM_DATA_ENCRYPTION_KEY_B64 must be set}
+  PRISM_DATA_ENCRYPTION_KEY_VERSION: ${PRISM_DATA_ENCRYPTION_KEY_VERSION:-v1}
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -20,16 +31,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
-      PRISM_ENVIRONMENT: development
-      PRISM_DATABASE_URL: postgresql+psycopg://prism:${POSTGRES_PASSWORD}@postgres:5432/prism
-      PRISM_ALLOW_DEV_AUTH: "true"
-      PRISM_TRUSTED_HOSTS: localhost,127.0.0.1,api
-      PRISM_AUDIT_HMAC_KEY: ${PRISM_AUDIT_HMAC_KEY:?PRISM_AUDIT_HMAC_KEY must be set}
-      PRISM_DATA_ENCRYPTION_KEY_B64: ${PRISM_DATA_ENCRYPTION_KEY_B64:?PRISM_DATA_ENCRYPTION_KEY_B64 must be set}
-      PRISM_DATA_ENCRYPTION_KEY_VERSION: ${PRISM_DATA_ENCRYPTION_KEY_VERSION:-v1}
+    environment: *prism-environment
     ports:
       - "8080:8080"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.enterprise
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment: *prism-environment
+    command: ["python", "-m", "enterprise.worker"]
+    restart: unless-stopped
 
 volumes:
   prism_pgdata:
