@@ -3,8 +3,8 @@ const AxeBuilder = require("@axe-core/playwright").default;
 
 test("public demo loads synthetic data and switches analysis views", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("#datasetName")).toContainText(
-    "PRISM Synthetic Enterprise Dataset"
+  await expect(page.locator("#datasetName")).toHaveText(
+    /PRISM synthetic enterprise dataset/i
   );
   await expect(page.locator("#rowCountTag")).not.toHaveText("0 rows", {
     timeout: 15000,
