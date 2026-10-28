@@ -36,6 +36,9 @@ class EnterpriseSettings(BaseSettings):
     connector_timeout_seconds: int = 15
     connector_max_rows: int = 1000
 
+    ai_provider_allowed_hosts: str = ""
+    ai_provider_max_input_chars: int = 100_000
+
     job_poll_seconds: float = 1.0
     job_lease_seconds: int = 120
     job_max_attempts: int = 3
@@ -73,6 +76,14 @@ class EnterpriseSettings(BaseSettings):
         return [
             value.strip().lower()
             for value in self.connector_allowed_hosts.split(",")
+            if value.strip()
+        ]
+
+    @property
+    def ai_provider_allowed_host_list(self) -> list[str]:
+        return [
+            value.strip().lower()
+            for value in self.ai_provider_allowed_hosts.split(",")
             if value.strip()
         ]
 
