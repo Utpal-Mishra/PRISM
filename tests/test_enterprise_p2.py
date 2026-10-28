@@ -371,3 +371,26 @@ def test_explicit_evidence_pins_remain_bounded_on_rerun() -> None:
     db.flush()
     assert case.requested_evidence_ids == ["EVD-PINNED"]
     assert case.evidence_ids == ["EVD-PINNED"]
+
+
+
+def test_unrelated_workspace_evidence_does_not_ground_a_case() -> None:
+    db = _session()
+    _evidence(
+        db,
+        "EVD-UNRELATED",
+        "forecast_result",
+        "internal",
+        "Revenue forecast evidence for a different business question.",
+    )
+    case = _case(
+        db,
+        question="What colour should the employee cafeteria walls be?",
+    )
+
+    synthesis = run_control_plane(db, case)
+    db.flush()
+
+    assert case.status == "insufficient_evidence"
+    assert case.evidence_ids == []
+    assert synthesis["status"] == "insufficient_evidence"
