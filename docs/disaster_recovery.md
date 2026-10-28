@@ -2,7 +2,7 @@
 
 ## Recovery objectives
 
-Initial P1 targets:
+Initial P1/P2 targets:
 
 - **Availability SLO:** 99.9% for the authenticated enterprise API.
 - **Latency SLO:** p95 API latency below 750 ms for non-analytical control-plane requests.
@@ -53,9 +53,15 @@ The checksum is verified before `pg_restore` runs.
 2. create a deterministic bootstrap tenant/workspace;
 3. take a logical backup;
 4. restore it into a second clean database;
-5. verify restored PRISM tables and bootstrap data.
+5. verify restored P0/P1/P2 tables, bootstrap data and the P2 immutable-snapshot trigger.
 
 A passing drill proves the repository's logical backup path is executable. It does not replace a production-region disaster-recovery exercise.
+
+### P2 recovery scope
+
+The automated restore drill now verifies the presence of `data_assets`, `data_snapshots`, `evidence_edges`, `decision_cases` and `ai_team_runs`, plus the PostgreSQL trigger that rejects snapshot updates. Materialised rows are therefore covered by the same logical-backup recovery path as the rest of the enterprise database.
+
+For production-scale materialisation, recovery testing must additionally verify real snapshot volumes and the achieved RTO/RPO under representative storage size.
 
 ## Production controls still required
 
