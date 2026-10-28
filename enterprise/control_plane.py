@@ -189,10 +189,7 @@ def _relevance_score(question: str, record: EvidenceRecord) -> int:
         "our",
     }
     evidence_text = _evidence_text(record)
-    score = sum(1 for token in question_tokens if token in evidence_text)
-    if record.evidence_class == "materialized_dataset_snapshot":
-        score += 1
-    return score
+    return sum(1 for token in question_tokens if token in evidence_text)
 
 
 def select_evidence(
@@ -228,13 +225,13 @@ def select_evidence(
         ),
         reverse=True,
     )
-    positive = [
+    if case.requested_evidence_ids:
+        return ranked[: settings.decision_case_max_evidence]
+    return [
         record
         for record in ranked
         if _relevance_score(case.business_question, record) > 0
-    ]
-    selected = positive or ranked
-    return selected[: settings.decision_case_max_evidence]
+    ][: settings.decision_case_max_evidence]
 
 
 def _evidence_for_team(team: str, evidence: list[EvidenceRecord]) -> list[EvidenceRecord]:
