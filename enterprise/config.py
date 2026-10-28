@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class EnterpriseSettings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     service_name: str = "PRISM Enterprise API"
-    service_version: str = "0.1.0-p0"
+    service_version: str = "0.2.0-p1"
     database_url: str = "sqlite+pysqlite:///./prism_enterprise.db"
 
     oidc_issuer: str = ""
