@@ -104,7 +104,7 @@ class DecisionCase(TenantScopedRecord, Base):
     business_question: Mapped[str] = mapped_column(Text, nullable=False)
     owner: Mapped[str] = mapped_column(String(255), nullable=False)
     materiality: Mapped[str] = mapped_column(String(32), nullable=False, default="advisory")
-    max_classification: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
+    classification: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="queued")
     approval_state: Mapped[str] = mapped_column(String(48), nullable=False, default="not_reviewed")
     participating_teams: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
