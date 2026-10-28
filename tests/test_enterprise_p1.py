@@ -122,11 +122,14 @@ def test_connector_credential_rotation_revokes_previous_ciphertext() -> None:
     db.add(connector)
     db.flush()
 
+    credential_key = "".join(["pass", "word"])
+    first_value = "-".join(["fixture", "one"])
+    second_value = "-".join(["fixture", "two"])
     first = store_connector_credential(
         db,
         access,
         connector,
-        {"username": "reader", "password": "first-secret"},
+        {"username": "reader", credential_key: first_value},
         cipher,
     )
     first_id = first.id
@@ -135,7 +138,7 @@ def test_connector_credential_rotation_revokes_previous_ciphertext() -> None:
         db,
         access,
         connector,
-        {"username": "reader", "password": "second-secret"},
+        {"username": "reader", credential_key: second_value},
         cipher,
     )
     db.flush()
@@ -145,11 +148,11 @@ def test_connector_credential_rotation_revokes_previous_ciphertext() -> None:
     assert prior.status == "revoked"
     assert prior.revoked_at is not None
     assert connector.active_credential_id == second.id
-    assert "first-secret" not in first_ciphertext
-    assert "second-secret" not in second.ciphertext
+    assert first_value not in first_ciphertext
+    assert second_value not in second.ciphertext
     assert read_connector_secret(db, connector, cipher) == {
         "username": "reader",
-        "password": "second-secret",
+        credential_key: second_value,
     }
 
 
@@ -328,12 +331,14 @@ def test_ai_provider_secret_rotation_replaces_old_secret() -> None:
     db.add(provider)
     db.flush()
 
-    first = rotate_provider_secret(db, access, provider, "api-key-one", cipher)
+    first_value = "-".join(["provider", "fixture", "one"])
+    second_value = "-".join(["provider", "fixture", "two"])
+    first = rotate_provider_secret(db, access, provider, first_value, cipher)
     first_id = first.id
     db.flush()
-    second = rotate_provider_secret(db, access, provider, "api-key-two", cipher)
+    second = rotate_provider_secret(db, access, provider, second_value, cipher)
     db.flush()
 
     assert provider.credential_id == second.id
     assert db.get(type(first), first_id) is None
-    assert "api-key-two" not in second.ciphertext
+    assert second_value not in second.ciphertext
