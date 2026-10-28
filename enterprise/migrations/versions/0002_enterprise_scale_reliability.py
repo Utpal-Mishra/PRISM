@@ -20,8 +20,6 @@ def upgrade() -> None:
             "connectors",
             "connector_credentials",
             "connector_runs",
-            "job_records",
-            "usage_buckets",
             "retention_policies",
             "deletion_requests",
             "ai_provider_configs",
