@@ -32,6 +32,23 @@ class EnterpriseSettings(BaseSettings):
     data_encryption_key_b64: SecretStr = SecretStr("")
     data_encryption_key_version: str = "v1"
 
+    connector_allowed_hosts: str = ""
+    connector_timeout_seconds: int = 15
+    connector_max_rows: int = 1000
+
+    job_poll_seconds: float = 1.0
+    job_lease_seconds: int = 120
+    job_max_attempts: int = 3
+
+    rate_limit_per_minute: int = 120
+    workspace_daily_job_quota: int = 1000
+
+    metrics_token: SecretStr = SecretStr("")
+    slo_availability_target: float = 0.999
+    slo_latency_p95_ms: int = 750
+
+    default_retention_days: int = 365
+
     model_config = SettingsConfigDict(
         env_prefix="PRISM_",
         env_file=".env.enterprise",
@@ -51,6 +68,14 @@ class EnterpriseSettings(BaseSettings):
     def trusted_host_list(self) -> list[str]:
         return [value.strip() for value in self.trusted_hosts.split(",") if value.strip()]
 
+    @property
+    def connector_allowed_host_list(self) -> list[str]:
+        return [
+            value.strip().lower()
+            for value in self.connector_allowed_hosts.split(",")
+            if value.strip()
+        ]
+
     @model_validator(mode="after")
     def validate_production_boundary(self) -> EnterpriseSettings:
         if self.environment != "production":
@@ -66,6 +91,14 @@ class EnterpriseSettings(BaseSettings):
             raise ValueError("Production PRISM requires an HTTPS OIDC issuer.")
         if self.oidc_jwks_url and not self.oidc_jwks_url.startswith("https://"):
             raise ValueError("Production PRISM requires an HTTPS OIDC JWKS URL.")
+        if len(self.metrics_token.get_secret_value()) < 32:
+            raise ValueError(
+                "Production PRISM requires a metrics token of at least 32 characters."
+            )
+        if not self.connector_allowed_host_list:
+            raise ValueError(
+                "Production PRISM requires an explicit connector host allowlist."
+            )
         if len(self.audit_hmac_key.get_secret_value()) < 32:
             raise ValueError(
                 "Production PRISM requires an audit HMAC key of at least 32 characters."
