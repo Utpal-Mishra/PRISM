@@ -12,6 +12,7 @@ from enterprise.models import (
     OutcomeRecord,
     StrategyRecord,
 )
+from enterprise.p2_models import DataSnapshot
 
 RETENTION_MODELS = {
     "evidence": EvidenceRecord,
@@ -19,6 +20,7 @@ RETENTION_MODELS = {
     "decision": DecisionRecord,
     "outcome": OutcomeRecord,
     "connector_run": ConnectorRun,
+    "data_snapshot": DataSnapshot,
 }
 
 
