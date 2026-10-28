@@ -19,6 +19,8 @@ on:
       - "playwright.config.js"
       - "package.json"
       - ".github/workflows/browser-e2e.yml"
+  schedule:
+    - cron: "17 6 * * 4"
   workflow_dispatch:
 
 permissions:
