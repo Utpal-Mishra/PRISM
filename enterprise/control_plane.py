@@ -153,9 +153,9 @@ def route_teams(question: str) -> list[str]:
     return selected
 
 
-def _classification_allowed(max_classification: str, classification: str) -> bool:
+def _classification_allowed(case_classification: str, classification: str) -> bool:
     return CLASSIFICATION_RANK.get(classification, 99) <= CLASSIFICATION_RANK.get(
-        max_classification,
+        case_classification,
         -1,
     )
 
