@@ -196,7 +196,6 @@ def run_dataset_materialization_job(db: Session, job: JobRecord) -> dict:
             connector_type=connector.connector_type,
             status="failed",
         ).inc()
-        MATERIALIZATIONS.labels(status="failed").inc()
         raise
 
     run.status = "succeeded"
@@ -556,8 +555,9 @@ def record_task_failure(
                 else:
                     run.status = "retrying"
                     run.completed_at = None
-        if job.job_type == "dataset_materialize" and job.status == "failed":
-            MATERIALIZATIONS.labels(status="failed").inc()
+        if job.job_type == "dataset_materialize":
+            status_label = "failed" if job.status == "failed" else "retrying"
+            MATERIALIZATIONS.labels(status=status_label).inc()
         return
 
     if job.job_type == "decision_case_analyze":
@@ -579,3 +579,4 @@ def record_task_failure(
             DECISION_CASES.labels(status="failed").inc()
         else:
             case.status = "retrying"
+            DECISION_CASES.labels(status="retrying").inc()
