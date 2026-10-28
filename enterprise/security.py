@@ -31,7 +31,9 @@ def install_security_middleware(
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
-        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request_id = getattr(request.state, "request_id", None)
+        request_id = request_id or request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request.state.request_id = request_id
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
