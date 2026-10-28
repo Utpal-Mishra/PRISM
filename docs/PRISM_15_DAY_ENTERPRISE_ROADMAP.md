@@ -1,7 +1,7 @@
 # PRISM — 15-Day Enterprise Evidence-to-Strategy Roadmap
 
 **Roadmap ID:** PRISM-RM-15D-20260909  
-**Version:** 1.2  
+**Version:** 1.3  
 **Start date:** 2026-09-09  
 **Target end date:** 2026-09-23  
 **Product direction:** Data → Evidence → Explanation → Prediction → Scenario → Strategy → Decision → Action → Outcome → Learning
@@ -138,10 +138,25 @@ The original Evidence-to-Strategy programme is now **15/15 complete**. Further w
 Production hardening: benchmark validation, accessibility/performance, worker architecture, persisted backend/workspaces, real connectors, SSO/RBAC, secrets, encryption, observability, model registry, approvals, validation agents and formal security review.
 
 ## Later enterprise release — AI Team Orchestration
-**Status:** ☐ Future backlog — target after the governed enterprise foundation is established (v2.x direction)
+**Status:** 🟡 P2 foundation integrated — 2026-10-28; live provider execution and specialist-team expansion remain later v2.x work
 
 ### Objective
 Evolve PRISM from a single analytical copilot into an evidence-grounded AI operating model that assembles the right specialist intelligence team for a business question, while preserving human accountability and PRISM's evidence-first architecture.
+
+### P2 delivered foundation
+- Governed enterprise `DATA-*` assets backed by explicit connector sources rather than implicit raw-data persistence.
+- Immutable, versioned `SNAP-*` materialisations with classification, row/byte limits, content hash, schema summary and provenance.
+- Persisted shared Evidence Graph edges connecting connector → data asset → snapshot → `EVD-*` evidence → AI team run → `DC-*` Decision Case → `DEC-*` human decision.
+- First five core AI teams registered: **Data, Analytics, Data Science, Strategy and Governance**.
+- Deterministic Control Plane task routing from a business question; users do not need to choose agents manually.
+- Clearance-bounded evidence selection so a Decision Case cannot use evidence above the creator's authorised data classification.
+- Persisted specialist `AITeamRun` records with evidence IDs, method, limitations and explicit `causal-not-established` guardrails.
+- Persisted `DC-*` Decision Cases with question, owner, participating teams, linked evidence, synthesis, materiality and review state.
+- Defensive `insufficient_evidence` refusal when no traceable PRISM evidence can support the case.
+- Governance Team review-readiness check before a case can be approved for an accountable human decision.
+- Manager/Admin review boundary and explicit promotion from approved `DC-*` into the existing `DEC-*` Decision Register.
+- Durable worker execution, retries, observability metrics, lifecycle deletion and snapshot retention integrated through the P1 operational control plane.
+- **No live external AI provider invocation in P2.** Provider credentials/egress remain governed by P1 and will be connected only after this evidence-first orchestration proves reliable.
 
 ### AI Control Plane
 Users should ask a business question rather than manually choosing agents. The PRISM control plane will interpret intent, decompose the problem, select the required AI teams, coordinate shared context, enforce evidence requirements, synthesise outputs and route material conclusions through governance and human review.
