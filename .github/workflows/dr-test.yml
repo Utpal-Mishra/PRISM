@@ -1,0 +1,81 @@
+name: Enterprise DR Test
+
+on:
+  push:
+    branches: [main, develop, "agent/**"]
+    paths:
+      - "enterprise/**"
+      - "scripts/backup_postgres.sh"
+      - "scripts/restore_postgres.sh"
+      - "alembic.ini"
+      - ".github/workflows/dr-test.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "enterprise/**"
+      - "scripts/backup_postgres.sh"
+      - "scripts/restore_postgres.sh"
+      - "alembic.ini"
+      - ".github/workflows/dr-test.yml"
+  schedule:
+    - cron: "41 4 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restore-drill:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: prism
+          POSTGRES_USER: prism
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prism -d prism"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      PRISM_DATABASE_URL: postgresql+psycopg://prism@localhost:5432/prism
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: prism
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install runtime and PostgreSQL client
+        run: |
+          pip install -r requirements-enterprise.txt
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      - name: Migrate and bootstrap source database
+        run: |
+          alembic upgrade head
+          python -m enterprise.bootstrap             --tenant "DR Test Tenant"             --workspace "Recovery Workspace"             --subject "dr-test-subject"
+      - name: Create logical backup
+        env:
+          PGDATABASE: prism
+          BACKUP_PATH: /tmp/prism-dr.dump
+        run: sh scripts/backup_postgres.sh
+      - name: Restore into clean recovery database
+        run: |
+          createdb prism_restore
+          PGDATABASE=prism_restore             BACKUP_PATH=/tmp/prism-dr.dump             sh scripts/restore_postgres.sh
+      - name: Verify restored enterprise state
+        run: |
+          test "$(psql -d prism_restore -Atc 'select count(*) from tenants')" = "1"
+          test "$(psql -d prism_restore -Atc 'select count(*) from workspaces')" = "1"
+          test "$(psql -d prism_restore -Atc 'select count(*) from memberships')" = "1"
+          psql -d prism_restore -Atc "select to_regclass('public.job_records')" | grep -q job_records
+          psql -d prism_restore -Atc "select to_regclass('public.connectors')" | grep -q connectors
