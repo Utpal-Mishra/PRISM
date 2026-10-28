@@ -16,6 +16,31 @@ from enterprise.models import Connector, ConnectorCredential
 from enterprise.tenancy import WorkspaceAccess
 
 SUPPORTED_CONNECTORS = {"rest_https", "postgresql"}
+PLAINTEXT_SECRET_KEYS = {
+    "password",
+    "passwd",
+    "secret",
+    "token",
+    "bearer_token",
+    "api_key",
+    "apikey",
+    "authorization",
+    "username",
+    "user",
+}
+
+
+def _contains_plaintext_secret(value: object) -> bool:
+    if isinstance(value, dict):
+        for key, item in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if normalized in PLAINTEXT_SECRET_KEYS:
+                return True
+            if _contains_plaintext_secret(item):
+                return True
+    elif isinstance(value, list):
+        return any(_contains_plaintext_secret(item) for item in value)
+    return False
 
 
 class ConnectorError(RuntimeError):
@@ -43,6 +68,10 @@ def validate_connector(
     settings = settings or get_settings()
     if connector_type not in SUPPORTED_CONNECTORS:
         raise ConnectorError("Unsupported enterprise connector type.")
+    if _contains_plaintext_secret(configuration):
+        raise ConnectorError(
+            "Connector configuration must not contain credentials or secret-like fields."
+        )
     if not host_allowed(endpoint_host, settings):
         raise ConnectorError("Connector host is not present in the deployment allowlist.")
 
