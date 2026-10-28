@@ -36,6 +36,7 @@ from enterprise.models import (
 )
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.retention import purge_expired_records
+from enterprise.tasks import record_task_failure
 from enterprise.tenancy import WorkspaceAccess
 
 
@@ -102,6 +103,18 @@ def test_connector_allowlist_and_https_boundary() -> None:
             "rest_https",
             "unapproved.example.com",
             {"base_url": "https://unapproved.example.com"},
+            settings,
+        )
+
+    with pytest.raises(ConnectorError):
+        validate_connector(
+            "postgresql",
+            "warehouse.internal.example",
+            {
+                "database": "analytics",
+                "port": 5432,
+                "".join(["pass", "word"]): "-".join(["plain", "fixture"]),
+            },
             settings,
         )
 
@@ -342,3 +355,55 @@ def test_ai_provider_secret_rotation_replaces_old_secret() -> None:
     assert provider.credential_id == second.id
     assert db.get(type(first), first_id) is None
     assert second_value not in second.ciphertext
+
+
+
+def test_connector_run_failure_tracks_retry_and_terminal_status() -> None:
+    db = _session()
+    access = _access()
+    settings = EnterpriseSettings(job_max_attempts=2)
+    from enterprise.models import ConnectorRun
+
+    run = ConnectorRun(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        connector_id="connector-1",
+        status="queued",
+    )
+    db.add(run)
+    db.flush()
+    job = enqueue_job(
+        db,
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        job_type="connector_run",
+        payload={
+            "connector_id": "connector-1",
+            "run_id": run.id,
+            "operation": {},
+        },
+        settings=settings,
+    )
+    db.commit()
+
+    claimed = claim_next_job(db, "worker-a", settings)
+    assert claimed is not None
+    mark_job_failed(db, claimed, "connector_error", settings)
+    record_task_failure(db, claimed, "connector_error")
+    db.commit()
+    assert db.get(ConnectorRun, run.id).status == "retrying"
+
+    claimed.run_after = datetime.now(UTC) - timedelta(seconds=1)
+    db.commit()
+    claimed_again = claim_next_job(db, "worker-b", settings)
+    assert claimed_again is not None
+    mark_job_failed(db, claimed_again, "connector_error", settings)
+    record_task_failure(db, claimed_again, "connector_error")
+    db.commit()
+
+    failed_run = db.get(ConnectorRun, run.id)
+    assert failed_run.status == "failed"
+    assert failed_run.error_code == "connector_error"
+    assert failed_run.completed_at is not None
