@@ -9,8 +9,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
-    String,
     Integer,
+    String,
     Text,
     UniqueConstraint,
 )
