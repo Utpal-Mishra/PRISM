@@ -32,6 +32,19 @@ For enterprise setup and release gates, see:
 
 A production tenant still requires environment activation of an approved identity provider, managed PostgreSQL, HTTPS ingress, secret/KMS-backed keys and the documented GitHub `main` protection ruleset.
 
+## Enterprise P1 scale & reliability
+
+The enterprise runtime now adds the first operational scale layer above P0: governed HTTPS REST/PostgreSQL connectors, encrypted credential rotation, PostgreSQL-backed workers with leases/retries, distributed workspace quotas, Prometheus metrics/SLO targets, retention and approved deletion workflows, tested PostgreSQL backup/restore, governed AI-provider registration, and browser E2E/accessibility gates.
+
+The public GitHub Pages app remains browser-local and does not become an enterprise data endpoint. P1 connector execution and future AI-provider egress live only behind the authenticated enterprise API/worker boundary.
+
+Operational references:
+- [Enterprise operations](docs/enterprise_operations.md)
+- [Disaster recovery](docs/disaster_recovery.md)
+- [Production readiness](docs/production_readiness.md)
+
+Production still requires environment activation of managed PostgreSQL/PITR, approved OIDC, HTTPS ingress, secret/KMS injection, monitoring/alerts, exact egress allowlists, staging load measurement and the documented GitHub main protection ruleset.
+
 ## Shared visual language
 
 PRISM uses the same dark-first product family as The Palm and NEXUS: green-black canvas, restrained glass/elevated surfaces, sage secondary text, green interaction states and a scarce lime accent for brand/high-value actions.
