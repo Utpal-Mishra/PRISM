@@ -239,11 +239,13 @@ def run_decision_case_job(db: Session, job: JobRecord) -> dict:
         raise TaskError("Decision Case job payload is incomplete.")
 
     case = db.scalar(
-        select(DecisionCase).where(
+        select(DecisionCase)
+        .where(
             DecisionCase.id == case_id,
             DecisionCase.tenant_id == job.tenant_id,
             DecisionCase.workspace_id == job.workspace_id,
         )
+        .with_for_update()
     )
     if case is None:
         raise TaskError("Decision Case was not found.")
