@@ -40,6 +40,7 @@
     function openSidebar() {
       if (!isMobile()) return;
       body.classList.add("sidebar-open");
+      sidebar.inert = false;
       sidebar.setAttribute("aria-hidden", "false");
       menuToggle.setAttribute("aria-expanded", "true");
       menuToggle.setAttribute("aria-label", "Close navigation");
@@ -49,8 +50,13 @@
       body.classList.remove("sidebar-open");
       menuToggle.setAttribute("aria-expanded", "false");
       menuToggle.setAttribute("aria-label", "Open navigation");
-      if (isMobile()) sidebar.setAttribute("aria-hidden", "true");
-      else sidebar.removeAttribute("aria-hidden");
+      if (isMobile()) {
+        sidebar.inert = true;
+        sidebar.setAttribute("aria-hidden", "true");
+      } else {
+        sidebar.inert = false;
+        sidebar.removeAttribute("aria-hidden");
+      }
       if (restoreFocus && isMobile()) menuToggle.focus();
     }
 
@@ -82,9 +88,11 @@
       if (mobile) {
         closeSidebar();
         setIntro(false);
+        sidebar.inert = true;
         sidebar.setAttribute("aria-hidden", "true");
       } else {
         body.classList.remove("sidebar-open");
+        sidebar.inert = false;
         sidebar.removeAttribute("aria-hidden");
         menuToggle.setAttribute("aria-expanded", "false");
         setIntro(true);
