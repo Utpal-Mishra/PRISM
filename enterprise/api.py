@@ -104,8 +104,6 @@ class RetentionPolicyInput(BaseModel):
         "outcome",
         "connector_run",
         "data_snapshot",
-        "decision_case",
-        "ai_team_run",
     ]
     retention_days: int = Field(ge=1, le=3650)
     enabled: bool = True
