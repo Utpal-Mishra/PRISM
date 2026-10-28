@@ -31,6 +31,7 @@ from enterprise.models import (
     AIProviderConfig,
     Connector,
     ConnectorCredential,
+    ConnectorRun,
     EvidenceRecord,
     JobRecord,
 )
@@ -362,8 +363,6 @@ def test_connector_run_failure_tracks_retry_and_terminal_status() -> None:
     db = _session()
     access = _access()
     settings = EnterpriseSettings(job_max_attempts=2)
-    from enterprise.models import ConnectorRun
-
     run = ConnectorRun(
         tenant_id=access.tenant_id,
         workspace_id=access.workspace_id,
