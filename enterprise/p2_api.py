@@ -123,6 +123,7 @@ def _case_payload(case: DecisionCase) -> dict[str, Any]:
         "status": case.status,
         "approval_state": case.approval_state,
         "participating_teams": case.participating_teams,
+        "requested_evidence_ids": case.requested_evidence_ids,
         "evidence_ids": case.evidence_ids,
         "synthesis": case.synthesis,
         "job_id": case.job_id,
@@ -547,7 +548,8 @@ def create_decision_case(
         max_classification=access.data_clearance,
         status="queued",
         approval_state="not_reviewed",
-        evidence_ids=requested_ids,
+        requested_evidence_ids=requested_ids,
+        evidence_ids=[],
     )
     db.add(case)
     db.flush()
