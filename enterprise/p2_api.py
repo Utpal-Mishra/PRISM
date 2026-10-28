@@ -47,6 +47,12 @@ class DecisionCaseCreate(BaseModel):
     business_question: str = Field(min_length=8, max_length=4000)
     owner: str = Field(min_length=1, max_length=255)
     materiality: Literal["advisory", "material"] = "advisory"
+    classification: Literal[
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+    ] = "internal"
     evidence_ids: list[str] = Field(default_factory=list, max_length=50)
 
 
@@ -121,6 +127,7 @@ def _case_payload(case: DecisionCase) -> dict[str, Any]:
         "business_question": case.business_question,
         "owner": case.owner,
         "materiality": case.materiality,
+        "classification": case.classification,
         "status": case.status,
         "approval_state": case.approval_state,
         "participating_teams": case.participating_teams,
@@ -500,7 +507,7 @@ def list_decision_cases(
     return [
         _case_payload(case)
         for case in cases
-        if clearance_allows(access.data_clearance, case.max_classification)
+        if clearance_allows(access.data_clearance, case.classification)
     ]
 
 
@@ -515,6 +522,12 @@ def create_decision_case(
 ) -> dict[str, str]:
     _limit_write(access)
     _limit_job(access)
+
+    if not clearance_allows(access.data_clearance, body.classification):
+        raise HTTPException(
+            status_code=403,
+            detail="Membership data clearance does not allow this Decision Case classification.",
+        )
 
     requested_ids = list(dict.fromkeys(body.evidence_ids))
     if len(requested_ids) > settings.decision_case_max_evidence:
@@ -541,7 +554,7 @@ def create_decision_case(
         inaccessible = [
             record.id
             for record in records
-            if not clearance_allows(access.data_clearance, record.classification)
+            if not clearance_allows(body.classification, record.classification)
         ]
         if inaccessible:
             raise HTTPException(
@@ -557,7 +570,7 @@ def create_decision_case(
         business_question=body.business_question,
         owner=body.owner,
         materiality=body.materiality,
-        max_classification=access.data_clearance,
+        classification=body.classification,
         status="queued",
         approval_state="not_reviewed",
         requested_evidence_ids=requested_ids,
@@ -583,6 +596,7 @@ def create_decision_case(
         object_id=case.id,
         detail={
             "materiality": case.materiality,
+            "classification": case.classification,
             "job_id": job.id,
             "requested_evidence_count": len(requested_ids),
         },
@@ -606,7 +620,7 @@ def get_decision_case(
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
-    if not clearance_allows(access.data_clearance, case.max_classification):
+    if not clearance_allows(access.data_clearance, case.classification):
         raise HTTPException(status_code=403, detail="Decision Case clearance is required.")
 
     runs = db.scalars(
@@ -657,7 +671,7 @@ def rerun_decision_case(
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
-    if not clearance_allows(access.data_clearance, case.max_classification):
+    if not clearance_allows(access.data_clearance, case.classification):
         raise HTTPException(status_code=403, detail="Decision Case clearance is required.")
     if case.status in {"queued", "running", "retrying"}:
         raise HTTPException(
@@ -711,7 +725,7 @@ def review_decision_case(
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
-    if not clearance_allows(access.data_clearance, case.max_classification):
+    if not clearance_allows(access.data_clearance, case.classification):
         raise HTTPException(status_code=403, detail="Decision Case clearance is required.")
     if case.status != "completed":
         raise HTTPException(
@@ -783,7 +797,7 @@ def promote_decision_case(
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
-    if not clearance_allows(access.data_clearance, case.max_classification):
+    if not clearance_allows(access.data_clearance, case.classification):
         raise HTTPException(status_code=403, detail="Decision Case clearance is required.")
     if case.approval_state != "approved_for_human_decision":
         raise HTTPException(
@@ -823,7 +837,7 @@ def promote_decision_case(
         target_type="decision",
         target_id=decision.id,
         relation="promoted_to",
-        classification=case.max_classification,
+        classification=case.classification,
     )
     case.approval_state = "decision_recorded"
     append_audit_event(
