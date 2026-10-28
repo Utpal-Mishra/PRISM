@@ -215,7 +215,7 @@ def select_evidence(
     candidates = [
         record
         for record in db.scalars(statement).all()
-        if _classification_allowed(case.max_classification, record.classification)
+        if _classification_allowed(case.classification, record.classification)
     ]
     ranked = sorted(
         candidates,
@@ -337,7 +337,7 @@ def _create_team_run(
         target_type="decision_case",
         target_id=case.id,
         relation="contributes_to",
-        classification=case.max_classification,
+        classification=case.classification,
         metadata_json={"team": team},
     )
     return run
@@ -459,7 +459,7 @@ def run_control_plane(
         target_type="decision_case",
         target_id=case.id,
         relation="governs",
-        classification=case.max_classification,
+        classification=case.classification,
     )
 
     case.participating_teams = teams
