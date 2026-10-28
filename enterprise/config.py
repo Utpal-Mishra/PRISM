@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class EnterpriseSettings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     service_name: str = "PRISM Enterprise API"
-    service_version: str = "0.2.0-p1"
+    service_version: str = "0.3.0-p2"
     database_url: str = "sqlite+pysqlite:///./prism_enterprise.db"
 
     oidc_issuer: str = ""
@@ -35,6 +35,10 @@ class EnterpriseSettings(BaseSettings):
     connector_allowed_hosts: str = ""
     connector_timeout_seconds: int = 15
     connector_max_rows: int = 1000
+
+    materialized_dataset_max_rows: int = 1000
+    materialized_dataset_max_bytes: int = 10 * 1024 * 1024
+    decision_case_max_evidence: int = 50
 
     ai_provider_allowed_hosts: str = ""
     ai_provider_max_input_chars: int = 100_000
