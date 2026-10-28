@@ -43,11 +43,13 @@ def upgrade() -> None:
         op.execute(
             """
             CREATE OR REPLACE FUNCTION reject_data_snapshot_update()
-            RETURNS trigger AS $
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS '
             BEGIN
-                RAISE EXCEPTION 'PRISM data snapshots are immutable';
+                RAISE EXCEPTION ''PRISM data snapshots are immutable'';
             END;
-            $ LANGUAGE plpgsql
+            '
             """
         )
         op.execute(
