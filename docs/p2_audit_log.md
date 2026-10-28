@@ -11,7 +11,7 @@ Scope: private project implementation record for the P2 governed data materialis
 - **DEC-P2-004 — Deterministic Control Plane before live LLM orchestration.** P2 proves evidence routing, team boundaries, Decision Cases and human review without external model calls.
 - **DEC-P2-005 — Dynamic team routing.** Users ask a business question; PRISM selects relevant core teams rather than forcing manual agent selection.
 - **DEC-P2-006 — Decision Case is not a business decision.** `DC-*` is an evidence-grounded investigation package. Only reviewed cases can be promoted into a separate `DEC-*` human decision.
-- **DEC-P2-007 — Clearance-bound evidence.** A case may only consume evidence within the creator's data-clearance ceiling.
+- **DEC-P2-007 — Case-classification-bound evidence.** A Decision Case classification must be within the creator's clearance, and the case may only consume evidence at or below that explicit case classification.
 - **DEC-P2-008 — Relevance required unless evidence is explicitly pinned.** Unpinned cases with zero lexical evidence relevance refuse rather than falling back to arbitrary workspace evidence.
 - **DEC-P2-009 — Restricted data requires handling basis.** Restricted data assets require a recorded handling/lawful-basis note before persistence.
 
@@ -69,7 +69,7 @@ Scope: private project implementation record for the P2 governed data materialis
 - **SEC-P2-003** Snapshot row access is filtered by membership data clearance.
 - **SEC-P2-004** Evidence Graph edges carry classification and are filtered before API return.
 - **SEC-P2-005** Restricted assets require handling/lawful-basis metadata; audit records only whether it was recorded, not the note content.
-- **SEC-P2-006** Decision Cases cannot consume evidence above creator clearance.
+- **SEC-P2-006** Decision Case classification must be within creator clearance; selected evidence cannot exceed the case classification.
 - **SEC-P2-007** Human review is required before promotion into a business Decision Record where strategy/materiality requires it.
 - **SEC-P2-008** P2 does not expose provider credentials or invoke an external AI service.
 
