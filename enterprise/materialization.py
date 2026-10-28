@@ -110,6 +110,10 @@ def create_snapshot(
     if locked_asset is None:
         raise MaterializationError("Data asset is unavailable for materialisation.")
     asset = locked_asset
+    if asset.classification == "restricted" and len(asset.handling_note.strip()) < 8:
+        raise MaterializationError(
+            "Restricted data assets require a recorded handling/lawful-basis note."
+        )
 
     normalized = _normalize_rows(rows)
     if len(normalized) > settings.materialized_dataset_max_rows:
