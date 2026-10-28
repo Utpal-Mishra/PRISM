@@ -17,6 +17,7 @@ class DataAsset(TenantScopedRecord, Base):
     description: Mapped[str] = mapped_column(String(1000), nullable=False, default="")
     owner: Mapped[str] = mapped_column(String(255), nullable=False)
     classification: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
+    handling_note: Mapped[str] = mapped_column(String(1000), nullable=False, default="")
     source_connector_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
     latest_snapshot_id: Mapped[str | None] = mapped_column(String(96))
@@ -111,8 +112,8 @@ class DecisionCase(TenantScopedRecord, Base):
     evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     synthesis: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     job_id: Mapped[str | None] = mapped_column(String(36), index=True)
-    approved_by: Mapped[str | None] = mapped_column(String(36))
-    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reviewed_by: Mapped[str | None] = mapped_column(String(36))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     review_rationale: Mapped[str | None] = mapped_column(String(1000))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
