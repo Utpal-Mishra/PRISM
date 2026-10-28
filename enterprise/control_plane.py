@@ -4,13 +4,13 @@ import json
 import re
 from datetime import UTC, datetime
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from enterprise.config import EnterpriseSettings, get_settings
 from enterprise.materialization import add_evidence_edge
 from enterprise.models import EvidenceRecord
-from enterprise.p2_models import AITeamRun, DecisionCase
+from enterprise.p2_models import AITeamRun, DecisionCase, EvidenceEdge
 
 TEAM_REGISTRY = {
     "data": {
@@ -210,8 +210,10 @@ def select_evidence(
         .order_by(EvidenceRecord.created_at.desc())
         .limit(500)
     )
-    if case.evidence_ids:
-        statement = statement.where(EvidenceRecord.id.in_(case.evidence_ids))
+    if case.requested_evidence_ids:
+        statement = statement.where(
+            EvidenceRecord.id.in_(case.requested_evidence_ids)
+        )
 
     candidates = [
         record
@@ -350,6 +352,24 @@ def run_control_plane(
     settings: EnterpriseSettings | None = None,
 ) -> dict:
     settings = settings or get_settings()
+    old_run_ids = db.scalars(
+        select(AITeamRun.id).where(
+            AITeamRun.tenant_id == case.tenant_id,
+            AITeamRun.workspace_id == case.workspace_id,
+            AITeamRun.decision_case_id == case.id,
+        )
+    ).all()
+    if old_run_ids:
+        db.execute(
+            delete(EvidenceEdge).where(
+                EvidenceEdge.tenant_id == case.tenant_id,
+                EvidenceEdge.workspace_id == case.workspace_id,
+                or_(
+                    EvidenceEdge.source_id.in_(old_run_ids),
+                    EvidenceEdge.target_id.in_(old_run_ids),
+                ),
+            )
+        )
     db.execute(
         delete(AITeamRun).where(
             AITeamRun.tenant_id == case.tenant_id,
