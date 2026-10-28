@@ -2,8 +2,7 @@
 
 from alembic import op
 
-from enterprise import models  # noqa: F401
-from enterprise import p2_models  # noqa: F401
+from enterprise import models, p2_models  # noqa: F401
 from enterprise.db import Base
 
 revision = "0003_control_plane"
