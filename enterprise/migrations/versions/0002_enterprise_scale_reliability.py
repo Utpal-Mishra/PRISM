@@ -5,7 +5,7 @@ from alembic import op
 from enterprise import models  # noqa: F401
 from enterprise.db import Base
 
-revision = "0002_enterprise_scale_reliability"
+revision = "0002_scale_reliability"
 down_revision = "0001_enterprise_foundation"
 branch_labels = None
 depends_on = None
