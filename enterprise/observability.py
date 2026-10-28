@@ -33,6 +33,16 @@ CONNECTOR_RUNS = Counter(
     "PRISM Enterprise connector run outcomes.",
     ["connector_type", "status"],
 )
+MATERIALIZATIONS = Counter(
+    "prism_materializations_total",
+    "PRISM governed dataset materialisation outcomes.",
+    ["status"],
+)
+DECISION_CASES = Counter(
+    "prism_decision_cases_total",
+    "PRISM AI Control Plane decision-case outcomes.",
+    ["status"],
+)
 
 
 def _route_label(request) -> str:
