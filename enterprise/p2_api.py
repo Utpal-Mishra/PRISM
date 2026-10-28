@@ -35,6 +35,7 @@ class DataAssetCreate(BaseModel):
     description: str = Field(default="", max_length=1000)
     owner: str = Field(min_length=1, max_length=255)
     classification: Literal["public", "internal", "confidential", "restricted"] = "internal"
+    handling_note: str = Field(default="", max_length=1000)
     connector_id: str = Field(min_length=1, max_length=36)
 
 
@@ -127,8 +128,8 @@ def _case_payload(case: DecisionCase) -> dict[str, Any]:
         "evidence_ids": case.evidence_ids,
         "synthesis": case.synthesis,
         "job_id": case.job_id,
-        "approved_by": case.approved_by,
-        "approved_at": case.approved_at,
+        "reviewed_by": case.reviewed_by,
+        "reviewed_at": case.reviewed_at,
         "review_rationale": case.review_rationale,
         "created_at": case.created_at,
         "updated_at": case.updated_at,
@@ -167,6 +168,7 @@ def list_data_assets(
             "description": asset.description,
             "owner": asset.owner,
             "classification": asset.classification,
+            "handling_note": asset.handling_note,
             "source_connector_id": asset.source_connector_id,
             "latest_snapshot_id": asset.latest_snapshot_id,
             "created_at": asset.created_at,
@@ -191,6 +193,14 @@ def create_data_asset(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Membership data clearance does not allow this classification.",
+        )
+    if body.classification == "restricted" and len(body.handling_note.strip()) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Restricted data assets require a handling/lawful-basis note "
+                "before materialisation."
+            ),
         )
 
     connector = db.scalar(
@@ -226,6 +236,7 @@ def create_data_asset(
         description=body.description,
         owner=body.owner,
         classification=body.classification,
+        handling_note=body.handling_note.strip(),
         source_connector_id=connector.id,
         status="active",
     )
@@ -252,6 +263,7 @@ def create_data_asset(
         detail={
             "name": asset.name,
             "classification": asset.classification,
+            "handling_note_recorded": bool(asset.handling_note),
             "source_connector_id": connector.id,
         },
     )
@@ -645,11 +657,16 @@ def rerun_decision_case(
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
     if not clearance_allows(access.data_clearance, case.max_classification):
         raise HTTPException(status_code=403, detail="Decision Case clearance is required.")
+    if case.status in {"queued", "running", "retrying"}:
+        raise HTTPException(
+            status_code=409,
+            detail="Decision Case analysis is already queued or running.",
+        )
 
     case.status = "queued"
     case.approval_state = "not_reviewed"
-    case.approved_by = None
-    case.approved_at = None
+    case.reviewed_by = None
+    case.reviewed_at = None
     case.review_rationale = None
     job = enqueue_job(
         db,
@@ -682,11 +699,13 @@ def review_decision_case(
 ) -> dict[str, str]:
     _limit_write(access)
     case = db.scalar(
-        select(DecisionCase).where(
+        select(DecisionCase)
+        .where(
             DecisionCase.id == case_id,
             DecisionCase.tenant_id == access.tenant_id,
             DecisionCase.workspace_id == access.workspace_id,
         )
+        .with_for_update()
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
@@ -713,8 +732,8 @@ def review_decision_case(
         )
 
     case.review_rationale = body.rationale
-    case.approved_by = access.user_id
-    case.approved_at = datetime.now(UTC)
+    case.reviewed_by = access.user_id
+    case.reviewed_at = datetime.now(UTC)
     if body.action == "approve":
         case.approval_state = "approved_for_human_decision"
         event_type = "decision_case_review_approved"
@@ -752,11 +771,13 @@ def promote_decision_case(
 ) -> dict[str, str]:
     _limit_write(access)
     case = db.scalar(
-        select(DecisionCase).where(
+        select(DecisionCase)
+        .where(
             DecisionCase.id == case_id,
             DecisionCase.tenant_id == access.tenant_id,
             DecisionCase.workspace_id == access.workspace_id,
         )
+        .with_for_update()
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
