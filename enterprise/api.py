@@ -9,6 +9,11 @@ from pydantic import BaseModel, Field, SecretStr
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from enterprise.ai_providers import (
+    AIProviderPolicyError,
+    rotate_provider_secret,
+    validate_provider_policy,
+)
 from enterprise.audit import append_audit_event, verify_audit_chain
 from enterprise.config import get_settings
 from enterprise.connectors import (
@@ -19,6 +24,7 @@ from enterprise.connectors import (
 from enterprise.db import SessionLocal, get_db
 from enterprise.jobs import enqueue_job
 from enterprise.models import (
+    AIProviderConfig,
     AuditEvent,
     Connector,
     ConnectorRun,
@@ -98,6 +104,18 @@ class RetentionPolicyInput(BaseModel):
     ]
     retention_days: int = Field(ge=1, le=3650)
     enabled: bool = True
+
+
+class AIProviderInput(BaseModel):
+    provider: str = Field(min_length=1, max_length=64)
+    model: str = Field(min_length=1, max_length=128)
+    endpoint_host: str = Field(min_length=1, max_length=255)
+    data_policy: dict[str, Any]
+    api_key: SecretStr | None = None
+
+
+class AIProviderCredentialInput(BaseModel):
+    api_key: SecretStr
 
 
 class DeletionRequestInput(BaseModel):
@@ -695,6 +713,205 @@ def approve_deletion_request(
         "job_id": job.id,
         "status": request.status,
     }
+
+
+@app.get("/v1/workspaces/{workspace_id}/ai-providers")
+def list_ai_providers(
+    access: ViewerAccessDep,
+    db: DbDep,
+) -> list[dict[str, Any]]:
+    rows = db.scalars(
+        select(AIProviderConfig)
+        .where(
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+        .order_by(AIProviderConfig.provider.asc(), AIProviderConfig.model.asc())
+    ).all()
+    return [
+        {
+            "provider_config_id": row.id,
+            "provider": row.provider,
+            "model": row.model,
+            "endpoint_host": row.endpoint_host,
+            "enabled": row.enabled,
+            "data_policy": row.data_policy,
+            "has_credential": bool(row.credential_id),
+        }
+        for row in rows
+    ]
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_ai_provider(
+    body: AIProviderInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = AIProviderConfig(
+        tenant_id=access.tenant_id,
+        workspace_id=access.workspace_id,
+        created_by=access.user_id,
+        provider=body.provider,
+        model=body.model,
+        endpoint_host=body.endpoint_host.lower(),
+        enabled=False,
+        data_policy=body.data_policy,
+    )
+    db.add(provider)
+    db.flush()
+    if body.api_key is not None:
+        rotate_provider_secret(
+            db,
+            access,
+            provider,
+            body.api_key.get_secret_value(),
+        )
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_registered",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={
+            "provider": provider.provider,
+            "model": provider.model,
+            "endpoint_host": provider.endpoint_host,
+            "enabled": False,
+        },
+    )
+    db.commit()
+    return {
+        "provider_config_id": provider.id,
+        "enabled": provider.enabled,
+    }
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/rotate",
+)
+def rotate_ai_provider_credential(
+    provider_id: str,
+    body: AIProviderCredentialInput,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    secret = rotate_provider_secret(
+        db,
+        access,
+        provider,
+        body.api_key.get_secret_value(),
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_credential_rotated",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={"credential_id": secret.id},
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "status": "rotated"}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/enable",
+)
+def enable_ai_provider(
+    provider_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    if not provider.credential_id:
+        raise HTTPException(
+            status_code=400,
+            detail="AI provider requires an encrypted credential before enablement.",
+        )
+    try:
+        validate_provider_policy(
+            provider.endpoint_host,
+            provider.data_policy,
+            settings,
+        )
+    except AIProviderPolicyError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    provider.enabled = True
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_enabled",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={
+            "provider": provider.provider,
+            "model": provider.model,
+            "allowed_data_classes": provider.data_policy.get(
+                "allowed_data_classes",
+                [],
+            ),
+        },
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "enabled": provider.enabled}
+
+
+@app.post(
+    "/v1/workspaces/{workspace_id}/ai-providers/{provider_id}/disable",
+)
+def disable_ai_provider(
+    provider_id: str,
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, str | bool]:
+    _limit_write(access)
+    provider = db.scalar(
+        select(AIProviderConfig).where(
+            AIProviderConfig.id == provider_id,
+            AIProviderConfig.tenant_id == access.tenant_id,
+            AIProviderConfig.workspace_id == access.workspace_id,
+        )
+    )
+    if provider is None:
+        raise HTTPException(status_code=404, detail="AI provider was not found.")
+    provider.enabled = False
+    append_audit_event(
+        db,
+        access,
+        event_type="ai_provider_disabled",
+        object_type="ai_provider",
+        object_id=provider.id,
+        detail={"provider": provider.provider, "model": provider.model},
+    )
+    db.commit()
+    return {"provider_config_id": provider.id, "enabled": provider.enabled}
 
 
 @app.get("/v1/workspaces/{workspace_id}/audit")
