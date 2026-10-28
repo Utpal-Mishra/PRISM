@@ -639,7 +639,8 @@ def create_deletion_request(
     db: DbDep,
 ) -> dict[str, str]:
     _limit_write(access)
-    if body.request_type in {"evidence", "connector", "data_asset", "decision_case"} and not body.target_id:
+    target_required = {"evidence", "connector", "data_asset", "decision_case"}
+    if body.request_type in target_required and not body.target_id:
         raise HTTPException(
             status_code=400,
             detail="This deletion request type requires a target_id.",
