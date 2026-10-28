@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.11.0 — Enterprise P2 Governed Data & AI Control Plane
+
+- Added enterprise `DATA-*` assets tied to governed P1 connector sources.
+- Added explicit durable dataset materialisation jobs producing bounded, versioned, immutable `SNAP-*` records with classification, schema summary, SHA-256 content hash and provenance.
+- Added PostgreSQL Row Level Security for P2 data assets, snapshots, Evidence Graph edges, Decision Cases and AI team runs.
+- Added a PostgreSQL trigger that rejects snapshot updates while preserving governed retention/deletion.
+- Added `EVD-DATA-*` metadata evidence without embedding raw materialised rows in evidence, job results or audit events.
+- Added persisted shared Evidence Graph edges connecting connectors, data assets, snapshots, evidence, team runs, Decision Cases and human decisions.
+- Added the first five Control Plane teams: Data, Analytics, Data Science, Strategy and Governance.
+- Added deterministic business-question routing with classification-bounded evidence selection and explicit insufficient-evidence refusal.
+- Added persisted `DC-*` Decision Cases and `AITeamRun` records with methods, limitations, linked `EVD-*` evidence and `causal-not-established` guardrails.
+- Added Governance review-readiness checks and Manager/Admin approval before a Decision Case can be promoted to a `DEC-*` human decision.
+- Added durable Decision Case/materialisation worker jobs with retries, terminal-state reconciliation and Prometheus counters.
+- Added P2 lifecycle support for snapshot retention and explicit deletion of data assets/Decision Cases with dependent lineage cleanup.
+- Added dedicated P2 regression tests for snapshot bounds/versioning, clearance filtering, five-team routing, refusal, reruns, evidence pinning and retention pointer repair.
+- Extended CI and PostgreSQL disaster-recovery validation for P2 tables, contracts and snapshot immutability.
+- Kept live external AI-provider invocation disabled in P2; provider egress remains governed by the P1 boundary for a later release.
+
 ## 1.10.0 — Enterprise P1 Scale & Reliability
 
 - Added governed server-side HTTPS REST and read-only PostgreSQL connector execution with deployment egress allowlists, bounded extraction and redirect refusal.

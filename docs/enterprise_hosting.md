@@ -42,19 +42,32 @@ Set those values and a PostgreSQL password in your shell, then:
 ```bash
 docker compose -f compose.enterprise.yml up -d postgres
 docker compose -f compose.enterprise.yml run --rm api alembic upgrade head
-docker compose -f compose.enterprise.yml up api
+docker compose -f compose.enterprise.yml up api worker
 ```
 
 Development header authentication is permitted only when `PRISM_ALLOW_DEV_AUTH=true` and the environment is not production. Production configuration rejects that setting.
 
-## P1 operations
+## P1/P2 operations
 
-The API and worker use the same container image. Durable work is stored in PostgreSQL, so workers can be horizontally replicated without a separate message broker for the current P1 workload.
+The API and worker use the same container image. Durable work is stored in PostgreSQL, so workers can be horizontally replicated without a separate message broker for the current P1/P2 workload.
 
-Before production deployment, set the P1 environment controls documented in `.env.enterprise.example`, especially connector allowlists, metrics token, quotas and SLO targets.
+Before production deployment, set the P1/P2 environment controls documented in `.env.enterprise.example`, especially connector allowlists, metrics token, quotas, SLO targets, materialised snapshot row/byte limits and Decision Case evidence limits.
 
 Operational runbooks:
 - [Enterprise operations](enterprise_operations.md)
 - [Disaster recovery](disaster_recovery.md)
 
 The repository provides an executable backup/restore drill. Production still requires the managed database provider's encrypted automated backups/PITR, monitoring and alerting.
+
+### P2 materialised snapshots
+
+P2 stores explicitly materialised `SNAP-*` rows inside PostgreSQL JSON records. This is a bounded governed persistence layer, not a replacement for an enterprise warehouse/lakehouse.
+
+Production sizing must account for:
+- `PRISM_MATERIALIZED_DATASET_MAX_ROWS`;
+- `PRISM_MATERIALIZED_DATASET_MAX_BYTES`;
+- workspace snapshot retention policy;
+- PostgreSQL storage encryption, backups and PITR;
+- expected connector refresh/materialisation cadence.
+
+For larger datasets, future versions should materialise into an approved warehouse/object-store layer while retaining PRISM metadata, evidence and Decision Cases in the governed control plane.

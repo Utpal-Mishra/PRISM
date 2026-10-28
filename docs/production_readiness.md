@@ -92,6 +92,38 @@ PRISM is deliberately split into a **public demonstration surface** and an **ent
 
 See [enterprise_operations.md](enterprise_operations.md) for the operational model and [disaster_recovery.md](disaster_recovery.md) for recovery controls.
 
+## Enterprise P2 governed data & AI Control Plane — implemented in repository
+
+### Governed data materialisation
+- Added explicit `DATA-*` enterprise assets tied to governed connector sources.
+- Added bounded, versioned `SNAP-*` records with row/byte limits, classification, content hashes, schema summaries and provenance.
+- Added PostgreSQL RLS for P2 data assets and snapshots.
+- Added a PostgreSQL immutable-update trigger for snapshots.
+- Added snapshot retention with latest-version pointer repair.
+- Added `EVD-DATA-*` evidence metadata while keeping raw rows out of evidence/job/audit payloads.
+
+### Shared Evidence Graph
+- Added persisted tenant/workspace-scoped graph edges from sources through evidence, AI team runs, Decision Cases and decisions.
+- Added clearance filtering to graph inspection.
+- Added lineage replacement on Decision Case rerun so obsolete team-run edges do not remain active.
+
+### AI Control Plane and Decision Cases
+- Added the first five registered teams: Data, Analytics, Data Science, Strategy and Governance.
+- Added deterministic business-question routing rather than manual agent selection.
+- Added classification-bounded evidence selection and explicit evidence pinning.
+- Added `DC-*` Decision Cases and persisted team-run records.
+- Added defensive `insufficient_evidence` refusal.
+- Added Governance review-readiness checks.
+- Added Manager/Admin review and promotion into existing `DEC-*` human decisions.
+- Added explicit `causal-not-established` and no-autonomous-execution boundaries.
+- Live external AI-provider invocation remains disabled in P2.
+
+### Reliability and validation
+- Added durable materialisation and Decision Case worker jobs with retries and terminal-state reconciliation.
+- Added Prometheus counters for materialisation and Decision Case outcomes.
+- Added P2 regression tests and CI contract checks.
+- Extended the PostgreSQL disaster-recovery drill to verify P2 tables and the immutable-snapshot trigger.
+
 ## P0 platform activation still required before enterprise data
 
 The repository cannot activate GitHub branch rules through application source code. Before an enterprise release, activate the `main` ruleset documented in [repository_controls.md](repository_controls.md), including required CI/Security status checks and force-push/deletion restrictions.
@@ -108,7 +140,7 @@ These are environment activations, not missing application features.
 
 ## Remaining production activation and later programme
 
-P1 now implements the application-side scale/reliability foundation. A real production environment must still activate managed PITR/backups, metrics/log shipping and alerts, ingress/network limits, organisation-specific connector/provider allowlists, recurring retention scheduling, staged load measurement and the documented GitHub ruleset. Later product stages can build governed AI-team orchestration on top of the P0/P1 control plane.
+P1 now implements the application-side scale/reliability foundation. A real production environment must still activate managed PITR/backups, metrics/log shipping and alerts, ingress/network limits, organisation-specific connector/provider allowlists, recurring retention scheduling, staged load measurement and the documented GitHub ruleset. Later product stages can connect approved AI providers and expand specialist teams on top of the P0/P1/P2 control plane; P2 already implements the deterministic evidence-grounded orchestration foundation.
 
 ## Legacy Streamlit boundary
 

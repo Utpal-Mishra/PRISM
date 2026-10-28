@@ -85,12 +85,65 @@ The GitHub Pages application is the public/product demonstration shell. A produc
 The legacy Python modules can later become reusable backend services where heavier computation, persistent state, enterprise connectors or governed models are required.
 
 
+## Enterprise P2 — governed data and AI Control Plane
+
+P2 adds the first server-side decision-intelligence orchestration layer above P0/P1.
+
+```text
+Business question
+      ↓
+Authenticated PRISM Enterprise API
+      ↓
+DC-* Decision Case
+      ↓
+Durable decision_case_analyze job
+      ↓
+PRISM Control Plane
+  ├─ Data Team
+  ├─ Analytics Team
+  ├─ Data Science Team
+  ├─ Strategy Team
+  └─ Governance Team
+      ↓
+Clearance-bounded EVD-* evidence
+      ↓
+Shared Evidence Graph
+      ↓
+Governance review-readiness
+      ↓
+Manager/Admin review
+      ↓
+Optional promotion to DEC-* human decision
+```
+
+The Control Plane in P2 is deterministic and evidence-grounded. It routes work and organises existing PRISM evidence; it does not create independent facts and it does not invoke an external AI provider.
+
+P2 also introduces explicit governed data materialisation:
+
+```text
+Governed connector
+      ↓
+DATA-* asset
+      ↓
+dataset_materialize worker job
+      ↓
+bounded connector read
+      ↓
+immutable SNAP-* version
+      ↓
+EVD-DATA-* metadata evidence
+      ↓
+Evidence Graph
+```
+
+Snapshot rows are stored only after explicit materialisation. Raw rows are not placed in job results, audit events or `EVD-DATA-*` evidence payloads. PostgreSQL RLS protects P2 tenant-scoped records and a database trigger rejects snapshot updates; retention/deletion may still remove data according to policy.
+
 ## AI Copilot boundary
 
 The v1.8.0 static Copilot is deliberately evidence-bound. It does not act as a general-purpose chatbot and does not silently transmit uploaded data. The default composer runs in-browser and may use only evidence present in the active PRISM workspace or governed records persisted in browser-local storage. Answers must cite valid `EVD-*` identifiers; unsupported questions are refused.
 
 A future provider adapter may connect a governed model service, but provider output remains subject to the same evidence-citation validation before PRISM accepts it as grounded.
 
-## Later AI-team orchestration
+## AI-team orchestration roadmap
 
-The planned v2.x operating model introduces a PRISM Control Plane above specialist Data, Analytics, Data Science, Strategy and Governance AI teams, later extending to Database, Finance, Business, Operations, Product, Development and Marketing. These teams must share the same semantic definitions, Evidence Graph, Decision Cases, governance controls and human approval boundary rather than operating as isolated agents.
+P2 now implements the governed Control Plane foundation for the Data, Analytics, Data Science, Strategy and Governance teams, together with shared Evidence Graph links and Decision Cases. Later v2.x work can connect approved model providers through the P1 provider boundary and expand to Database, Finance, Business, Operations, Product, Development and Marketing teams. All later teams must continue to share the same semantic definitions, Evidence Graph, Decision Cases, governance controls and human approval boundary rather than operating as isolated agents.

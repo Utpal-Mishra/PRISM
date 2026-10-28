@@ -74,6 +74,24 @@ jobs:
           grep -q -- "OIDC" enterprise/auth.py
           grep -q -- "ROW LEVEL SECURITY" enterprise/migrations/versions/0001_enterprise_foundation.py
           grep -q -- "0002_scale_reliability" enterprise/migrations/versions/0002_enterprise_scale_reliability.py
+          grep -q -- "0003_control_plane" enterprise/migrations/versions/0003_control_plane.py
+          grep -q -- "data_snapshots_immutable_update" enterprise/migrations/versions/0003_control_plane.py
+          test -f enterprise/materialization.py
+          test -f enterprise/control_plane.py
+          test -f enterprise/p2_api.py
+          test -f enterprise/p2_models.py
+          grep -q -- "materialized_dataset_max_rows" enterprise/config.py
+          grep -q -- "raw_rows_in_evidence" enterprise/materialization.py
+          grep -q -- "deterministic_control_plane_v1" enterprise/control_plane.py
+          grep -q -- "insufficient_evidence" enterprise/control_plane.py
+          grep -q -- "human_approval_required" enterprise/control_plane.py
+          grep -q -- "approved_for_human_decision" enterprise/p2_api.py
+          grep -q -- "handling/lawful-basis" enterprise/p2_api.py
+          grep -q -- "with_for_update" enterprise/materialization.py
+          grep -q -- "with_for_update" enterprise/p2_api.py
+          grep -q -- "case.classification" enterprise/control_plane.py
+          grep -q -- "decision_case_analyze" enterprise/tasks.py
+          grep -q -- "dataset_materialize" enterprise/tasks.py
           grep -q -- "job_lease_seconds" enterprise/config.py
           grep -q -- "SKIP LOCKED" docs/enterprise_operations.md
           grep -q -- "rest_https" enterprise/connectors.py

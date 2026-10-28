@@ -35,6 +35,7 @@ from enterprise.models import (
     RetentionPolicy,
 )
 from enterprise.observability import install_observability
+from enterprise.p2_api import router as p2_router
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.security import install_security_middleware
 from enterprise.tenancy import (
@@ -53,6 +54,7 @@ app = FastAPI(
 )
 install_observability(app, settings)
 install_security_middleware(app, settings)
+app.include_router(p2_router)
 
 
 class EvidenceCreate(BaseModel):
@@ -101,6 +103,7 @@ class RetentionPolicyInput(BaseModel):
         "decision",
         "outcome",
         "connector_run",
+        "data_snapshot",
     ]
     retention_days: int = Field(ge=1, le=3650)
     enabled: bool = True
@@ -123,6 +126,8 @@ class DeletionRequestInput(BaseModel):
         "evidence",
         "connector",
         "workspace_analytical_records",
+        "data_asset",
+        "decision_case",
     ]
     target_id: str | None = Field(default=None, max_length=96)
     reason: str = Field(min_length=8, max_length=500)
@@ -634,7 +639,8 @@ def create_deletion_request(
     db: DbDep,
 ) -> dict[str, str]:
     _limit_write(access)
-    if body.request_type in {"evidence", "connector"} and not body.target_id:
+    target_required = {"evidence", "connector", "data_asset", "decision_case"}
+    if body.request_type in target_required and not body.target_id:
         raise HTTPException(
             status_code=400,
             detail="This deletion request type requires a target_id.",

@@ -1,6 +1,6 @@
-# PRISM Enterprise P1 Operations
+# PRISM Enterprise P1/P2 Operations
 
-P1 turns the P0 security boundary into an operational enterprise runtime. This document describes the implemented control plane and the production activations still required outside source control.
+P1 turns the P0 security boundary into an operational runtime; P2 adds governed data materialisation and the first evidence-grounded AI Control Plane. This document describes both layers and the production activations still required outside source control.
 
 ## Runtime topology
 
@@ -13,6 +13,8 @@ PRISM Enterprise API
     ├── OIDC / tenant membership / RBAC
     ├── workspace quotas
     ├── connector administration
+    ├── governed DATA-* assets and SNAP-* materialisation
+    ├── DC-* Decision Cases and Evidence Graph inspection
     ├── retention / deletion administration
     └── governed AI-provider administration
             ↓
@@ -20,6 +22,8 @@ PRISM Enterprise API
             ↑
 PRISM Worker(s)
     ├── connector_run
+    ├── dataset_materialize
+    ├── decision_case_analyze
     ├── retention_purge
     └── deletion_execute
 ```
@@ -38,6 +42,46 @@ Connector credentials are submitted separately from connector configuration, enc
 A connector run does not persist extracted raw rows by default. It records bounded operational evidence instead: row count, SHA-256 content hash, sampled schema summary, method and run identifiers. This preserves traceability without turning the control plane into an uncontrolled data lake.
 
 Production deployments must set `PRISM_CONNECTOR_ALLOWED_HOSTS` to the exact hosts or approved wildcard subdomains that PRISM may contact.
+
+## P2 governed materialisation
+
+A connector read remains ephemeral unless an authorised user explicitly queues materialisation into a governed `DATA-*` asset.
+
+Each materialisation creates an immutable `SNAP-*` version containing:
+- data classification and accountable asset owner;
+- bounded rows and encoded byte size;
+- SHA-256 content hash;
+- sampled schema summary;
+- source connector/run provenance;
+- immutable version number.
+
+Configured defaults are 1,000 rows and 10 MiB per materialised snapshot. These are application bounds, not warehouse-scale capacity claims.
+
+Raw materialised rows are stored only in the tenant-scoped snapshot record. They are not copied into the durable job result, audit detail or `EVD-DATA-*` evidence payload. PostgreSQL rejects snapshot UPDATE operations; approved retention/deletion may remove snapshots.
+
+P2 Evidence Graph relationships include:
+
+`connector → data_asset → data_snapshot → evidence → ai_team_run → decision_case → decision`
+
+Snapshot retention recalculates `latest_snapshot_id` so a data asset never points to an expired snapshot.
+
+## P2 AI Control Plane
+
+A Decision Case starts from a business question rather than manual agent selection. The deterministic P2 Control Plane routes the case across the relevant subset of:
+
+- Data Team;
+- Analytics Team;
+- Data Science Team;
+- Strategy Team;
+- Governance Team.
+
+Evidence selection is limited to the creator's authorised classification. Explicitly pinned evidence remains pinned across reruns; otherwise reruns can discover newly created evidence.
+
+Each team run stores evidence IDs, deterministic method, limitations and a claim boundary. Team output may organise and interpret cited PRISM evidence but must not invent independent facts. If no traceable evidence is available, the case ends as `insufficient_evidence` and is not reviewable.
+
+The Governance Team verifies that specialist team runs retain evidence links. Material or strategy-oriented cases become `pending_human_review`; a Manager/Admin must approve the case before it can be promoted into the existing `DEC-*` human Decision Register.
+
+P2 does not call an external AI provider and does not execute operational business actions. The P1 provider registry remains the future controlled egress boundary.
 
 ## Durable jobs and workers
 
@@ -73,7 +117,9 @@ Current metrics include:
 - HTTP request totals by route/status;
 - HTTP latency histograms;
 - terminal job outcomes;
-- connector-run outcomes.
+- connector-run outcomes;
+- governed materialisation outcomes;
+- Decision Case outcomes.
 
 Structured application logs include a request correlation ID, method, route, status and duration without request bodies or connector credentials.
 
@@ -101,7 +147,7 @@ Deletion is intentionally two-stage:
 1. Manager creates a reasoned deletion request.
 2. Admin approves the request, which queues execution.
 
-Supported targets include individual evidence, connectors (including credentials/run metadata), and workspace analytical records. Completion is written to the tamper-evident audit chain. Audit history itself is not silently removed by analytical-record deletion.
+Supported targets include individual evidence, connectors (including credentials/run metadata), P2 data assets, P2 Decision Cases, and workspace analytical records. Completion is written to the tamper-evident audit chain. Audit history itself is not silently removed by analytical-record deletion.
 
 ## AI-provider governance
 
@@ -117,7 +163,7 @@ Provider configurations are disabled by default. Enablement requires:
 
 No provider API key is exposed to the public browser application.
 
-A later AI-team release must call providers through this governed server boundary and enforce the selected provider's exact request/response contract, classification policy and evidence-grounding rules.
+P2 deliberately does not invoke providers. A later model-enabled Control Plane release must call providers through this governed server boundary and enforce the selected provider's exact request/response contract, classification policy and evidence-grounding rules.
 
 ## Browser and staging acceptance
 

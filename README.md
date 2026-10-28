@@ -45,6 +45,22 @@ Operational references:
 
 Production still requires environment activation of managed PostgreSQL/PITR, approved OIDC, HTTPS ingress, secret/KMS injection, monitoring/alerts, exact egress allowlists, staging load measurement and the documented GitHub main protection ruleset.
 
+## Enterprise P2 governed data & AI Control Plane
+
+P2 introduces the first governed server-side decision-intelligence orchestration layer. Enterprise users can register `DATA-*` assets against approved P1 connectors, explicitly materialise bounded immutable `SNAP-*` dataset versions, inspect shared Evidence Graph links and create persisted `DC-*` Decision Cases from business questions.
+
+The Control Plane dynamically routes a Decision Case across the first five AI teams — **Data, Analytics, Data Science, Strategy and Governance** — while using only traceable `EVD-*` evidence within the requesting user's data-clearance boundary. Unsupported cases end in `insufficient_evidence` rather than an invented recommendation.
+
+Material recommendations remain human-controlled: Governance must mark the case review-ready, a Manager/Admin must review it, and only then can the case be promoted into the existing `DEC-*` Decision Register. P2 does not invoke an external model provider or execute operational actions.
+
+P2 data flow:
+
+```text
+Connector → DATA-* → SNAP-* → EVD-* → AI Team Runs → DC-* → Human Review → DEC-*
+```
+
+The public GitHub Pages experience remains unchanged and browser-local; P2 lives only in the authenticated enterprise API/worker boundary.
+
 ## Shared visual language
 
 PRISM uses the same dark-first product family as The Palm and NEXUS: green-black canvas, restrained glass/elevated surfaces, sage secondary text, green interaction states and a scarce lime accent for brand/high-value actions.

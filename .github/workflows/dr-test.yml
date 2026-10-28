@@ -79,3 +79,9 @@ jobs:
           test "$(psql -d prism_restore -Atc 'select count(*) from memberships')" = "1"
           psql -d prism_restore -Atc "select to_regclass('public.job_records')" | grep -q job_records
           psql -d prism_restore -Atc "select to_regclass('public.connectors')" | grep -q connectors
+          psql -d prism_restore -Atc "select to_regclass('public.data_assets')" | grep -q data_assets
+          psql -d prism_restore -Atc "select to_regclass('public.data_snapshots')" | grep -q data_snapshots
+          psql -d prism_restore -Atc "select to_regclass('public.evidence_edges')" | grep -q evidence_edges
+          psql -d prism_restore -Atc "select to_regclass('public.decision_cases')" | grep -q decision_cases
+          psql -d prism_restore -Atc "select to_regclass('public.ai_team_runs')" | grep -q ai_team_runs
+          test "$(psql -d prism_restore -Atc "select count(*) from pg_trigger where tgname='data_snapshots_immutable_update' and not tgisinternal")" = "1"
