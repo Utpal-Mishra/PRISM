@@ -1,0 +1,52 @@
+name: Browser E2E
+
+on:
+  push:
+    branches: [main, develop, "agent/**"]
+    paths:
+      - "index.html"
+      - "assets/**"
+      - "tests/e2e/**"
+      - "playwright.config.js"
+      - "package.json"
+      - ".github/workflows/browser-e2e.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "index.html"
+      - "assets/**"
+      - "tests/e2e/**"
+      - "playwright.config.js"
+      - "package.json"
+      - ".github/workflows/browser-e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package.json
+      - name: Install pinned browser-test dependencies
+        run: npm install --ignore-scripts --no-fund
+      - name: Audit browser-test dependencies
+        run: npm audit --audit-level=high
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser acceptance suite
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: failure()
+        with:
+          name: prism-browser-e2e-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
