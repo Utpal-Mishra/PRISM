@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.10.0 — Enterprise P1 Scale & Reliability
+
+- Added governed server-side HTTPS REST and read-only PostgreSQL connector execution with deployment egress allowlists, bounded extraction and redirect refusal.
+- Added encrypted/versioned connector credentials, rotation/revocation and rejection of plaintext secret-like connector configuration.
+- Added PostgreSQL-backed durable jobs with leases, retry budgets, `SKIP LOCKED` worker claims and connector-run retry/terminal status reconciliation.
+- Added a dedicated enterprise worker service while keeping credentials/raw extracts out of the operational job payload.
+- Added database-backed workspace write/job quotas with HTTP 429 and Retry-After semantics.
+- Added Prometheus HTTP/latency/job/connector metrics, shared request correlation IDs and explicit initial SLO targets.
+- Added checksum-verified PostgreSQL backup/restore scripts and an automated PostgreSQL 17 restore drill.
+- Added tenant-scoped retention policies and Manager-requested/Admin-approved deletion workflows with tamper-evident completion audit.
+- Added disabled-by-default governed AI-provider registration, encrypted credentials, provider egress allowlists and recorded purpose/data-policy requirements before enablement.
+- Added bounded staging load-smoke tooling.
+- Added Chromium desktop/mobile Playwright acceptance, npm audit and axe serious/critical accessibility gating; remediated keyboard/focus defects surfaced by the new gate.
+- Added P1 regression coverage for connector boundaries, encrypted rotation, durable jobs, quotas, retention and AI-provider policies.
+- Preserved the public GitHub Pages application as a browser-local demonstration rather than converting it into the confidential enterprise runtime.
+
 ## 1.9.0 — Enterprise P0 Foundation
 
 - Added a separate authenticated PRISM Enterprise FastAPI runtime while preserving GitHub Pages as the public/browser-local demonstration surface.
