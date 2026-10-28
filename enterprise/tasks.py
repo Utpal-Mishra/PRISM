@@ -340,11 +340,13 @@ def _delete_connector(db: Session, job: JobRecord, connector_id: str) -> dict:
 
 def _delete_data_asset(db: Session, job: JobRecord, asset_id: str) -> dict:
     asset = db.scalar(
-        select(DataAsset).where(
+        select(DataAsset)
+        .where(
             DataAsset.id == asset_id,
             DataAsset.tenant_id == job.tenant_id,
             DataAsset.workspace_id == job.workspace_id,
         )
+        .with_for_update()
     )
     if asset is None:
         return {"data_asset_deleted": False}
