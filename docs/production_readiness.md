@@ -51,6 +51,47 @@ PRISM is deliberately split into a **public demonstration surface** and an **ent
 - CycloneDX SBOM generation is part of the security workflow.
 - Enterprise regression tests cover fail-closed production config, role/clearance hierarchy, authoritative workspace membership, encryption round-trip and audit tamper detection.
 
+## Enterprise P1 scale & reliability — implemented in repository
+
+### Governed data integrations
+- Added server-side HTTPS REST and PostgreSQL read-only connector adapters.
+- Added explicit connector egress allowlists, bounded extraction and redirect refusal.
+- Added encrypted/versioned connector credentials with rotation and revocation.
+- Added plaintext-secret rejection for connector configuration.
+- Connector runs persist metadata/evidence by default rather than raw extracted rows.
+
+### Durable execution and quotas
+- Added PostgreSQL-backed durable jobs with leases, retry budgets and `SKIP LOCKED` worker claims.
+- Added a separate worker process in the enterprise deployment topology.
+- Added database-backed workspace API-write and daily-job quotas with HTTP 429 / Retry-After behaviour.
+- Added connector-run retry/terminal state reconciliation.
+
+### Observability and service objectives
+- Added Prometheus request, latency, job and connector-run metrics.
+- Added structured request logs using shared correlation IDs.
+- Added authenticated metrics access and explicit initial availability/latency objectives.
+- Added a bounded staging load-smoke utility.
+
+### Recovery and lifecycle
+- Added checksum-verified PostgreSQL logical backup and restore scripts.
+- Added an automated PostgreSQL 17 migration/bootstrap/backup/restore verification workflow.
+- Added workspace retention policies and queued retention execution.
+- Added Manager-requested / Admin-approved deletion workflows with audited completion.
+
+### Governed AI-provider boundary
+- Added disabled-by-default enterprise AI-provider configurations.
+- Added encrypted provider credentials and rotation.
+- Added provider-host allowlisting and recorded purpose/data-class/retention-policy requirements before enablement.
+- Live AI-team/provider invocation remains a later governed feature rather than an unbounded P1 network call.
+
+### Browser acceptance
+- Added Chromium desktop/mobile Playwright acceptance tests.
+- Added axe-based serious/critical accessibility gating.
+- Added bounded browser-load smoke assertions and npm dependency auditing.
+- Remediated public-shell keyboard/focus accessibility issues surfaced by the new tests.
+
+See [enterprise_operations.md](enterprise_operations.md) for the operational model and [disaster_recovery.md](disaster_recovery.md) for recovery controls.
+
 ## P0 platform activation still required before enterprise data
 
 The repository cannot activate GitHub branch rules through application source code. Before an enterprise release, activate the `main` ruleset documented in [repository_controls.md](repository_controls.md), including required CI/Security status checks and force-push/deletion restrictions.
@@ -65,9 +106,9 @@ A production deployment must also supply:
 
 These are environment activations, not missing application features.
 
-## P1 and later — not part of P0
+## Remaining production activation and later programme
 
-P0 establishes a defensible enterprise security boundary; it does not make PRISM fully production-scaled. The next programme should add real data connectors, job/worker execution, rate limits/quotas, observability and SLOs, managed backup/restore and disaster recovery, data-retention/deletion workflows, enterprise connector secret rotation, browser E2E/accessibility/performance testing, and governed AI-provider operations.
+P1 now implements the application-side scale/reliability foundation. A real production environment must still activate managed PITR/backups, metrics/log shipping and alerts, ingress/network limits, organisation-specific connector/provider allowlists, recurring retention scheduling, staged load measurement and the documented GitHub ruleset. Later product stages can build governed AI-team orchestration on top of the P0/P1 control plane.
 
 ## Legacy Streamlit boundary
 
