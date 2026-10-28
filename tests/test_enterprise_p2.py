@@ -30,7 +30,11 @@ def _session() -> Session:
     return Session(engine)
 
 
-def _asset(db: Session, classification: str = "internal") -> DataAsset:
+def _asset(
+    db: Session,
+    classification: str = "internal",
+    handling_note: str = "",
+) -> DataAsset:
     asset = DataAsset(
         id="DATA-TEST",
         tenant_id="tenant-p2",
@@ -40,6 +44,7 @@ def _asset(db: Session, classification: str = "internal") -> DataAsset:
         description="P2 test fixture",
         owner="Data Owner",
         classification=classification,
+        handling_note=handling_note,
         source_connector_id="connector-p2",
         status="active",
     )
@@ -52,7 +57,7 @@ def _case(
     db: Session,
     *,
     question: str,
-    max_classification: str = "internal",
+    classification: str = "internal",
     requested_evidence_ids: list[str] | None = None,
 ) -> DecisionCase:
     case = DecisionCase(
@@ -63,7 +68,7 @@ def _case(
         business_question=question,
         owner="Decision Owner",
         materiality="material",
-        max_classification=max_classification,
+        classification=classification,
         status="queued",
         approval_state="not_reviewed",
         requested_evidence_ids=requested_evidence_ids or [],
@@ -238,7 +243,7 @@ def test_control_plane_filters_clearance_and_requires_human_review() -> None:
     case = _case(
         db,
         question="Should we use the forecast to decide the margin strategy?",
-        max_classification="internal",
+        classification="internal",
     )
 
     synthesis = run_control_plane(db, case)
@@ -394,3 +399,37 @@ def test_unrelated_workspace_evidence_does_not_ground_a_case() -> None:
     assert case.status == "insufficient_evidence"
     assert case.evidence_ids == []
     assert synthesis["status"] == "insufficient_evidence"
+
+
+
+def test_restricted_materialisation_requires_handling_note() -> None:
+    db = _session()
+    asset = _asset(db, classification="restricted", handling_note="")
+    settings = EnterpriseSettings(
+        materialized_dataset_max_rows=10,
+        materialized_dataset_max_bytes=100_000,
+    )
+
+    with pytest.raises(MaterializationError):
+        create_snapshot(
+            db,
+            asset=asset,
+            rows=[{"value": 1}],
+            connector_run_id="run-restricted",
+            created_by="user-p2",
+            connector_type="postgresql",
+            settings=settings,
+        )
+
+    asset.handling_note = "Approved restricted-data handling basis."
+    db.flush()
+    snapshot, _ = create_snapshot(
+        db,
+        asset=asset,
+        rows=[{"value": 1}],
+        connector_run_id="run-restricted-2",
+        created_by="user-p2",
+        connector_type="postgresql",
+        settings=settings,
+    )
+    assert snapshot.classification == "restricted"
