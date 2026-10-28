@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const AxeBuilder = require("@axe-core/playwright").default;
 
-test("public demo loads synthetic data and switches analysis views", async ({ page }) => {
+test("public demo loads synthetic data and switches analysis views", async ({ page, isMobile }) => {
   await page.goto("/");
   await expect(page.locator("#datasetName")).toHaveText(
     /PRISM synthetic enterprise dataset/i
@@ -10,7 +10,10 @@ test("public demo loads synthetic data and switches analysis views", async ({ pa
     timeout: 15000,
   });
 
-  await page.locator('.nav-list [data-view="relationships"]').click();
+  const relationshipsNav = isMobile
+    ? page.locator('.mobile-dock [data-view="relationships"]')
+    : page.locator('.nav-list [data-view="relationships"]');
+  await relationshipsNav.click();
   await expect(page.locator("#view-relationships")).toHaveClass(/active/);
   await expect(page.locator("#correlationList")).toBeVisible();
 });
