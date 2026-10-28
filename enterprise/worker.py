@@ -12,7 +12,7 @@ from enterprise.jobs import (
     mark_job_succeeded,
 )
 from enterprise.observability import JOBS
-from enterprise.tasks import dispatch_job
+from enterprise.tasks import dispatch_job, record_task_failure
 
 LOGGER = logging.getLogger("prism.enterprise.worker")
 
@@ -39,6 +39,8 @@ def run_once(worker_id: str | None = None) -> bool:
             db.rollback()
             error_code = type(exc).__name__.lower()[:80]
             mark_job_failed(db, job, error_code, settings)
+            set_tenant_context(db, job.tenant_id, job.workspace_id)
+            record_task_failure(db, job, error_code)
             db.commit()
             JOBS.labels(job_type=job.job_type, status="failed").inc()
             LOGGER.exception(
