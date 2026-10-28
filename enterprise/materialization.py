@@ -97,6 +97,20 @@ def create_snapshot(
     settings: EnterpriseSettings | None = None,
 ) -> tuple[DataSnapshot, EvidenceRecord]:
     settings = settings or get_settings()
+    locked_asset = db.scalar(
+        select(DataAsset)
+        .where(
+            DataAsset.id == asset.id,
+            DataAsset.tenant_id == asset.tenant_id,
+            DataAsset.workspace_id == asset.workspace_id,
+            DataAsset.status == "active",
+        )
+        .with_for_update()
+    )
+    if locked_asset is None:
+        raise MaterializationError("Data asset is unavailable for materialisation.")
+    asset = locked_asset
+
     normalized = _normalize_rows(rows)
     if len(normalized) > settings.materialized_dataset_max_rows:
         raise MaterializationError(
@@ -168,6 +182,7 @@ def create_snapshot(
             "schema_summary": snapshot.schema_summary,
             "method": "governed_bounded_connector_materialization_v1",
             "raw_rows_in_evidence": False,
+            "handling_note_recorded": bool(asset.handling_note),
             "causal_status": "not_applicable",
         },
     )
