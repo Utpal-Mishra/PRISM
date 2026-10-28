@@ -258,12 +258,12 @@ def execute_postgresql_read(
     return [dict(zip(columns, row, strict=True)) for row in values]
 
 
-def execute_connector(
+def fetch_connector_rows(
     db: Session,
     connector: Connector,
     operation: dict,
     settings: EnterpriseSettings | None = None,
-) -> dict:
+) -> list[dict]:
     settings = settings or get_settings()
     validate_connector(
         connector.connector_type,
@@ -273,12 +273,20 @@ def execute_connector(
     )
     secret = read_connector_secret(db, connector)
     if connector.connector_type == "rest_https":
-        rows = execute_rest_get(connector, secret, operation, settings)
-    elif connector.connector_type == "postgresql":
-        rows = execute_postgresql_read(connector, secret, operation, settings)
-    else:
-        raise ConnectorError("Unsupported enterprise connector type.")
+        return execute_rest_get(connector, secret, operation, settings)
+    if connector.connector_type == "postgresql":
+        return execute_postgresql_read(connector, secret, operation, settings)
+    raise ConnectorError("Unsupported enterprise connector type.")
 
+
+def execute_connector(
+    db: Session,
+    connector: Connector,
+    operation: dict,
+    settings: EnterpriseSettings | None = None,
+) -> dict:
+    settings = settings or get_settings()
+    rows = fetch_connector_rows(db, connector, operation, settings)
     return {
         "row_count": len(rows),
         "content_hash": _content_hash(rows),
