@@ -95,3 +95,67 @@ Scope: private project implementation record for P1 application-side enterprise 
 - **EXPAN-P1-001** Future connector types can extend the server adapter model without changing the credential/tenant/job boundary.
 - **EXPAN-P1-002** Higher-volume execution can move from PostgreSQL queue to a managed broker while retaining the P1 job state contract.
 - **EXPAN-P1-003** AI Teams can build on the provider registry, Evidence Graph and durable job runtime after P1 production activation.
+
+## Business Learning Log
+
+- **BUS-P1-001 — Enterprise scale is primarily an operational-control problem at this stage.** P1 shows that moving from a secure enterprise foundation to a usable enterprise runtime requires governed connectors, durable execution, quotas, observability, recovery, retention/deletion controls and production acceptance gates—not simply additional analytical features.
+- **BUS-P1-002 — Technical readiness and business-value validation remain separate.** P1 materially improves reliability and governability, but no external enterprise-pilot adoption, ROI or decision-quality result is treated as proven by this implementation.
+
+## Change / Release Log
+
+- **REL-P1-001 — v1.10.0 Enterprise P1 Scale & Reliability.** Merged on 2026-10-28 through PR #38 with repository commit `2af56092f35febb454d4ed0a1e92217f8b19aebd`.
+- **REL-P1-002 — Runtime/version boundary.** The public browser-local product remains labelled v1.8.0 while the enterprise service advances to `0.2.0-p1`; the repository-level release/changelog milestone is v1.10.0.
+
+## Model / Analytics Log
+
+- **MOD-P1-001 — No unrestricted external model runtime introduced.** P1 adds governed AI-provider registration and encrypted credentials, but providers remain disabled by default.
+- **MOD-P1-002 — Future AI execution remains policy-bound.** Provider activation must satisfy purpose/data-policy requirements, egress allowlisting and credential governance; evidence-grounded AI-team orchestration remains a later stage rather than being implied by provider registration.
+
+## KPI / Measurement Log
+
+- **KPI-P1-001 — Initial reliability targets defined, not yet production-measured.** Availability target: 99.9%; p95 API latency target: below 750 ms for non-analytical control-plane requests; production RPO target: 15 minutes or better; production RTO target: 4 hours or better.
+- **KPI-P1-002 — Staging measurement gate exists.** A bounded load-smoke tool is implemented, but actual staging p95, availability, throughput and saturation evidence must be captured before these targets can be reported as achieved.
+
+## Dependency Log
+
+- **DEP-P1-001 — Production activation dependencies remain external.** Approved OIDC, managed PostgreSQL/PITR, HTTPS ingress/WAF, secret/KMS injection, metrics/log collection and alerting, network-level rate limits, exact egress allowlists, recurring retention scheduling, real staging load measurement and the GitHub `main` protection ruleset are still required for production activation.
+- **DEP-P1-002 — Queue scaling dependency.** The PostgreSQL queue is intentionally sufficient for current P1 scale; a dedicated broker becomes a dependency only when measured backlog, scheduling complexity or claim latency justifies it.
+
+## Issue / Incident Log
+
+- **ISS-P1-001 — GitHub Issue #37 remains open.** The `main` branch protection/ruleset is still a release blocker for enterprise production use. This is a configuration/release-readiness issue, not a production incident.
+- **ISS-P1-002 — No production incident recorded.** P1 validation surfaced migration, secret-fixture and accessibility defects during development; each was remediated before merge and is tracked in the Experiment / Validation Log.
+
+## Governance / Compliance Log
+
+- **GOV-P1-001 — Retention and deletion governance strengthened.** Tenant retention policies, queued purges and Manager-requested/Admin-approved deletion workflows now provide explicit accountable lifecycle controls.
+- **GOV-P1-002 — AI-provider governance boundary added.** Provider purpose, data-policy acknowledgement, egress policy and encrypted credential requirements must be recorded before enablement.
+- **GOV-P1-003 — Organisational compliance activation remains incomplete.** Repository controls do not by themselves establish GDPR/compliance readiness; production still requires organisation-specific retention schedules, DPIA/legal basis where applicable, access reviews, DPA/vendor governance and accountable operational procedures.
+
+## Cost / Resource Log
+
+- **COST-P1-001 — P1 increases production infrastructure requirements.** The enterprise runtime now expects managed PostgreSQL/PITR, one or more workers, metrics/logging, backups, secret/KMS services and security/network controls.
+- **COST-P1-002 — Dependency minimisation remains an explicit cost/complexity choice.** P1 uses PostgreSQL for durable jobs rather than introducing Redis/Celery or another broker, reducing current operational overhead until measured scale requires expansion.
+- **COST-P1-003 — No verified production TCO baseline yet.** Hosting, database, observability, backup, identity, security and worker costs must be measured in the selected deployment environment before commercial/unit-economics conclusions are made.
+
+## User Feedback Log
+
+- **FDB-P1-001 — No external enterprise-pilot feedback recorded in this release.** P1 validation is technical/operational; user-value, adoption and workflow-fit evidence still requires a controlled pilot or external user study.
+
+## Documentation Log
+
+- **DOC-P1-001 — P1 operating documentation added/updated.** `docs/enterprise_operations.md`, `docs/disaster_recovery.md`, `docs/enterprise_hosting.md`, `docs/production_readiness.md`, the repository changelog and this P1 audit log were updated for the scale/reliability foundation.
+- **DOC-P1-002 — Disaster-recovery boundary documented.** Passing repository restore drills prove the logical backup path is executable but do not substitute for a production-region restore exercise or measured production RPO/RTO.
+
+## Merchant & Fulfilment Log
+
+- **MER-P1-001 — Not applicable to current PRISM scope.** No merchant, physical fulfilment, inventory fulfilment or commerce-logistics workflow was introduced in P1. The category remains reserved for future applicability rather than creating artificial entries.
+
+## Current P1 Status Snapshot
+
+- **P1 implementation:** merged and recorded as v1.10.0.
+- **Enterprise application-side scale/reliability foundation:** implemented.
+- **Production environment activation:** incomplete.
+- **Primary release blocker:** GitHub Issue #37 (`main` ruleset/protection).
+- **Primary next validation need:** real staging load/SLO measurement followed by controlled enterprise-pilot evidence.
+- **AI-team orchestration:** still planned/deferred; provider governance exists, live AI-team execution does not.
