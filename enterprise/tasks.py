@@ -75,9 +75,6 @@ def run_connector_job(db: Session, job: JobRecord) -> dict:
     try:
         result = execute_connector(db, connector, operation)
     except ConnectorError:
-        run.status = "failed"
-        run.error_code = "connector_error"
-        run.completed_at = datetime.now(UTC)
         CONNECTOR_RUNS.labels(
             connector_type=connector.connector_type,
             status="failed",
@@ -267,3 +264,33 @@ def dispatch_job(db: Session, job: JobRecord) -> dict:
     if job.job_type == "deletion_execute":
         return run_deletion_job(db, job)
     raise TaskError("Unsupported job type.")
+
+
+def record_task_failure(
+    db: Session,
+    job: JobRecord,
+    error_code: str,
+) -> None:
+    if job.job_type != "connector_run":
+        return
+
+    run_id = str(job.payload.get("run_id", ""))
+    if not run_id:
+        return
+    run = db.scalar(
+        select(ConnectorRun).where(
+            ConnectorRun.id == run_id,
+            ConnectorRun.tenant_id == job.tenant_id,
+            ConnectorRun.workspace_id == job.workspace_id,
+        )
+    )
+    if run is None:
+        return
+
+    run.error_code = error_code[:80]
+    if job.status == "failed":
+        run.status = "failed"
+        run.completed_at = datetime.now(UTC)
+    else:
+        run.status = "retrying"
+        run.completed_at = None
