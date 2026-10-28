@@ -372,7 +372,7 @@ def test_connector_run_failure_tracks_retry_and_terminal_status() -> None:
     )
     db.add(run)
     db.flush()
-    job = enqueue_job(
+    enqueue_job(
         db,
         tenant_id=access.tenant_id,
         workspace_id=access.workspace_id,
