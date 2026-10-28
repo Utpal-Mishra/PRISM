@@ -107,6 +107,7 @@ class DecisionCase(TenantScopedRecord, Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="queued")
     approval_state: Mapped[str] = mapped_column(String(48), nullable=False, default="not_reviewed")
     participating_teams: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    requested_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     synthesis: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     job_id: Mapped[str | None] = mapped_column(String(36), index=True)
