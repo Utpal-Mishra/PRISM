@@ -168,7 +168,7 @@ def list_data_assets(
             "description": asset.description,
             "owner": asset.owner,
             "classification": asset.classification,
-            "handling_note": asset.handling_note,
+            "handling_note_recorded": bool(asset.handling_note),
             "source_connector_id": asset.source_connector_id,
             "latest_snapshot_id": asset.latest_snapshot_id,
             "created_at": asset.created_at,
@@ -647,11 +647,13 @@ def rerun_decision_case(
     _limit_write(access)
     _limit_job(access)
     case = db.scalar(
-        select(DecisionCase).where(
+        select(DecisionCase)
+        .where(
             DecisionCase.id == case_id,
             DecisionCase.tenant_id == access.tenant_id,
             DecisionCase.workspace_id == access.workspace_id,
         )
+        .with_for_update()
     )
     if case is None:
         raise HTTPException(status_code=404, detail="Decision Case was not found.")
