@@ -40,8 +40,27 @@ def upgrade() -> None:
                 """
             )
 
+        op.execute(
+            """
+            CREATE OR REPLACE FUNCTION reject_data_snapshot_update()
+            RETURNS trigger AS $
+            BEGIN
+                RAISE EXCEPTION 'PRISM data snapshots are immutable';
+            END;
+            $ LANGUAGE plpgsql
+            """
+        )
+        op.execute(
+            """
+            CREATE TRIGGER data_snapshots_immutable_update
+            BEFORE UPDATE ON data_snapshots
+            FOR EACH ROW EXECUTE FUNCTION reject_data_snapshot_update()
+            """
+        )
+
 
 def downgrade() -> None:
+    op.execute("DROP FUNCTION IF EXISTS reject_data_snapshot_update() CASCADE")
     for table in [
         "ai_team_runs",
         "decision_cases",
