@@ -86,6 +86,10 @@ jobs:
           grep -q -- "insufficient_evidence" enterprise/control_plane.py
           grep -q -- "human_approval_required" enterprise/control_plane.py
           grep -q -- "approved_for_human_decision" enterprise/p2_api.py
+          grep -q -- "handling/lawful-basis" enterprise/p2_api.py
+          grep -q -- "with_for_update" enterprise/materialization.py
+          grep -q -- "with_for_update" enterprise/p2_api.py
+          grep -q -- "case.classification" enterprise/control_plane.py
           grep -q -- "decision_case_analyze" enterprise/tasks.py
           grep -q -- "dataset_materialize" enterprise/tasks.py
           grep -q -- "job_lease_seconds" enterprise/config.py
