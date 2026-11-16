@@ -12,9 +12,9 @@ from sqlalchemy.orm import Session
 from enterprise.audit import append_audit_event
 from enterprise.db import get_db
 from enterprise.phase18_models import (
+    DataResidencyPolicy,
     DPARecord,
     DPIAAssessment,
-    DataResidencyPolicy,
     IncidentRecord,
     LegalHold,
     ProcessingActivity,
