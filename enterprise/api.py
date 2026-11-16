@@ -82,11 +82,20 @@ class ConnectorCredentialInput(BaseModel):
     password: SecretStr | None = None
     bearer_token: SecretStr | None = None
     headers: dict[str, SecretStr] = Field(default_factory=dict)
+    secret_values: dict[str, SecretStr] = Field(default_factory=dict)
 
 
 class ConnectorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
-    connector_type: Literal["rest_https", "postgresql"]
+    connector_type: Literal[
+        "rest_https",
+        "postgresql",
+        "snowflake_sql_api",
+        "databricks_sql",
+        "azure_blob_https",
+        "gcs_https",
+        "s3_presigned_https",
+    ]
     endpoint_host: str = Field(min_length=1, max_length=255)
     configuration: dict[str, Any]
     credential: ConnectorCredentialInput
@@ -154,6 +163,8 @@ def _credential_dict(value: ConnectorCredentialInput) -> dict:
             key: item.get_secret_value()
             for key, item in value.headers.items()
         }
+    for key, item in value.secret_values.items():
+        secret[key] = item.get_secret_value()
     return secret
 
 
