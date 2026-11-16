@@ -17,6 +17,11 @@ from enterprise.db import SessionLocal, get_db
 from enterprise.jobs import enqueue_job
 from enterprise.materialization import add_evidence_edge
 from enterprise.models import Connector, ConnectorRun, DecisionRecord, EvidenceRecord
+from enterprise.phase18_models import (
+    DPIAAssessment,
+    DataResidencyPolicy,
+    ProcessingActivity,
+)
 from enterprise.p2_models import (
     AITeamRun,
     DataAsset,
@@ -37,6 +42,8 @@ class DataAssetCreate(BaseModel):
     owner: str = Field(min_length=1, max_length=255)
     classification: Literal["public", "internal", "confidential", "restricted"] = "internal"
     handling_note: str = Field(default="", max_length=1000)
+    processing_activity_id: str | None = Field(default=None, max_length=96)
+    residency_region: str | None = Field(default=None, max_length=100)
     connector_id: str = Field(min_length=1, max_length=36)
 
 
@@ -177,6 +184,8 @@ def list_data_assets(
             "owner": asset.owner,
             "classification": asset.classification,
             "handling_note_recorded": bool(asset.handling_note),
+            "processing_activity_id": asset.processing_activity_id,
+            "residency_region": asset.residency_region,
             "source_connector_id": asset.source_connector_id,
             "latest_snapshot_id": asset.latest_snapshot_id,
             "created_at": asset.created_at,
@@ -202,15 +211,6 @@ def create_data_asset(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Membership data clearance does not allow this classification.",
         )
-    if body.classification == "restricted" and len(body.handling_note.strip()) < 8:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Restricted data assets require a handling/lawful-basis note "
-                "before materialisation."
-            ),
-        )
-
     connector = db.scalar(
         select(Connector).where(
             Connector.id == body.connector_id,
@@ -221,6 +221,88 @@ def create_data_asset(
     )
     if connector is None:
         raise HTTPException(status_code=404, detail="Active connector was not found.")
+
+    residency_region = (
+        body.residency_region
+        or str(connector.configuration.get("region", "")).strip()
+        or None
+    )
+    policies = db.scalars(
+        select(DataResidencyPolicy).where(
+            DataResidencyPolicy.tenant_id == access.tenant_id,
+            DataResidencyPolicy.workspace_id == access.workspace_id,
+            DataResidencyPolicy.status == "active",
+        )
+    ).all()
+    for policy in policies:
+        if not clearance_allows(
+            policy.classification_ceiling,
+            body.classification,
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="Residency policy classification ceiling blocks this asset.",
+            )
+        if residency_region is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Active residency policy requires a connector/data region.",
+            )
+        if residency_region in policy.prohibited_regions:
+            raise HTTPException(
+                status_code=403,
+                detail="Data residency policy prohibits the selected region.",
+            )
+        if (
+            policy.allowed_regions
+            and residency_region not in policy.allowed_regions
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="Data residency policy does not allow the selected region.",
+            )
+
+    processing_activity_id = body.processing_activity_id
+    if body.classification == "restricted":
+        if len(body.handling_note.strip()) < 8:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Restricted data assets require a handling/lawful-basis "
+                    "note before materialisation."
+                ),
+            )
+        if not processing_activity_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Restricted data assets require a processing activity.",
+            )
+        activity = db.scalar(
+            select(ProcessingActivity).where(
+                ProcessingActivity.id == processing_activity_id,
+                ProcessingActivity.tenant_id == access.tenant_id,
+                ProcessingActivity.workspace_id == access.workspace_id,
+                ProcessingActivity.status == "active",
+            )
+        )
+        if activity is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Active processing activity was not found.",
+            )
+        approved_dpia = db.scalar(
+            select(DPIAAssessment).where(
+                DPIAAssessment.tenant_id == access.tenant_id,
+                DPIAAssessment.workspace_id == access.workspace_id,
+                DPIAAssessment.processing_activity_id == activity.id,
+                DPIAAssessment.status == "approved",
+            )
+        )
+        if approved_dpia is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Restricted data materialisation requires an approved DPIA.",
+            )
 
     duplicate = db.scalar(
         select(DataAsset).where(
@@ -245,6 +327,8 @@ def create_data_asset(
         owner=body.owner,
         classification=body.classification,
         handling_note=body.handling_note.strip(),
+        processing_activity_id=processing_activity_id,
+        residency_region=residency_region,
         source_connector_id=connector.id,
         status="active",
     )
@@ -272,6 +356,8 @@ def create_data_asset(
             "name": asset.name,
             "classification": asset.classification,
             "handling_note_recorded": bool(asset.handling_note),
+            "processing_activity_id": asset.processing_activity_id,
+            "residency_region": asset.residency_region,
             "source_connector_id": connector.id,
         },
     )
