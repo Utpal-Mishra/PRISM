@@ -13,6 +13,31 @@ from enterprise.models import (
     StrategyRecord,
 )
 from enterprise.p2_models import DataAsset, DataSnapshot
+from enterprise.phase18_models import LegalHold
+
+def _held_ids(
+    db: Session,
+    *,
+    tenant_id: str,
+    workspace_id: str,
+    record_type: str,
+) -> set[str]:
+    holds = db.scalars(
+        select(LegalHold).where(
+            LegalHold.tenant_id == tenant_id,
+            LegalHold.workspace_id == workspace_id,
+            LegalHold.status == "active",
+            LegalHold.scope_type.in_([record_type, "workspace"]),
+        )
+    ).all()
+    held: set[str] = set()
+    for hold in holds:
+        if hold.scope_type == "workspace" and hold.scope_id in {"*", workspace_id}:
+            held.add("*")
+        elif hold.scope_type == record_type:
+            held.add(hold.scope_id)
+    return held
+
 
 RETENTION_MODELS = {
     "evidence": EvidenceRecord,
@@ -40,6 +65,14 @@ def purge_expired_records(
         raise ValueError("Retention period must be at least one day.")
 
     cutoff = (now or datetime.now(UTC)) - timedelta(days=retention_days)
+    held_ids = _held_ids(
+        db,
+        tenant_id=tenant_id,
+        workspace_id=workspace_id,
+        record_type=record_type,
+    )
+    if "*" in held_ids:
+        return 0
 
     if model is DataSnapshot:
         expired = db.scalars(
@@ -47,6 +80,7 @@ def purge_expired_records(
                 DataSnapshot.tenant_id == tenant_id,
                 DataSnapshot.workspace_id == workspace_id,
                 DataSnapshot.created_at < cutoff,
+                DataSnapshot.id.not_in(held_ids) if held_ids else True,
             )
         ).all()
         if not expired:
@@ -84,11 +118,12 @@ def purge_expired_records(
             asset.latest_snapshot_id = latest.id if latest is not None else None
         return len(expired)
 
-    result = db.execute(
-        delete(model).where(
-            model.tenant_id == tenant_id,
-            model.workspace_id == workspace_id,
-            model.created_at < cutoff,
-        )
+    statement = delete(model).where(
+        model.tenant_id == tenant_id,
+        model.workspace_id == workspace_id,
+        model.created_at < cutoff,
     )
+    if held_ids:
+        statement = statement.where(model.id.not_in(held_ids))
+    result = db.execute(statement)
     return int(result.rowcount or 0)
