@@ -25,6 +25,7 @@ from enterprise.connectors import (
 )
 from enterprise.db import SessionLocal, get_db
 from enterprise.jobs import enqueue_job
+from enterprise.key_rotation import rotate_workspace_ciphertext
 from enterprise.models import (
     AIProviderConfig,
     AuditEvent,
@@ -974,6 +975,28 @@ def disable_ai_provider(
     )
     db.commit()
     return {"provider_config_id": provider.id, "enabled": provider.enabled}
+
+
+@app.post("/v1/workspaces/{workspace_id}/crypto/rotate")
+def rotate_workspace_encryption(
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, int | str]:
+    _limit_write(access)
+    result = rotate_workspace_ciphertext(db, access)
+    append_audit_event(
+        db,
+        access,
+        event_type="workspace_ciphertext_rotated",
+        object_type="workspace",
+        object_id=access.workspace_id,
+        detail=result,
+    )
+    db.commit()
+    return {
+        "workspace_id": access.workspace_id,
+        **result,
+    }
 
 
 @app.get("/v1/workspaces/{workspace_id}/audit")
