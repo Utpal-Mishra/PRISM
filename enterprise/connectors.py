@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import io
 import json
 from datetime import UTC, datetime
 from urllib.parse import urlparse
@@ -259,30 +258,49 @@ def execute_rest_get(
     return normalized[: settings.connector_max_rows]
 
 
-def _rows_from_http_object(
+def _rows_from_stream(
     response: httpx.Response,
     object_format: str,
-    max_rows: int,
+    settings: EnterpriseSettings,
 ) -> list[dict]:
-    if object_format == "json":
-        payload = response.json()
-        if isinstance(payload, list):
-            rows = payload
-        elif isinstance(payload, dict) and isinstance(payload.get("items"), list):
-            rows = payload["items"]
-        elif isinstance(payload, dict):
-            rows = [payload]
-        else:
-            raise ConnectorError("Object JSON must contain an object or array.")
-        return [item for item in rows if isinstance(item, dict)][:max_rows]
+    declared = response.headers.get("content-length")
+    if declared and int(declared) > settings.max_upload_bytes:
+        raise ConnectorError("Cloud object exceeds the configured ingestion byte limit.")
 
-    reader = csv.DictReader(io.StringIO(response.text))
-    rows: list[dict] = []
-    for row in reader:
-        rows.append(dict(row))
-        if len(rows) >= max_rows:
-            break
-    return rows
+    if object_format == "csv":
+        reader = csv.DictReader(response.iter_lines())
+        rows: list[dict] = []
+        for row in reader:
+            rows.append(dict(row))
+            if len(rows) >= settings.connector_max_rows:
+                break
+        return rows
+
+    chunks: list[bytes] = []
+    total = 0
+    for chunk in response.iter_bytes():
+        total += len(chunk)
+        if total > settings.max_upload_bytes:
+            raise ConnectorError("Cloud object exceeds the configured ingestion byte limit.")
+        chunks.append(chunk)
+    try:
+        payload = json.loads(b"".join(chunks).decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ConnectorError("Cloud object contains invalid JSON.") from exc
+
+    if isinstance(payload, list):
+        rows = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("items"), list):
+        rows = payload["items"]
+    elif isinstance(payload, dict):
+        rows = [payload]
+    else:
+        raise ConnectorError("Object JSON must contain an object or array.")
+    return [
+        item
+        for item in rows
+        if isinstance(item, dict)
+    ][: settings.connector_max_rows]
 
 
 def execute_snowflake_sql_api(
@@ -417,13 +435,13 @@ def execute_object_https(
         timeout=settings.connector_timeout_seconds,
         follow_redirects=False,
     ) as client:
-        response = client.get(url, headers=headers)
-        response.raise_for_status()
-    return _rows_from_http_object(
-        response,
-        str(config.get("object_format", "json")).lower(),
-        settings.connector_max_rows,
-    )
+        with client.stream("GET", url, headers=headers) as response:
+            response.raise_for_status()
+            return _rows_from_stream(
+                response,
+                str(config.get("object_format", "json")).lower(),
+                settings,
+            )
 
 
 def execute_s3_presigned_https(
@@ -443,13 +461,13 @@ def execute_s3_presigned_https(
         timeout=settings.connector_timeout_seconds,
         follow_redirects=False,
     ) as client:
-        response = client.get(signed_url)
-        response.raise_for_status()
-    return _rows_from_http_object(
-        response,
-        str(connector.configuration.get("object_format", "json")).lower(),
-        settings.connector_max_rows,
-    )
+        with client.stream("GET", signed_url) as response:
+            response.raise_for_status()
+            return _rows_from_stream(
+                response,
+                str(connector.configuration.get("object_format", "json")).lower(),
+                settings,
+            )
 
 
 def execute_postgresql_read(
