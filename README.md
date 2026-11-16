@@ -2,7 +2,7 @@
 
 PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release — v1.8.0 Evidence-First AI Analytical Copilot
+## Current release — v1.12.1 Multicolor Enterprise Palette
 
 - Static GitHub Pages application served from `index.html`
 - Domain-agnostic CSV/XLSX upload with local browser processing
@@ -21,7 +21,7 @@ PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace
 
 ## Enterprise P0 foundation
 
-PRISM now contains a separate enterprise server boundary under `enterprise/`. The public v1.8.0 GitHub Pages application remains the browser-local demonstration experience; it is **not** the confidential enterprise runtime.
+PRISM now contains a separate enterprise server boundary under `enterprise/`. The public GitHub Pages application remains the browser-local demonstration experience; it is **not** the confidential enterprise runtime.
 
 The enterprise foundation provides OIDC authentication, authoritative tenant/workspace memberships, server-side RBAC/data clearance, PostgreSQL persistence with Row Level Security, governed evidence/decision records, tamper-evident audit history, AES-256-GCM field encryption, security middleware, schema migrations, container packaging and security CI/SBOM controls.
 
@@ -81,28 +81,30 @@ See [Enterprise Phase 1–8 Completion](docs/enterprise_phase1_8_completion.md) 
 
 ## Shared visual language
 
-PRISM now uses a professional enterprise dark palette: deep navy/slate surfaces with restrained cobalt/sky-blue interaction states. Teal is reserved for success, amber for warning and red for risk.
+PRISM now uses a **graphite + multi-accent enterprise palette** rather than a blue-led or green-led visual identity. Neutral charcoal surfaces keep reporting screens calm, while orchid, coral, mint, amber, rose and plum add category and analytical differentiation.
 
 Canonical tokens:
 
 ```text
-Canvas       #0B1220
-Sidebar      #0F172A
-Surface      #111827
-Surface 2    #172033
-Border       #263247
-Text         #F8FAFC
-Muted        #94A3B8
-Cobalt       #60A5FA
-Blue         #3B82F6
-Action blue  #2563EB
-Soft blue    #93C5FD
-Success      #2DD4BF
-Warning      #F59E0B
-Danger       #F87171
+Canvas       #121217
+Sidebar      #17171E
+Surface      #1D1D26
+Surface 2    #242431
+Border       #353545
+Text         #F8F7FB
+Muted        #A7A5B3
+
+Orchid       #A78BFA
+Deep violet  #7C3AED
+Coral        #FF786B
+Mint         #3DD6A5
+Amber        #F6C453
+Rose         #F472B6
+Plum         #C084FC
+Danger       #FF5D73
 ```
 
-The previous green/lime-dominant PRISM palette is deprecated. Charts, focus states, navigation and mobile surfaces are aligned to the same business-oriented system.
+Colour is deliberately concentrated in KPI top rules, navigation cues, chart series, status states, brand details and high-value actions rather than large panel backgrounds.
 
 ## Mobile experience
 
