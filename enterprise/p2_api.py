@@ -17,17 +17,17 @@ from enterprise.db import SessionLocal, get_db
 from enterprise.jobs import enqueue_job
 from enterprise.materialization import add_evidence_edge
 from enterprise.models import Connector, ConnectorRun, DecisionRecord, EvidenceRecord
-from enterprise.phase18_models import (
-    DPIAAssessment,
-    DataResidencyPolicy,
-    ProcessingActivity,
-)
 from enterprise.p2_models import (
     AITeamRun,
     DataAsset,
     DataSnapshot,
     DecisionCase,
     EvidenceEdge,
+)
+from enterprise.phase18_models import (
+    DataResidencyPolicy,
+    DPIAAssessment,
+    ProcessingActivity,
 )
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.tenancy import WorkspaceAccess, clearance_allows, require_role
