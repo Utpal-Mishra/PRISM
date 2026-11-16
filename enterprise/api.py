@@ -41,6 +41,7 @@ from enterprise.pilot_api import router as pilot_router
 from enterprise.persistence_api import router as persistence_router
 from enterprise.ai_runtime_api import router as ai_runtime_router
 from enterprise.p2_api import router as p2_router
+from enterprise.phase18_models import DPARecord
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.security import install_security_middleware
 from enterprise.tenancy import (
@@ -418,6 +419,27 @@ def create_connector(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+    if body.configuration.get("external_processor") is True:
+        dpa_id = str(body.configuration.get("dpa_id", "")).strip()
+        if not dpa_id:
+            raise HTTPException(
+                status_code=400,
+                detail="External processor connectors require an active DPA record.",
+            )
+        dpa = db.scalar(
+            select(DPARecord).where(
+                DPARecord.id == dpa_id,
+                DPARecord.tenant_id == access.tenant_id,
+                DPARecord.workspace_id == access.workspace_id,
+                DPARecord.status == "active",
+            )
+        )
+        if dpa is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Active DPA record was not found for this connector.",
+            )
 
     connector = Connector(
         tenant_id=access.tenant_id,
