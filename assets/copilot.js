@@ -297,8 +297,8 @@
     style.textContent = `
       .copilot-shell{display:grid;gap:14px}.copilot-input{display:grid;gap:10px}.copilot-input textarea{width:100%;min-height:110px;resize:vertical}
       .copilot-actions,.copilot-suggestions,.copilot-citations,.copilot-result-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-      .copilot-suggestion,.copilot-citation{border:1px solid rgba(120,230,170,.22);background:rgba(120,230,170,.07);color:var(--accent);border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer}
-      .copilot-citation{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.copilot-citation:hover,.copilot-suggestion:hover{background:rgba(120,230,170,.13)}
+      .copilot-suggestion,.copilot-citation{border:1px solid rgba(167,139,250,.22);background:rgba(255,120,107,.08);color:var(--accent);border-radius:8px;padding:7px 9px;font-size:11px;cursor:pointer}
+      .copilot-citation{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.copilot-citation:hover,.copilot-suggestion:hover{background:rgba(244,114,182,.13)}
       .copilot-findings{display:grid;gap:8px;margin:12px 0}.copilot-guidance{padding-top:10px;border-top:1px solid var(--border)}
       #downloadAnalysisBrief:disabled{opacity:.45;cursor:not-allowed}
       @media(max-width:600px){.copilot-actions>*{width:100%}.copilot-suggestions{display:grid;grid-template-columns:1fr 1fr}.copilot-suggestion{min-height:42px}}
