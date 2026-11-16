@@ -2,23 +2,21 @@
   "use strict";
 
   const tokens = Object.freeze({
-    background: "#121217",
-    surface: "#1D1D26",
-    surface2: "#242431",
-    border: "#353545",
-    text: "#F8F7FB",
-    muted: "#A7A5B3",
-    soft: "#D7D5DE",
-    accent: "#A78BFA",
-    accent2: "#FF786B",
-    deep: "#7C3AED",
-    mint: "#3DD6A5",
-    amber: "#F6C453",
-    rose: "#F472B6",
-    plum: "#C084FC",
-    warning: "#F6C453",
-    danger: "#FF5D73",
-    chartPalette: ["#A78BFA", "#FF786B", "#3DD6A5", "#F6C453", "#F472B6", "#C084FC"],
+    background: "#07110D",
+    surface: "#0B1712",
+    surface2: "#0E1D17",
+    border: "#1E3229",
+    text: "#EDF7F1",
+    muted: "#8FA39A",
+    soft: "#C9D8D0",
+    accent: "#78E6AA",
+    accent2: "#52D98D",
+    deep: "#31B76E",
+    lime: "#C8F56B",
+    success: "#78E6AA",
+    warning: "#E5B85C",
+    danger: "#FF7D7D",
+    chartPalette: ["#78E6AA", "#52D98D", "#93F2C5", "#C8F56B", "#69D99E", "#A6E878"],
   });
 
   window.PRISM_DESIGN_TOKENS = tokens;
@@ -33,9 +31,9 @@
     ["#A8B5C7", tokens.soft],
     ["#263247", tokens.border],
     ["#1e2d40", tokens.border],
-    ["rgba(120,226,193,.10)", "rgba(167,139,250,.12)"],
-    ["rgba(120,230,170,.10)", "rgba(167,139,250,.12)"],
-    ["rgba(120,226,193,0.10)", "rgba(167,139,250,.12)"],
+    ["rgba(120,226,193,.10)", "rgba(120,230,170,.12)"],
+    ["rgba(120,230,170,.10)", "rgba(120,230,170,.12)"],
+    ["rgba(120,226,193,0.10)", "rgba(120,230,170,.12)"],
   ]);
 
   function applyPalette(value, seen = new WeakSet()) {
@@ -183,10 +181,10 @@
     style.id = "prismSemanticStyles";
     style.textContent = `
       .semantic-panel{margin-bottom:14px}.semantic-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0 16px}
-      .semantic-stat{--semantic-accent:var(--violet);position:relative;overflow:hidden;padding:11px;border:1px solid var(--border);border-radius:10px;background:rgba(22,22,29,.78)}.semantic-stat::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--semantic-accent)}.semantic-stat:nth-child(1){--semantic-accent:var(--violet)}.semantic-stat:nth-child(2){--semantic-accent:var(--coral)}.semantic-stat:nth-child(3){--semantic-accent:var(--mint)}.semantic-stat:nth-child(4){--semantic-accent:var(--amber)}.semantic-stat:nth-child(5){--semantic-accent:var(--rose)}.semantic-stat span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.semantic-stat strong{display:block;margin-top:4px;font-size:20px}
-      .semantic-kpis{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px}.semantic-chip{padding:5px 8px;border:1px solid rgba(167,139,250,.18);border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:700}
-      .semantic-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.semantic-editor{max-height:330px;overflow:auto;border:1px solid var(--border);border-radius:10px}.semantic-row{display:grid;grid-template-columns:minmax(120px,1.3fr) .8fr .9fr .9fr;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border);font-size:10px}.semantic-row:last-child{border-bottom:0}.semantic-row.header{position:sticky;top:0;background:#242431;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;z-index:1}.semantic-row select{min-width:0;width:100%;padding:6px 7px;font-size:11px}.semantic-field{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--soft)}
-      .semantic-relations{display:grid;gap:7px}.semantic-relation{padding:9px 10px;border-left:2px solid var(--accent);background:rgba(43,36,54,.48);border-radius:0 8px 8px 0;color:var(--soft);font-size:11px}.semantic-note{color:var(--muted);font-size:11px;line-height:1.55}.semantic-actions{display:flex;gap:8px;flex-wrap:wrap}
+      .semantic-stat{--semantic-accent:var(--accent);position:relative;overflow:hidden;padding:11px;border:1px solid var(--border);border-radius:10px;background:rgba(9,21,16,.78)}.semantic-stat::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:var(--semantic-accent)}.semantic-stat:nth-child(1){--semantic-accent:var(--accent)}.semantic-stat:nth-child(2){--semantic-accent:var(--accent2)}.semantic-stat:nth-child(3){--semantic-accent:var(--success)}.semantic-stat:nth-child(4){--semantic-accent:var(--lime)}.semantic-stat:nth-child(5){--semantic-accent:var(--accent2)}.semantic-stat span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.semantic-stat strong{display:block;margin-top:4px;font-size:20px}
+      .semantic-kpis{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px}.semantic-chip{padding:5px 8px;border:1px solid rgba(120,230,170,.18);border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:700}
+      .semantic-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.semantic-editor{max-height:330px;overflow:auto;border:1px solid var(--border);border-radius:10px}.semantic-row{display:grid;grid-template-columns:minmax(120px,1.3fr) .8fr .9fr .9fr;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border);font-size:10px}.semantic-row:last-child{border-bottom:0}.semantic-row.header{position:sticky;top:0;background:#0E1D17;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;z-index:1}.semantic-row select{min-width:0;width:100%;padding:6px 7px;font-size:11px}.semantic-field{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--soft)}
+      .semantic-relations{display:grid;gap:7px}.semantic-relation{padding:9px 10px;border-left:2px solid var(--accent);background:rgba(16,43,29,.48);border-radius:0 8px 8px 0;color:var(--soft);font-size:11px}.semantic-note{color:var(--muted);font-size:11px;line-height:1.55}.semantic-actions{display:flex;gap:8px;flex-wrap:wrap}
       @media(max-width:820px){.semantic-grid{grid-template-columns:1fr}.semantic-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.semantic-row{grid-template-columns:minmax(105px,1.2fr) .75fr .9fr}.semantic-row>*:nth-child(2){display:none}}
       @media(max-width:390px){.semantic-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.semantic-row{grid-template-columns:minmax(95px,1fr) 1fr}.semantic-row>*:nth-child(3){display:none}.semantic-actions .secondary-button{width:100%}}
     `;

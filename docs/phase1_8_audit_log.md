@@ -109,3 +109,11 @@ Scope: private project implementation record for completion of the original Ente
 - **DEC-ENT-009** Pilot completion requires passed security/UAT gates, no blocking UAT findings and measurements for success criteria.
 - **DEC-ENT-010** Replace green/lime-dominant public UI with restrained navy/slate/cobalt enterprise palette.
 - **DEC-ENT-011** Retire the subsequent blue-led palette; use neutral graphite surfaces with orchid, coral, mint, amber, rose and plum as bounded functional accents.
+
+
+## Visual System Addendum — 2026-11-16
+
+- **SYS-ENT-007** Public application assets advanced to v1.12.2 for the restored green enterprise palette.
+- **PRO-ENT-009** Restored deep forest surfaces with mint/emerald/lime KPI, navigation, chart and brand treatments.
+- **AUT-ENT-006** Browser E2E now validates canonical green tokens and rejects retired violet/coral tokens.
+- **DEC-ENT-012** Revert the experimental multi-accent graphite palette and make the green family the canonical PRISM visual identity again.

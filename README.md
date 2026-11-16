@@ -2,7 +2,7 @@
 
 PRISM is an enterprise-oriented reporting, analytics and data-strategy workspace. The public application is **browser-native and deployable on GitHub Pages**: uploaded CSV/XLSX data is analysed locally in the user's browser without a Streamlit/Python server.
 
-## Current release — v1.12.1 Multicolor Enterprise Palette
+## Current release — v1.12.2 Green Enterprise Palette
 
 - Static GitHub Pages application served from `index.html`
 - Domain-agnostic CSV/XLSX upload with local browser processing
@@ -81,30 +81,29 @@ See [Enterprise Phase 1–8 Completion](docs/enterprise_phase1_8_completion.md) 
 
 ## Shared visual language
 
-PRISM now uses a **graphite + multi-accent enterprise palette** rather than a blue-led or green-led visual identity. Neutral charcoal surfaces keep reporting screens calm, while orchid, coral, mint, amber, rose and plum add category and analytical differentiation.
-
-Canonical tokens:
+PRISM uses a **deep green enterprise palette** with dark forest surfaces and mint/emerald/lime accents.
 
 ```text
-Canvas       #121217
-Sidebar      #17171E
-Surface      #1D1D26
-Surface 2    #242431
-Border       #353545
-Text         #F8F7FB
-Muted        #A7A5B3
+Canvas       #07110D
+Sidebar      #09140F
+Surface      #0B1712
+Surface 2    #0E1D17
+Border       #1E3229
+Text         #EDF7F1
+Muted        #8FA39A
 
-Orchid       #A78BFA
-Deep violet  #7C3AED
-Coral        #FF786B
-Mint         #3DD6A5
-Amber        #F6C453
-Rose         #F472B6
-Plum         #C084FC
-Danger       #FF5D73
+Mint         #78E6AA
+Emerald      #52D98D
+Deep green   #31B76E
+Lime         #C8F56B
+Soft mint    #93F2C5
+Mid green    #69D99E
+Yellow-green #A6E878
+Warning      #E5B85C
+Danger       #FF7D7D
 ```
 
-Colour is deliberately concentrated in KPI top rules, navigation cues, chart series, status states, brand details and high-value actions rather than large panel backgrounds.
+The interface keeps large surfaces dark and restrained while using green-family accents for navigation, KPI rules, charts, focus states and primary actions.
 
 ## Mobile experience
 

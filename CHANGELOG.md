@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.12.2 — Green Enterprise Palette
+
+- Reverted PRISM from the graphite multi-accent palette back to a green-led enterprise identity.
+- Restored deep forest backgrounds with mint, emerald and lime interaction states.
+- Reworked KPI and chart variation to remain inside the green colour family.
+- Restored green mobile, compact KPI, semantic, analytical and Copilot accents.
+- Restored the PRISM mark to a lime → mint → emerald gradient.
+- Updated browser/PWA theme colour and cache-busted public assets.
+- Browser E2E now enforces the green palette contract and rejects the retired violet/coral tokens.
+
 ## 1.12.1 — Multicolor Enterprise Palette
 
 - Replaced the blue-led PRISM UI with a graphite/charcoal foundation and controlled multi-accent system.
