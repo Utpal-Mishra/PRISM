@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from enterprise.artifacts import append_artifact_version
 from enterprise.audit import append_audit_event
 from enterprise.config import get_settings
 from enterprise.control_plane import team_registry
@@ -827,6 +828,19 @@ def promote_decision_case(
     )
     db.add(decision)
     db.flush()
+    append_artifact_version(
+        db,
+        access,
+        artifact_type="decision",
+        artifact_id=decision.id,
+        classification=case.classification,
+        payload={
+            "owner": decision.owner,
+            "status": decision.status,
+            "payload": decision.payload,
+        },
+        change_note="Decision promoted from governed Decision Case.",
+    )
     add_evidence_edge(
         db,
         tenant_id=access.tenant_id,
