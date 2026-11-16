@@ -89,7 +89,7 @@ jobs:
           grep -q -- "snowflake_sql_api" enterprise/connectors.py
           grep -q -- "databricks_sql" enterprise/connectors.py
           grep -q -- "oauth_token_url" enterprise/connectors.py
-          grep -q -- "workspace concurrent job limit" enterprise/jobs.py
+          grep -q -- "Workspace concurrent job limit" enterprise/jobs.py
           grep -q -- "LegalHold" enterprise/retention.py
           grep -q -- "processing_activity_id" enterprise/p2_api.py
           grep -q -- "Prompt-injection policy blocked" enterprise/ai_runtime.py
