@@ -1,0 +1,64 @@
+groups:
+  - name: prism-enterprise-slo
+    rules:
+      - alert: PrismHighServerErrorRate
+        expr: |
+          sum(rate(prism_http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(prism_http_requests_total[5m])), 0.001)
+          > 0.01
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PRISM Enterprise 5xx rate is above 1%"
+          runbook: "docs/incident_response.md"
+
+      - alert: PrismControlPlaneLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(prism_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 0.75
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PRISM Enterprise p95 request latency exceeds 750 ms"
+          runbook: "docs/incident_response.md"
+
+      - alert: PrismJobsFailing
+        expr: sum(increase(prism_jobs_total{status="failed"}[15m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PRISM background jobs are repeatedly failing"
+          runbook: "docs/incident_response.md"
+
+      - alert: PrismConnectorFailureBurst
+        expr: sum(increase(prism_connector_runs_total{status="failed"}[15m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PRISM connector failures exceeded the operational threshold"
+          runbook: "docs/incident_response.md"
+
+      - alert: PrismMaterialisationFailures
+        expr: sum(increase(prism_materializations_total{status="failed"}[30m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Governed data materialisation failures are elevated"
+          runbook: "docs/incident_response.md"
+
+      - alert: PrismDecisionCaseFailures
+        expr: sum(increase(prism_decision_cases_total{status="failed"}[30m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Decision Case processing failures are elevated"
+          runbook: "docs/incident_response.md"
