@@ -17,6 +17,7 @@ from enterprise.ai_providers import (
 )
 from enterprise.config import EnterpriseSettings, get_settings
 from enterprise.models import AIProviderConfig, EvidenceRecord
+from enterprise.observability import AI_GATEWAY_CALLS
 from enterprise.phase18_models import AICallAudit, ModelEvaluation, ModelRegistryRecord
 from enterprise.tenancy import WorkspaceAccess, clearance_allows
 
@@ -234,6 +235,7 @@ def invoke_model(
             output_status="blocked_prompt_injection",
             detail={"prompt_body_stored": False},
         )
+        AI_GATEWAY_CALLS.labels(status="blocked_prompt_injection").inc()
         raise AIGatewayError("Prompt-injection policy blocked this request.")
 
     redacted_user, redactions = redact_text(user_text)
@@ -283,6 +285,7 @@ def invoke_model(
             latency_ms=latency_ms,
             detail={"prompt_body_stored": False},
         )
+        AI_GATEWAY_CALLS.labels(status="provider_error").inc()
         raise AIGatewayError("AI provider request failed.") from exc
 
     latency_ms = int((time.perf_counter() - started) * 1000)
@@ -314,6 +317,7 @@ def invoke_model(
             latency_ms=latency_ms,
             detail={"prompt_body_stored": False},
         )
+        AI_GATEWAY_CALLS.labels(status="invalid_output").inc()
         raise AIGatewayError(
             "AI provider returned an invalid governed response."
         ) from exc
@@ -356,10 +360,12 @@ def invoke_model(
         },
     )
     if status_value != "accepted":
+        AI_GATEWAY_CALLS.labels(status=status_value).inc()
         raise AIGatewayError(
             f"AI output failed governance validation: {status_value}."
         )
 
+    AI_GATEWAY_CALLS.labels(status="accepted").inc()
     return {
         "ai_audit_id": audit.id,
         "model_alias": model.alias,
