@@ -18,7 +18,7 @@
   const byId = (id) => document.getElementById(id);
   const numberFmt = new Intl.NumberFormat("en-IE", { maximumFractionDigits: 2 });
   const compactFmt = new Intl.NumberFormat("en-IE", { notation: "compact", maximumFractionDigits: 1 });
-  const chartPalette = ["#A78BFA", "#FF786B", "#3DD6A5", "#F6C453", "#F472B6", "#C084FC"];
+  const chartPalette = ["#78E6AA", "#52D98D", "#93F2C5", "#C8F56B", "#69D99E", "#A6E878"];
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -638,10 +638,10 @@
       const xHist = f.series.map((r) => r.month); const yHist = f.series.map((r) => r.value);
       const xFuture = f.forecast.map((r) => r.month);
       window.Plotly.newPlot(els.forecastChart, [
-        { x: xHist, y: yHist, type: "scatter", mode: "lines+markers", name: "Actual", line: { color: "#A7A5B3" } },
+        { x: xHist, y: yHist, type: "scatter", mode: "lines+markers", name: "Actual", line: { color: "#8FA39A" } },
         { x: xFuture, y: f.forecast.map((r) => r.upper), type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip", showlegend: false },
-        { x: xFuture, y: f.forecast.map((r) => r.lower), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(167,139,250,.14)", name: "95% range", hoverinfo: "skip" },
-        { x: xFuture, y: f.forecast.map((r) => r.estimate), type: "scatter", mode: "lines+markers", name: "Forecast", line: { color: "#A78BFA", dash: "dot" } },
+        { x: xFuture, y: f.forecast.map((r) => r.lower), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(120,230,170,.12)", name: "95% range", hoverinfo: "skip" },
+        { x: xFuture, y: f.forecast.map((r) => r.estimate), type: "scatter", mode: "lines+markers", name: "Forecast", line: { color: "#78E6AA", dash: "dot" } },
       ], plotLayout(f.metricColumn, { margin: { l: 55, r: 20, t: 20, b: 45 } }), { displayModeBar: false, responsive: true });
     }
   }
@@ -864,8 +864,8 @@
 
   function plotLayout(yTitle = "", extra = {}) {
     return {
-      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { color: "#BDB9C7", size: 10 },
-      xaxis: { gridcolor: "#353545", zerolinecolor: "#353545" }, yaxis: { gridcolor: "#353545", zerolinecolor: "#353545", title: yTitle },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { color: "#A9B5AE", size: 10 },
+      xaxis: { gridcolor: "#1E3229", zerolinecolor: "#1E3229" }, yaxis: { gridcolor: "#1E3229", zerolinecolor: "#1E3229", title: yTitle },
       showlegend: true, legend: { orientation: "h", y: 1.08 }, margin: { l: 50, r: 20, t: 25, b: 45 }, ...extra,
     };
   }
@@ -893,9 +893,9 @@
 
   function showNotice(message, kind = "info") {
     els.notice.textContent = message; els.notice.classList.remove("hidden");
-    els.notice.style.borderColor = kind === "error" ? "#6A2B3A" : kind === "success" ? "#22634F" : "#69476F";
-    els.notice.style.background = kind === "error" ? "#2A171D" : kind === "success" ? "#142A22" : "#251B29";
-    els.notice.style.color = kind === "error" ? "#FFD0D8" : kind === "success" ? "#D2F8E9" : "#F0DDF1";
+    els.notice.style.borderColor = kind === "error" ? "#63323A" : kind === "success" ? "#285645" : "#35526B";
+    els.notice.style.background = kind === "error" ? "#271319" : kind === "success" ? "#10251F" : "#101B28";
+    els.notice.style.color = kind === "error" ? "#FFD1D1" : kind === "success" ? "#CBF8E8" : "#C8D8E7";
   }
 
   function escapeHTML(value) {
