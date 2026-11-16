@@ -43,6 +43,16 @@ DECISION_CASES = Counter(
     "PRISM AI Control Plane decision-case outcomes.",
     ["status"],
 )
+AI_GATEWAY_CALLS = Counter(
+    "prism_ai_gateway_calls_total",
+    "Governed AI gateway outcomes.",
+    ["status"],
+)
+PILOT_EVENTS = Counter(
+    "prism_pilot_events_total",
+    "Enterprise pilot lifecycle events.",
+    ["event"],
+)
 
 
 def _route_label(request) -> str:
