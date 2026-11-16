@@ -15,6 +15,7 @@ from enterprise.models import (
 from enterprise.p2_models import DataAsset, DataSnapshot
 from enterprise.phase18_models import LegalHold
 
+
 def _held_ids(
     db: Session,
     *,
