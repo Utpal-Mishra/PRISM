@@ -16,6 +16,14 @@ def upgrade() -> None:
     Base.metadata.create_all(bind=bind, checkfirst=True)
 
     if bind.dialect.name == "postgresql":
+        op.execute(
+            "ALTER TABLE data_assets "
+            "ADD COLUMN IF NOT EXISTS processing_activity_id VARCHAR(96)"
+        )
+        op.execute(
+            "ALTER TABLE data_assets "
+            "ADD COLUMN IF NOT EXISTS residency_region VARCHAR(100)"
+        )
         tenant_tables = [
             "artifact_versions",
             "dataset_registry_records",
