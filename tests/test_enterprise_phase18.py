@@ -12,10 +12,10 @@ from enterprise.connectors import validate_connector
 from enterprise.db import Base
 from enterprise.phase18_models import (
     AICallAudit,
-    DPARecord,
-    DPIAAssessment,
     DataResidencyPolicy,
     DatasetRegistryRecord,
+    DPARecord,
+    DPIAAssessment,
     EnterprisePilot,
     GovernanceRecord,
     MetricRegistryRecord,
