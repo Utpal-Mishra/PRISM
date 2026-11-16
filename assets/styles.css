@@ -107,21 +107,31 @@ button:focus-visible, select:focus-visible, .upload-card:focus-within { outline:
 
 .nav-list { display: grid; gap: 5px; }
 .nav-item {
+  --nav-accent: var(--violet);
+  position: relative;
   border: 0;
   border-radius: 10px;
   background: transparent;
   color: #B7B4C1;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 30px;
   text-align: left;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
 }
+.nav-item::before { content: ""; position: absolute; left: 12px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--nav-accent); opacity: .58; transform: translateY(-50%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--nav-accent) 10%, transparent); }
+.nav-item:nth-child(1), .nav-item:nth-child(7) { --nav-accent: var(--violet); }
+.nav-item:nth-child(2), .nav-item:nth-child(8) { --nav-accent: var(--coral); }
+.nav-item:nth-child(3) { --nav-accent: var(--mint); }
+.nav-item:nth-child(4) { --nav-accent: var(--amber); }
+.nav-item:nth-child(5) { --nav-accent: var(--rose); }
+.nav-item:nth-child(6) { --nav-accent: var(--plum); }
 .nav-item:hover { background: #26232E; color: var(--text); transform: translateX(1px); }
+.nav-item:hover::before, .nav-item.active::before { opacity: 1; }
 .nav-item.active {
-  background: linear-gradient(135deg, #30263D, #211D29);
+  background: linear-gradient(135deg, rgba(167,139,250,.13), rgba(255,120,107,.07));
   color: var(--text);
-  box-shadow: inset 2px 0 var(--accent), inset 0 0 0 1px rgba(167,139,250,.11);
+  box-shadow: inset 2px 0 var(--nav-accent), inset 0 0 0 1px color-mix(in srgb, var(--nav-accent) 18%, transparent);
 }
 .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); display: grid; gap: 6px; color: var(--muted); font-size: 10px; }
 .sidebar-footer a { color: var(--accent); text-decoration: none; }
