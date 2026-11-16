@@ -4,11 +4,15 @@ import socket
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session
 
 from enterprise.config import EnterpriseSettings, get_settings
 from enterprise.models import JobRecord
+
+
+class WorkloadLimitExceeded(RuntimeError):
+    pass
 
 
 def enqueue_job(
@@ -23,6 +27,28 @@ def enqueue_job(
     run_after: datetime | None = None,
 ) -> JobRecord:
     settings = settings or get_settings()
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        db.execute(
+            text("SELECT pg_advisory_xact_lock(hashtext(:scope))"),
+            {"scope": f"job-quota:{tenant_id}:{workspace_id}"},
+        )
+    active_count = int(
+        db.scalar(
+            select(func.count())
+            .select_from(JobRecord)
+            .where(
+                JobRecord.tenant_id == tenant_id,
+                JobRecord.workspace_id == workspace_id,
+                JobRecord.status.in_(["queued", "running", "retrying"]),
+            )
+        )
+        or 0
+    )
+    if active_count >= settings.workload_max_concurrent_jobs:
+        raise WorkloadLimitExceeded(
+            "Workspace concurrent job limit has been reached."
+        )
+
     record = JobRecord(
         id=str(uuid.uuid4()),
         tenant_id=tenant_id,

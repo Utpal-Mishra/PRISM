@@ -85,3 +85,13 @@ jobs:
           psql -d prism_restore -Atc "select to_regclass('public.decision_cases')" | grep -q decision_cases
           psql -d prism_restore -Atc "select to_regclass('public.ai_team_runs')" | grep -q ai_team_runs
           test "$(psql -d prism_restore -Atc "select count(*) from pg_trigger where tgname='data_snapshots_immutable_update' and not tgisinternal")" = "1"
+          psql -d prism_restore -Atc "select to_regclass('public.artifact_versions')" | grep -q artifact_versions
+          psql -d prism_restore -Atc "select to_regclass('public.dataset_registry_records')" | grep -q dataset_registry_records
+          psql -d prism_restore -Atc "select to_regclass('public.metric_registry_records')" | grep -q metric_registry_records
+          psql -d prism_restore -Atc "select to_regclass('public.governance_records')" | grep -q governance_records
+          psql -d prism_restore -Atc "select to_regclass('public.processing_activities')" | grep -q processing_activities
+          psql -d prism_restore -Atc "select to_regclass('public.dpia_assessments')" | grep -q dpia_assessments
+          psql -d prism_restore -Atc "select to_regclass('public.data_residency_policies')" | grep -q data_residency_policies
+          psql -d prism_restore -Atc "select to_regclass('public.model_registry_records')" | grep -q model_registry_records
+          psql -d prism_restore -Atc "select to_regclass('public.ai_call_audits')" | grep -q ai_call_audits
+          psql -d prism_restore -Atc "select to_regclass('public.enterprise_pilots')" | grep -q enterprise_pilots

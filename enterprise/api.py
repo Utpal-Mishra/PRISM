@@ -14,6 +14,8 @@ from enterprise.ai_providers import (
     rotate_provider_secret,
     validate_provider_policy,
 )
+from enterprise.ai_runtime_api import router as ai_runtime_router
+from enterprise.artifacts import append_artifact_version
 from enterprise.audit import append_audit_event, verify_audit_chain
 from enterprise.config import get_settings
 from enterprise.connectors import (
@@ -23,6 +25,7 @@ from enterprise.connectors import (
 )
 from enterprise.db import SessionLocal, get_db
 from enterprise.jobs import enqueue_job
+from enterprise.key_rotation import rotate_workspace_ciphertext
 from enterprise.models import (
     AIProviderConfig,
     AuditEvent,
@@ -36,6 +39,10 @@ from enterprise.models import (
 )
 from enterprise.observability import install_observability
 from enterprise.p2_api import router as p2_router
+from enterprise.persistence_api import router as persistence_router
+from enterprise.phase18_models import DPARecord
+from enterprise.pilot_api import router as pilot_router
+from enterprise.privacy_api import router as privacy_router
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.security import install_security_middleware
 from enterprise.tenancy import (
@@ -55,6 +62,10 @@ app = FastAPI(
 install_observability(app, settings)
 install_security_middleware(app, settings)
 app.include_router(p2_router)
+app.include_router(persistence_router)
+app.include_router(privacy_router)
+app.include_router(ai_runtime_router)
+app.include_router(pilot_router)
 
 
 class EvidenceCreate(BaseModel):
@@ -82,11 +93,20 @@ class ConnectorCredentialInput(BaseModel):
     password: SecretStr | None = None
     bearer_token: SecretStr | None = None
     headers: dict[str, SecretStr] = Field(default_factory=dict)
+    secret_values: dict[str, SecretStr] = Field(default_factory=dict)
 
 
 class ConnectorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
-    connector_type: Literal["rest_https", "postgresql"]
+    connector_type: Literal[
+        "rest_https",
+        "postgresql",
+        "snowflake_sql_api",
+        "databricks_sql",
+        "azure_blob_https",
+        "gcs_https",
+        "s3_presigned_https",
+    ]
     endpoint_host: str = Field(min_length=1, max_length=255)
     configuration: dict[str, Any]
     credential: ConnectorCredentialInput
@@ -154,6 +174,8 @@ def _credential_dict(value: ConnectorCredentialInput) -> dict:
             key: item.get_secret_value()
             for key, item in value.headers.items()
         }
+    for key, item in value.secret_values.items():
+        secret[key] = item.get_secret_value()
     return secret
 
 
@@ -319,6 +341,20 @@ def create_decision(
         payload=body.payload,
     )
     db.add(record)
+    db.flush()
+    append_artifact_version(
+        db,
+        access,
+        artifact_type="decision",
+        artifact_id=record.id,
+        classification=str(body.payload.get("classification", "internal")),
+        payload={
+            "owner": record.owner,
+            "status": record.status,
+            "payload": record.payload,
+        },
+        change_note="Initial decision record.",
+    )
     append_audit_event(
         db,
         access,
@@ -384,6 +420,27 @@ def create_connector(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+    if body.configuration.get("external_processor") is True:
+        dpa_id = str(body.configuration.get("dpa_id", "")).strip()
+        if not dpa_id:
+            raise HTTPException(
+                status_code=400,
+                detail="External processor connectors require an active DPA record.",
+            )
+        dpa = db.scalar(
+            select(DPARecord).where(
+                DPARecord.id == dpa_id,
+                DPARecord.tenant_id == access.tenant_id,
+                DPARecord.workspace_id == access.workspace_id,
+                DPARecord.status == "active",
+            )
+        )
+        if dpa is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Active DPA record was not found for this connector.",
+            )
 
     connector = Connector(
         tenant_id=access.tenant_id,
@@ -918,6 +975,28 @@ def disable_ai_provider(
     )
     db.commit()
     return {"provider_config_id": provider.id, "enabled": provider.enabled}
+
+
+@app.post("/v1/workspaces/{workspace_id}/crypto/rotate")
+def rotate_workspace_encryption(
+    access: AdminAccessDep,
+    db: DbDep,
+) -> dict[str, int | str]:
+    _limit_write(access)
+    result = rotate_workspace_ciphertext(db, access)
+    append_audit_event(
+        db,
+        access,
+        event_type="workspace_ciphertext_rotated",
+        object_type="workspace",
+        object_id=access.workspace_id,
+        detail=result,
+    )
+    db.commit()
+    return {
+        "workspace_id": access.workspace_id,
+        **result,
+    }
 
 
 @app.get("/v1/workspaces/{workspace_id}/audit")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -15,7 +16,15 @@ from enterprise.crypto import EncryptedValue, FieldCipher
 from enterprise.models import Connector, ConnectorCredential
 from enterprise.tenancy import WorkspaceAccess
 
-SUPPORTED_CONNECTORS = {"rest_https", "postgresql"}
+SUPPORTED_CONNECTORS = {
+    "rest_https",
+    "postgresql",
+    "snowflake_sql_api",
+    "databricks_sql",
+    "azure_blob_https",
+    "gcs_https",
+    "s3_presigned_https",
+}
 PLAINTEXT_SECRET_KEYS = {
     "password",
     "passwd",
@@ -88,6 +97,31 @@ def validate_connector(
         port = int(configuration.get("port", 5432))
         if not database or not 1 <= port <= 65535:
             raise ConnectorError("PostgreSQL connector requires a database and valid port.")
+
+    if connector_type in {
+        "snowflake_sql_api",
+        "databricks_sql",
+        "azure_blob_https",
+        "gcs_https",
+    }:
+        base_url = str(configuration.get("base_url", ""))
+        parsed = urlparse(base_url)
+        if parsed.scheme != "https" or parsed.hostname != endpoint_host:
+            raise ConnectorError(
+                "Cloud connector base_url must use HTTPS and the allowed host."
+            )
+        if parsed.username or parsed.password:
+            raise ConnectorError("Cloud connector URLs must not contain credentials.")
+
+    if connector_type == "databricks_sql" and not str(
+        configuration.get("warehouse_id", "")
+    ).strip():
+        raise ConnectorError("Databricks SQL requires warehouse_id.")
+
+    if connector_type in {"azure_blob_https", "gcs_https"}:
+        object_format = str(configuration.get("object_format", "json")).lower()
+        if object_format not in {"json", "csv"}:
+            raise ConnectorError("Object connector format must be json or csv.")
 
 
 def _aad(connector_id: str, credential_version: int) -> str:
@@ -177,6 +211,60 @@ def _content_hash(rows: list[dict]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _oauth_bearer_token(
+    connector: Connector,
+    secret: dict,
+    settings: EnterpriseSettings,
+) -> str:
+    token_url = str(connector.configuration.get("oauth_token_url", "")).strip()
+    if not token_url:
+        return str(secret.get("bearer_token", ""))
+
+    parsed = urlparse(token_url)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or not host_allowed(parsed.hostname, settings)
+    ):
+        raise ConnectorError(
+            "OAuth token endpoint must use HTTPS and an approved connector host."
+        )
+    client_id = str(secret.get("client_id", ""))
+    client_secret = str(secret.get("client_secret", ""))
+    if not client_id or not client_secret:
+        raise ConnectorError(
+            "OAuth client-credentials flow requires client_id and client_secret."
+        )
+
+    token_data = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+    scope = str(connector.configuration.get("oauth_scope", "")).strip()
+    if scope:
+        token_data["scope"] = scope
+    audience = str(connector.configuration.get("oauth_audience", "")).strip()
+    if audience:
+        token_data["audience"] = audience
+
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        response = client.post(
+            token_url,
+            headers={"Accept": "application/json"},
+            data=token_data,
+        )
+        response.raise_for_status()
+        body = response.json()
+    token = body.get("access_token")
+    if not isinstance(token, str) or not token:
+        raise ConnectorError("OAuth token endpoint did not return access_token.")
+    return token
+
+
 def execute_rest_get(
     connector: Connector,
     secret: dict,
@@ -188,7 +276,7 @@ def execute_rest_get(
         raise ConnectorError("REST operation path must be relative to the configured base URL.")
 
     headers = {"Accept": "application/json"}
-    token = secret.get("bearer_token")
+    token = _oauth_bearer_token(connector, secret, settings)
     if token:
         headers["Authorization"] = f"Bearer {token}"
     extra_headers = secret.get("headers", {})
@@ -222,6 +310,218 @@ def execute_rest_get(
 
     normalized = [row for row in rows if isinstance(row, dict)]
     return normalized[: settings.connector_max_rows]
+
+
+def _rows_from_stream(
+    response: httpx.Response,
+    object_format: str,
+    settings: EnterpriseSettings,
+) -> list[dict]:
+    declared = response.headers.get("content-length")
+    if declared and int(declared) > settings.max_upload_bytes:
+        raise ConnectorError("Cloud object exceeds the configured ingestion byte limit.")
+
+    if object_format == "csv":
+        reader = csv.DictReader(response.iter_lines())
+        rows: list[dict] = []
+        for row in reader:
+            rows.append(dict(row))
+            if len(rows) >= settings.connector_max_rows:
+                break
+        return rows
+
+    chunks: list[bytes] = []
+    total = 0
+    for chunk in response.iter_bytes():
+        total += len(chunk)
+        if total > settings.max_upload_bytes:
+            raise ConnectorError("Cloud object exceeds the configured ingestion byte limit.")
+        chunks.append(chunk)
+    try:
+        payload = json.loads(b"".join(chunks).decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ConnectorError("Cloud object contains invalid JSON.") from exc
+
+    if isinstance(payload, list):
+        rows = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("items"), list):
+        rows = payload["items"]
+    elif isinstance(payload, dict):
+        rows = [payload]
+    else:
+        raise ConnectorError("Object JSON must contain an object or array.")
+    return [
+        item
+        for item in rows
+        if isinstance(item, dict)
+    ][: settings.connector_max_rows]
+
+
+def execute_snowflake_sql_api(
+    connector: Connector,
+    secret: dict,
+    operation: dict,
+    settings: EnterpriseSettings,
+) -> list[dict]:
+    token = _oauth_bearer_token(connector, secret, settings)
+    statement = str(operation.get("query", "")).strip()
+    if not token or not statement:
+        raise ConnectorError("Snowflake SQL API requires bearer_token and query.")
+
+    config = connector.configuration
+    payload: dict = {
+        "statement": statement,
+        "timeout": min(settings.connector_timeout_seconds, 45),
+    }
+    for key in ["database", "schema", "warehouse", "role"]:
+        value = config.get(key)
+        if value:
+            payload[key] = value
+
+    url = f"{str(config['base_url']).rstrip('/')}/api/v2/statements"
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        response = client.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+        )
+        response.raise_for_status()
+        body = response.json()
+
+    data = body.get("data")
+    metadata = body.get("resultSetMetaData", {})
+    columns = [
+        str(item.get("name", f"column_{index + 1}"))
+        for index, item in enumerate(metadata.get("rowType", []))
+    ]
+    if not isinstance(data, list):
+        raise ConnectorError("Snowflake SQL API did not return inline row data.")
+    if not columns and data:
+        columns = [f"column_{index + 1}" for index in range(len(data[0]))]
+    return [
+        dict(zip(columns, row, strict=False))
+        for row in data[: settings.connector_max_rows]
+        if isinstance(row, list)
+    ]
+
+
+def execute_databricks_sql(
+    connector: Connector,
+    secret: dict,
+    operation: dict,
+    settings: EnterpriseSettings,
+) -> list[dict]:
+    token = _oauth_bearer_token(connector, secret, settings)
+    statement = str(operation.get("query", "")).strip()
+    if not token or not statement:
+        raise ConnectorError("Databricks SQL requires bearer_token and query.")
+
+    config = connector.configuration
+    url = f"{str(config['base_url']).rstrip('/')}/api/2.0/sql/statements"
+    payload = {
+        "statement": statement,
+        "warehouse_id": config["warehouse_id"],
+        "wait_timeout": "10s",
+        "on_wait_timeout": "CANCEL",
+        "disposition": "INLINE",
+        "format": "JSON_ARRAY",
+    }
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        response = client.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+        )
+        response.raise_for_status()
+        body = response.json()
+
+    state = str(body.get("status", {}).get("state", ""))
+    if state and state != "SUCCEEDED":
+        raise ConnectorError(f"Databricks SQL statement ended in state {state}.")
+    columns = [
+        str(item.get("name", f"column_{index + 1}"))
+        for index, item in enumerate(
+            body.get("manifest", {}).get("schema", {}).get("columns", [])
+        )
+    ]
+    rows = body.get("result", {}).get("data_array", [])
+    return [
+        dict(zip(columns, row, strict=False))
+        for row in rows[: settings.connector_max_rows]
+        if isinstance(row, list)
+    ]
+
+
+def execute_object_https(
+    connector: Connector,
+    secret: dict,
+    operation: dict,
+    settings: EnterpriseSettings,
+) -> list[dict]:
+    config = connector.configuration
+    path = str(operation.get("path", config.get("resource_path", "")))
+    if not path.startswith("/") or path.startswith("//") or "://" in path:
+        raise ConnectorError("Object path must be relative to the configured host.")
+
+    headers = {"Accept": "application/json,text/csv;q=0.9,*/*;q=0.1"}
+    token = _oauth_bearer_token(connector, secret, settings)
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    if connector.connector_type == "azure_blob_https":
+        headers["x-ms-version"] = str(config.get("api_version", "2023-11-03"))
+
+    url = f"{str(config['base_url']).rstrip('/')}{path}"
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        with client.stream("GET", url, headers=headers) as response:
+            response.raise_for_status()
+            return _rows_from_stream(
+                response,
+                str(config.get("object_format", "json")).lower(),
+                settings,
+            )
+
+
+def execute_s3_presigned_https(
+    connector: Connector,
+    secret: dict,
+    operation: dict,
+    settings: EnterpriseSettings,
+) -> list[dict]:
+    signed_url = str(secret.get("signed_url", ""))
+    if not signed_url:
+        raise ConnectorError("S3 presigned connector requires encrypted signed_url.")
+    parsed = urlparse(signed_url)
+    if parsed.scheme != "https" or parsed.hostname != connector.endpoint_host:
+        raise ConnectorError("S3 presigned URL must use the approved connector host.")
+
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        with client.stream("GET", signed_url) as response:
+            response.raise_for_status()
+            return _rows_from_stream(
+                response,
+                str(connector.configuration.get("object_format", "json")).lower(),
+                settings,
+            )
 
 
 def execute_postgresql_read(
@@ -276,6 +576,14 @@ def fetch_connector_rows(
         return execute_rest_get(connector, secret, operation, settings)
     if connector.connector_type == "postgresql":
         return execute_postgresql_read(connector, secret, operation, settings)
+    if connector.connector_type == "snowflake_sql_api":
+        return execute_snowflake_sql_api(connector, secret, operation, settings)
+    if connector.connector_type == "databricks_sql":
+        return execute_databricks_sql(connector, secret, operation, settings)
+    if connector.connector_type in {"azure_blob_https", "gcs_https"}:
+        return execute_object_https(connector, secret, operation, settings)
+    if connector.connector_type == "s3_presigned_https":
+        return execute_s3_presigned_https(connector, secret, operation, settings)
     raise ConnectorError("Unsupported enterprise connector type.")
 
 

@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class EnterpriseSettings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     service_name: str = "PRISM Enterprise API"
-    service_version: str = "0.3.0-p2"
+    service_version: str = "1.0.0-enterprise"
     database_url: str = "sqlite+pysqlite:///./prism_enterprise.db"
 
     oidc_issuer: str = ""
@@ -31,10 +31,15 @@ class EnterpriseSettings(BaseSettings):
     audit_hmac_key: SecretStr = SecretStr("")
     data_encryption_key_b64: SecretStr = SecretStr("")
     data_encryption_key_version: str = "v1"
+    data_encryption_keys_json: SecretStr = SecretStr("")
 
     connector_allowed_hosts: str = ""
     connector_timeout_seconds: int = 15
     connector_max_rows: int = 1000
+    connector_cache_ttl_seconds: int = 300
+    connector_query_timeout_seconds: int = 30
+    workload_max_concurrent_jobs: int = 8
+    workload_max_cached_entries: int = 500
 
     materialized_dataset_max_rows: int = 1000
     materialized_dataset_max_bytes: int = 10 * 1024 * 1024
@@ -55,6 +60,12 @@ class EnterpriseSettings(BaseSettings):
     slo_latency_p95_ms: int = 750
 
     default_retention_days: int = 365
+    incident_ack_minutes: int = 30
+    incident_resolve_target_hours: int = 24
+    ai_gateway_timeout_seconds: int = 45
+    ai_gateway_max_output_chars: int = 20_000
+    ai_gateway_daily_call_quota: int = 500
+    pilot_max_users: int = 25
 
     model_config = SettingsConfigDict(
         env_prefix="PRISM_",

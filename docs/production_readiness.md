@@ -124,6 +124,23 @@ See [enterprise_operations.md](enterprise_operations.md) for the operational mod
 - Added P2 regression tests and CI contract checks.
 - Extended the PostgreSQL disaster-recovery drill to verify P2 tables and the immutable-snapshot trigger.
 
+## Original Enterprise Phase 1–8 — application-side completion
+
+The repository now contains the application/runtime controls for the original Phase 1–8 programme. See [enterprise_phase1_8_completion.md](enterprise_phase1_8_completion.md) for the detailed mapping.
+
+Key additions beyond P2:
+
+- authoritative versioned Registry → Evidence → Strategy → Decision → Outcome → Governance persistence;
+- Snowflake/Databricks/cloud-object/OAuth connector adapters;
+- query caching, streamed ingestion and race-safe workload ceilings;
+- ROPA/DPIA/DPA/residency/legal-hold/incident controls;
+- versioned AES keyring and audited re-encryption;
+- reliability alert rules and recurring failure drills;
+- model registry/evaluations plus a governed live AI gateway;
+- controlled enterprise pilot/UAT/readiness framework.
+
+**Important:** this is repository/application completion, not a claim that an organisation-specific production environment or pilot is already live. Production still requires approved OIDC, managed PostgreSQL/PITR, KMS/vault, real connector/provider credentials, monitoring/alert destinations, staging performance/recovery evidence and the documented GitHub `main` ruleset.
+
 ## P0 platform activation still required before enterprise data
 
 The repository cannot activate GitHub branch rules through application source code. Before an enterprise release, activate the `main` ruleset documented in [repository_controls.md](repository_controls.md), including required CI/Security status checks and force-push/deletion restrictions.
@@ -140,7 +157,7 @@ These are environment activations, not missing application features.
 
 ## Remaining production activation and later programme
 
-P1 now implements the application-side scale/reliability foundation. A real production environment must still activate managed PITR/backups, metrics/log shipping and alerts, ingress/network limits, organisation-specific connector/provider allowlists, recurring retention scheduling, staged load measurement and the documented GitHub ruleset. Later product stages can connect approved AI providers and expand specialist teams on top of the P0/P1/P2 control plane; P2 already implements the deterministic evidence-grounded orchestration foundation.
+P1 now implements the application-side scale/reliability foundation. A real production environment must still activate managed PITR/backups, metrics/log shipping and alerts, ingress/network limits, organisation-specific connector/provider allowlists, recurring retention scheduling, staged load measurement and the documented GitHub ruleset. Approved AI providers can now be connected through the governed model gateway after provider policy and model evaluation gates pass. Expansion to additional specialist teams remains optional; production activation and a measured controlled pilot remain environment/organisation work.
 
 ## Legacy Streamlit boundary
 

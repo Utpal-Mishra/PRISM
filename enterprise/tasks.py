@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from enterprise.audit import append_audit_event
 from enterprise.auth import Principal
-from enterprise.connectors import ConnectorError, execute_connector, fetch_connector_rows
+from enterprise.connectors import ConnectorError, execute_connector
 from enterprise.control_plane import run_control_plane
 from enterprise.materialization import MaterializationError, create_snapshot
 from enterprise.models import (
@@ -36,6 +36,7 @@ from enterprise.p2_models import (
     EvidenceEdge,
 )
 from enterprise.retention import purge_expired_records
+from enterprise.scale import fetch_rows_with_cache
 from enterprise.tenancy import WorkspaceAccess
 
 
@@ -182,7 +183,15 @@ def run_dataset_materialization_job(db: Session, job: JobRecord) -> dict:
         raise TaskError("Data asset source connector does not match the queued connector.")
 
     try:
-        rows = fetch_connector_rows(db, connector, operation)
+        rows, cache_hit = fetch_rows_with_cache(
+            db,
+            tenant_id=job.tenant_id,
+            workspace_id=job.workspace_id,
+            created_by=job.created_by,
+            connector=connector,
+            operation=operation,
+            classification=asset.classification,
+        )
         snapshot, evidence = create_snapshot(
             db,
             asset=asset,
@@ -190,6 +199,7 @@ def run_dataset_materialization_job(db: Session, job: JobRecord) -> dict:
             connector_run_id=run.id,
             created_by=job.created_by,
             connector_type=connector.connector_type,
+            cache_hit=cache_hit,
         )
     except (ConnectorError, MaterializationError):
         CONNECTOR_RUNS.labels(

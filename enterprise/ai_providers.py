@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from enterprise.config import EnterpriseSettings, get_settings
-from enterprise.crypto import FieldCipher
+from enterprise.crypto import EncryptedValue, FieldCipher
 from enterprise.models import AIProviderConfig, EncryptedSecret
 from enterprise.tenancy import WorkspaceAccess
 
@@ -90,3 +90,25 @@ def rotate_provider_secret(
         ):
             db.delete(previous)
     return secret
+
+
+def read_provider_secret(
+    db: Session,
+    provider: AIProviderConfig,
+    cipher: FieldCipher | None = None,
+) -> dict:
+    if not provider.credential_id:
+        raise AIProviderPolicyError("AI provider has no encrypted credential.")
+    secret = db.get(EncryptedSecret, provider.credential_id)
+    if secret is None:
+        raise AIProviderPolicyError("AI provider credential was not found.")
+    if secret.purpose != f"ai-provider:{provider.id}":
+        raise AIProviderPolicyError("AI provider credential purpose mismatch.")
+    cipher = cipher or FieldCipher()
+    return cipher.decrypt_json(
+        EncryptedValue(
+            key_version=secret.key_version,
+            ciphertext=secret.ciphertext,
+        ),
+        f"ai-provider:{provider.id}",
+    )

@@ -61,25 +61,48 @@ Connector → DATA-* → SNAP-* → EVD-* → AI Team Runs → DC-* → Human Re
 
 The public GitHub Pages experience remains unchanged and browser-local; P2 lives only in the authenticated enterprise API/worker boundary.
 
+## Enterprise Phase 1–8 completion
+
+The original enterprise programme now has an application-side implementation across identity/backend, authoritative persistence, connectors, scale, privacy/governance, reliability, governed AI and controlled-pilot operations.
+
+Highlights include:
+
+- versioned server-side Dataset/Metric Registry, Evidence, Strategy, Decision, Outcome and Governance records;
+- PostgreSQL/Snowflake/Databricks/REST/cloud-object connector adapters with encrypted credentials and OAuth2 client-credentials support;
+- durable workers, quotas, query cache, streamed bounded ingestion and query pushdown;
+- Processing Activity/ROPA, DPIA, DPA, residency policy, legal hold, incident response and versioned AES key rotation;
+- Prometheus alert rules, DR/restore testing, load smoke and recurring failure drills;
+- governed live AI gateway with model registry/evaluations, prompt-injection/redaction controls, evidence-citation validation, transparency notices and AI-call auditing;
+- controlled enterprise pilot/UAT/measurement/readiness records.
+
+Organisation-specific OIDC, managed PostgreSQL, KMS/vault, cloud/data-platform credentials, observability backends and the real pilot organisation remain deployment activations rather than fabricated repository state.
+
+See [Enterprise Phase 1–8 Completion](docs/enterprise_phase1_8_completion.md) and [Phase 1–8 Audit Log](docs/phase1_8_audit_log.md).
+
 ## Shared visual language
 
-PRISM uses the same dark-first product family as The Palm and NEXUS: green-black canvas, restrained glass/elevated surfaces, sage secondary text, green interaction states and a scarce lime accent for brand/high-value actions.
+PRISM now uses a professional enterprise dark palette: deep navy/slate surfaces with restrained cobalt/sky-blue interaction states. Teal is reserved for success, amber for warning and red for risk.
 
-Canonical dark tokens include:
+Canonical tokens:
 
 ```text
-Background  #07110d
-Surface     #0b1712
-Surface 2   #0e1d17
-Border      #1e3229
-Text        #edf7f1
-Muted       #8fa39a
-Green       #78e6aa
-Green 2     #52d98d
-Lime        #c8f56b
+Canvas       #0B1220
+Sidebar      #0F172A
+Surface      #111827
+Surface 2    #172033
+Border       #263247
+Text         #F8FAFC
+Muted        #94A3B8
+Cobalt       #60A5FA
+Blue         #3B82F6
+Action blue  #2563EB
+Soft blue    #93C5FD
+Success      #2DD4BF
+Warning      #F59E0B
+Danger       #F87171
 ```
 
-The browser charts are also routed through the shared palette so data visualisations do not drift back into a separate blue-themed product identity.
+The previous green/lime-dominant PRISM palette is deprecated. Charts, focus states, navigation and mobile surfaces are aligned to the same business-oriented system.
 
 ## Mobile experience
 

@@ -1,0 +1,42 @@
+name: Enterprise Failure Drills
+
+on:
+  push:
+    branches: [main, develop, "agent/**"]
+    paths:
+      - "enterprise/**"
+      - "tests/test_failure_modes.py"
+      - "ops/prometheus-alerts.yml"
+      - ".github/workflows/failure-drills.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "enterprise/**"
+      - "tests/test_failure_modes.py"
+      - "ops/prometheus-alerts.yml"
+      - ".github/workflows/failure-drills.yml"
+  schedule:
+    - cron: "13 3 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  failure-drills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install enterprise test dependencies
+        run: pip install -r requirements-dev.txt -r requirements-enterprise.txt
+      - name: Run bounded failure drills
+        run: pytest -q tests/test_failure_modes.py
+      - name: Validate alert rules are present
+        run: |
+          grep -q "PrismHighServerErrorRate" ops/prometheus-alerts.yml
+          grep -q "PrismControlPlaneLatencyHigh" ops/prometheus-alerts.yml
+          grep -q "PrismJobsFailing" ops/prometheus-alerts.yml

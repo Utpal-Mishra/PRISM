@@ -75,6 +75,28 @@ jobs:
           grep -q -- "ROW LEVEL SECURITY" enterprise/migrations/versions/0001_enterprise_foundation.py
           grep -q -- "0002_scale_reliability" enterprise/migrations/versions/0002_enterprise_scale_reliability.py
           grep -q -- "0003_control_plane" enterprise/migrations/versions/0003_control_plane.py
+          grep -q -- "0004_phase18" enterprise/migrations/versions/0004_phase18.py
+          test -f enterprise/artifacts.py
+          test -f enterprise/persistence_api.py
+          test -f enterprise/privacy_api.py
+          test -f enterprise/scale.py
+          test -f enterprise/ai_runtime.py
+          test -f enterprise/ai_runtime_api.py
+          test -f enterprise/pilot_api.py
+          test -f enterprise/key_rotation.py
+          test -f ops/prometheus-alerts.yml
+          test -f docs/incident_response.md
+          grep -q -- "snowflake_sql_api" enterprise/connectors.py
+          grep -q -- "databricks_sql" enterprise/connectors.py
+          grep -q -- "oauth_token_url" enterprise/connectors.py
+          grep -q -- "Workspace concurrent job limit" enterprise/jobs.py
+          grep -q -- "LegalHold" enterprise/retention.py
+          grep -q -- "processing_activity_id" enterprise/p2_api.py
+          grep -q -- "Prompt-injection policy blocked" enterprise/ai_runtime.py
+          grep -q -- "passing evaluation" enterprise/ai_runtime_api.py
+          grep -q -- "ready_for_completion" enterprise/pilot_api.py
+          grep -q -- "data_encryption_keys_json" enterprise/config.py
+          grep -q -- "rotate_workspace_ciphertext" enterprise/key_rotation.py
           grep -q -- "data_snapshots_immutable_update" enterprise/migrations/versions/0003_control_plane.py
           test -f enterprise/materialization.py
           test -f enterprise/control_plane.py
