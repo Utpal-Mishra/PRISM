@@ -94,6 +94,7 @@ def create_snapshot(
     connector_run_id: str,
     created_by: str,
     connector_type: str,
+    cache_hit: bool = False,
     settings: EnterpriseSettings | None = None,
 ) -> tuple[DataSnapshot, EvidenceRecord]:
     settings = settings or get_settings()
@@ -158,6 +159,7 @@ def create_snapshot(
             "connector_run_id": connector_run_id,
             "method": "governed_bounded_connector_materialization_v1",
             "immutable_snapshot": True,
+            "cache_hit": cache_hit,
         },
         immutable=True,
     )
@@ -186,6 +188,7 @@ def create_snapshot(
             "schema_summary": snapshot.schema_summary,
             "method": "governed_bounded_connector_materialization_v1",
             "raw_rows_in_evidence": False,
+            "cache_hit": cache_hit,
             "handling_note_recorded": bool(asset.handling_note),
             "causal_status": "not_applicable",
         },
