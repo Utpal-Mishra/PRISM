@@ -14,6 +14,7 @@ from enterprise.ai_providers import (
     rotate_provider_secret,
     validate_provider_policy,
 )
+from enterprise.artifacts import append_artifact_version
 from enterprise.audit import append_audit_event, verify_audit_chain
 from enterprise.config import get_settings
 from enterprise.connectors import (
@@ -35,6 +36,10 @@ from enterprise.models import (
     RetentionPolicy,
 )
 from enterprise.observability import install_observability
+from enterprise.privacy_api import router as privacy_router
+from enterprise.pilot_api import router as pilot_router
+from enterprise.persistence_api import router as persistence_router
+from enterprise.ai_runtime_api import router as ai_runtime_router
 from enterprise.p2_api import router as p2_router
 from enterprise.quota import UsageLimitExceeded, enforce
 from enterprise.security import install_security_middleware
@@ -55,6 +60,10 @@ app = FastAPI(
 install_observability(app, settings)
 install_security_middleware(app, settings)
 app.include_router(p2_router)
+app.include_router(persistence_router)
+app.include_router(privacy_router)
+app.include_router(ai_runtime_router)
+app.include_router(pilot_router)
 
 
 class EvidenceCreate(BaseModel):
@@ -330,6 +339,20 @@ def create_decision(
         payload=body.payload,
     )
     db.add(record)
+    db.flush()
+    append_artifact_version(
+        db,
+        access,
+        artifact_type="decision",
+        artifact_id=record.id,
+        classification=str(body.payload.get("classification", "internal")),
+        payload={
+            "owner": record.owner,
+            "status": record.status,
+            "payload": record.payload,
+        },
+        change_note="Initial decision record.",
+    )
     append_audit_event(
         db,
         access,
