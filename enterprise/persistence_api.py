@@ -63,6 +63,14 @@ class StrategyInput(BaseModel):
     change_note: str = Field(default="", max_length=500)
 
 
+class DecisionUpdateInput(BaseModel):
+    owner: str = Field(min_length=1, max_length=255)
+    status: str = Field(min_length=1, max_length=64)
+    classification: Classification = "internal"
+    payload: dict[str, Any]
+    change_note: str = Field(default="", max_length=500)
+
+
 class OutcomeInput(BaseModel):
     decision_id: str = Field(min_length=1, max_length=96)
     classification: Classification = "internal"
@@ -459,6 +467,84 @@ def update_strategy(
     )
     db.commit()
     return {"strategy_id": strategy.id, "version": version.version}
+
+
+@router.get("/v1/workspaces/{workspace_id}/decisions")
+def list_decisions(
+    access: ViewerAccessDep,
+    db: DbDep,
+) -> list[dict[str, Any]]:
+    rows = db.scalars(
+        select(DecisionRecord)
+        .where(
+            DecisionRecord.tenant_id == access.tenant_id,
+            DecisionRecord.workspace_id == access.workspace_id,
+        )
+        .order_by(DecisionRecord.created_at.desc())
+    ).all()
+    result: list[dict[str, Any]] = []
+    for row in rows:
+        classification = str(row.payload.get("classification", "internal"))
+        if not clearance_allows(access.data_clearance, classification):
+            continue
+        result.append(
+            {
+                "decision_id": row.id,
+                "owner": row.owner,
+                "status": row.status,
+                "classification": classification,
+                "payload": row.payload,
+                "created_at": row.created_at,
+            }
+        )
+    return result
+
+
+@router.put("/v1/workspaces/{workspace_id}/decisions/{decision_id}")
+def update_decision(
+    decision_id: str,
+    body: DecisionUpdateInput,
+    access: ManagerAccessDep,
+    db: DbDep,
+) -> dict[str, Any]:
+    _require_clearance(access, body.classification)
+    decision = db.scalar(
+        select(DecisionRecord)
+        .where(
+            DecisionRecord.id == decision_id,
+            DecisionRecord.tenant_id == access.tenant_id,
+            DecisionRecord.workspace_id == access.workspace_id,
+        )
+        .with_for_update()
+    )
+    if decision is None:
+        raise HTTPException(status_code=404, detail="Decision record was not found.")
+    decision.owner = body.owner
+    decision.status = body.status
+    decision.payload = {**body.payload, "classification": body.classification}
+    version = append_artifact_version(
+        db,
+        access,
+        artifact_type="decision",
+        artifact_id=decision.id,
+        classification=body.classification,
+        payload={
+            "owner": decision.owner,
+            "status": decision.status,
+            "payload": decision.payload,
+        },
+        change_note=body.change_note or "Decision record updated.",
+    )
+    append_audit_event(
+        db,
+        access,
+        event_type="decision_updated",
+        object_type="decision",
+        object_id=decision.id,
+        detail={"version": version.version, "status": decision.status},
+    )
+    db.commit()
+    return {"decision_id": decision.id, "version": version.version}
 
 
 @router.get("/v1/workspaces/{workspace_id}/outcomes")
