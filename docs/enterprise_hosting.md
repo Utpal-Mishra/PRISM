@@ -47,11 +47,11 @@ docker compose -f compose.enterprise.yml up api worker
 
 Development header authentication is permitted only when `PRISM_ALLOW_DEV_AUTH=true` and the environment is not production. Production configuration rejects that setting.
 
-## P1/P2 operations
+## Phase 1–8 operations
 
-The API and worker use the same container image. Durable work is stored in PostgreSQL, so workers can be horizontally replicated without a separate message broker for the current P1/P2 workload.
+The API and worker use the same container image. Durable work is stored in PostgreSQL, so workers can be horizontally replicated without a separate message broker for the current governed enterprise workload.
 
-Before production deployment, set the P1/P2 environment controls documented in `.env.enterprise.example`, especially connector allowlists, metrics token, quotas, SLO targets, materialised snapshot row/byte limits and Decision Case evidence limits.
+Before production deployment, set the Phase 1–8 environment controls documented in `.env.enterprise.example`, including connector/provider allowlists, metrics token, quotas/SLOs, materialisation limits, AI-gateway limits, current/historical encryption keys and controlled-pilot limits.
 
 Operational runbooks:
 - [Enterprise operations](enterprise_operations.md)
@@ -71,3 +71,8 @@ Production sizing must account for:
 - expected connector refresh/materialisation cadence.
 
 For larger datasets, future versions should materialise into an approved warehouse/object-store layer while retaining PRISM metadata, evidence and Decision Cases in the governed control plane.
+
+
+### External-service activation
+
+Repository support does not imply a live vendor/customer connection. Snowflake, Databricks, Azure/GCP/S3, OIDC, KMS/vault, Prometheus/logging destinations and AI providers require approved organisation-specific endpoints and credentials. The Phase 8 pilot framework similarly requires a real authorised organisation, users, data domains, security review and UAT before it can be marked active/completed.
