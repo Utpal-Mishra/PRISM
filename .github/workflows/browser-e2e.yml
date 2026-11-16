@@ -42,14 +42,18 @@ jobs:
         run: npm audit --audit-level=high
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Validate enterprise palette contract
+      - name: Validate multicolor enterprise palette contract
         run: |
-          grep -q -- "--bg: #0B1220" assets/styles.css
-          grep -q -- "--sidebar: #0F172A" assets/styles.css
-          grep -q -- "--accent: #60A5FA" assets/styles.css
-          grep -q -- "--accent-2: #3B82F6" assets/styles.css
-          ! grep -qi -- "#c8f56b" assets/styles.css
-          ! grep -qi -- "#78e6aa" assets/styles.css
+          grep -q -- "--bg: #121217" assets/styles.css
+          grep -q -- "--sidebar: #17171E" assets/styles.css
+          grep -q -- "--violet: #A78BFA" assets/styles.css
+          grep -q -- "--coral: #FF786B" assets/styles.css
+          grep -q -- "--mint: #3DD6A5" assets/styles.css
+          grep -q -- "--amber: #F6C453" assets/styles.css
+          grep -q -- "--rose: #F472B6" assets/styles.css
+          ! grep -qi -- "#60A5FA" assets/styles.css
+          ! grep -qi -- "#3B82F6" assets/styles.css
+          ! grep -qi -- "#2563EB" assets/styles.css
       - name: Run browser acceptance suite
         run: npm run test:e2e
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
