@@ -18,6 +18,7 @@
   const byId = (id) => document.getElementById(id);
   const numberFmt = new Intl.NumberFormat("en-IE", { maximumFractionDigits: 2 });
   const compactFmt = new Intl.NumberFormat("en-IE", { notation: "compact", maximumFractionDigits: 1 });
+  const chartPalette = ["#A78BFA", "#FF786B", "#3DD6A5", "#F6C453", "#F472B6", "#C084FC"];
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -528,7 +529,7 @@
     state.segment = { category, metric, rows: result };
     els.segmentTable.innerHTML = makeTable(result.slice(0, 10).map((r) => ({ [category]: r.segment, total: round(r.total, 2), average: round(r.average, 2), records: r.count, share: `${r.sharePct.toFixed(1)}%` })), [category, "total", "average", "records", "share"]);
     if (window.Plotly && result.length) {
-      window.Plotly.newPlot(els.segmentChart, [{ type: "bar", x: result.slice(0, 10).map((r) => r.total).reverse(), y: result.slice(0, 10).map((r) => r.segment).reverse(), orientation: "h", marker: { color: "#4F8CFF" }, hovertemplate: `${escapeHTML(metric)}: %{x:,.2f}<extra></extra>` }], plotLayout("", { margin: { l: 110, r: 20, t: 10, b: 35 } }), { displayModeBar: false, responsive: true });
+      window.Plotly.newPlot(els.segmentChart, [{ type: "bar", x: result.slice(0, 10).map((r) => r.total).reverse(), y: result.slice(0, 10).map((r) => r.segment).reverse(), orientation: "h", marker: { color: result.slice(0, 10).map((_, index) => chartPalette[index % chartPalette.length]) }, hovertemplate: `${escapeHTML(metric)}: %{x:,.2f}<extra></extra>` }], plotLayout("", { margin: { l: 110, r: 20, t: 10, b: 35 } }), { displayModeBar: false, responsive: true });
     } else if (!result.length) els.segmentChart.innerHTML = `<div class="empty-state">No usable segment values were found.</div>`;
     refreshStrategy();
   }
@@ -637,10 +638,10 @@
       const xHist = f.series.map((r) => r.month); const yHist = f.series.map((r) => r.value);
       const xFuture = f.forecast.map((r) => r.month);
       window.Plotly.newPlot(els.forecastChart, [
-        { x: xHist, y: yHist, type: "scatter", mode: "lines+markers", name: "Actual", line: { color: "#94A3B8" } },
+        { x: xHist, y: yHist, type: "scatter", mode: "lines+markers", name: "Actual", line: { color: "#A7A5B3" } },
         { x: xFuture, y: f.forecast.map((r) => r.upper), type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip", showlegend: false },
-        { x: xFuture, y: f.forecast.map((r) => r.lower), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(96,165,250,.12)", name: "95% range", hoverinfo: "skip" },
-        { x: xFuture, y: f.forecast.map((r) => r.estimate), type: "scatter", mode: "lines+markers", name: "Forecast", line: { color: "#4F8CFF", dash: "dot" } },
+        { x: xFuture, y: f.forecast.map((r) => r.lower), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(167,139,250,.14)", name: "95% range", hoverinfo: "skip" },
+        { x: xFuture, y: f.forecast.map((r) => r.estimate), type: "scatter", mode: "lines+markers", name: "Forecast", line: { color: "#A78BFA", dash: "dot" } },
       ], plotLayout(f.metricColumn, { margin: { l: 55, r: 20, t: 20, b: 45 } }), { displayModeBar: false, responsive: true });
     }
   }
@@ -863,8 +864,8 @@
 
   function plotLayout(yTitle = "", extra = {}) {
     return {
-      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { color: "#A8B5C7", size: 10 },
-      xaxis: { gridcolor: "#263247", zerolinecolor: "#263247" }, yaxis: { gridcolor: "#263247", zerolinecolor: "#263247", title: yTitle },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { color: "#BDB9C7", size: 10 },
+      xaxis: { gridcolor: "#353545", zerolinecolor: "#353545" }, yaxis: { gridcolor: "#353545", zerolinecolor: "#353545", title: yTitle },
       showlegend: true, legend: { orientation: "h", y: 1.08 }, margin: { l: 50, r: 20, t: 25, b: 45 }, ...extra,
     };
   }
@@ -892,9 +893,9 @@
 
   function showNotice(message, kind = "info") {
     els.notice.textContent = message; els.notice.classList.remove("hidden");
-    els.notice.style.borderColor = kind === "error" ? "#6B2F3A" : kind === "success" ? "#236B63" : "#315B86";
-    els.notice.style.background = kind === "error" ? "#27151B" : kind === "success" ? "#102927" : "#111D31";
-    els.notice.style.color = kind === "error" ? "#FECACA" : kind === "success" ? "#CCFBF1" : "#DBEAFE";
+    els.notice.style.borderColor = kind === "error" ? "#6A2B3A" : kind === "success" ? "#22634F" : "#69476F";
+    els.notice.style.background = kind === "error" ? "#2A171D" : kind === "success" ? "#142A22" : "#251B29";
+    els.notice.style.color = kind === "error" ? "#FFD0D8" : kind === "success" ? "#D2F8E9" : "#F0DDF1";
   }
 
   function escapeHTML(value) {

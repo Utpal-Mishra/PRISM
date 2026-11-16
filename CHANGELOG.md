@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.12.1 — Multicolor Enterprise Palette
+
+- Replaced the blue-led PRISM UI with a graphite/charcoal foundation and controlled multi-accent system.
+- Added Orchid `#A78BFA`, Coral `#FF786B`, Mint `#3DD6A5`, Amber `#F6C453`, Rose `#F472B6` and Plum `#C084FC` as the shared analytical/category palette.
+- Added colour-coded navigation cues without colouring full navigation rows.
+- Added six-colour KPI top rules so metric groups are easier to scan while card surfaces remain neutral.
+- Added the same six-colour chart sequence and recoloured forecast ranges/notices.
+- Recoloured the PRISM SVG brand mark with an amber/coral/rose/orchid gradient and mint inner detail.
+- Updated browser/PWA theme colour, mobile/compact surfaces and cache-busted public assets.
+- Extended Browser E2E to enforce the no-blue multicolor palette contract before Chromium/axe acceptance.
+
 ## 1.12.0 — Original Enterprise Phase 1–8 Completion
 
 - Completed the application-side implementation of the original Enterprise Phase 1–8 programme while preserving organisation-specific cloud/identity/vendor activation as an explicit deployment step.

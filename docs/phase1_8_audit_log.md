@@ -16,6 +16,7 @@ Scope: private project implementation record for completion of the original Ente
 - **SYS-ENT-003** Mounted persistence, privacy, AI-runtime and pilot routers into `enterprise.api`.
 - **SYS-ENT-004** Added versioned encryption keyring and Admin-triggered workspace ciphertext re-encryption.
 - **SYS-ENT-005** Added browser palette cache-busting so the professional theme is delivered immediately after deployment.
+- **SYS-ENT-006** Replaced the blue-led palette with graphite surfaces plus six controlled analytical accents.
 
 ## Architecture Log
 
@@ -33,6 +34,7 @@ Scope: private project implementation record for completion of the original Ente
 - **AUT-ENT-002** Extended PostgreSQL DR verification through Phase 8 tables.
 - **AUT-ENT-003** Extended CI contract checks through original Phase 1–8 modules.
 - **AUT-ENT-004** Browser E2E now validates the professional enterprise palette contract before Chromium/axe tests.
+- **AUT-ENT-005** Browser E2E now rejects the retired blue tokens and validates graphite/orchid/coral/mint/amber/rose palette tokens.
 
 ## Recommendation Log
 
@@ -82,6 +84,7 @@ Scope: private project implementation record for completion of the original Ente
 - **PRO-ENT-005** Governed model registry/evaluation/gateway/AI-audit APIs.
 - **PRO-ENT-006** Controlled enterprise pilot/UAT/measurement/readiness APIs.
 - **PRO-ENT-007** Public application professional navy/slate/cobalt visual system.
+- **PRO-ENT-008** Public application graphite multi-accent system with colour-coded KPI, navigation, chart and brand cues.
 
 ## Merchant & Fulfilment Log
 
@@ -105,3 +108,4 @@ Scope: private project implementation record for completion of the original Ente
 - **DEC-ENT-008** AI-assisted Decision Cases always return to human review.
 - **DEC-ENT-009** Pilot completion requires passed security/UAT gates, no blocking UAT findings and measurements for success criteria.
 - **DEC-ENT-010** Replace green/lime-dominant public UI with restrained navy/slate/cobalt enterprise palette.
+- **DEC-ENT-011** Retire the subsequent blue-led palette; use neutral graphite surfaces with orchid, coral, mint, amber, rose and plum as bounded functional accents.
