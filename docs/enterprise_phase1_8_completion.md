@@ -188,26 +188,26 @@ A real controlled organisation, named authorised users, approved data domains, c
 
 ## Public application design update
 
-The GitHub Pages application now uses a restrained enterprise palette:
+The GitHub Pages application uses a graphite foundation with controlled multi-colour analytical accents:
 
 | Token | Value |
 | --- | --- |
-| Canvas | `#0B1220` |
-| Sidebar | `#0F172A` |
-| Surface | `#111827` |
-| Elevated surface | `#172033` |
-| Border | `#263247` |
-| Primary text | `#F8FAFC` |
-| Muted text | `#94A3B8` |
-| Primary accent | `#60A5FA` |
-| Strong accent | `#3B82F6` |
-| Action accent | `#2563EB` |
-| Soft highlight | `#93C5FD` |
-| Success | `#2DD4BF` |
-| Warning | `#F59E0B` |
-| Danger | `#F87171` |
+| Canvas | `#121217` |
+| Sidebar | `#17171E` |
+| Surface | `#1D1D26` |
+| Elevated surface | `#242431` |
+| Border | `#353545` |
+| Primary text | `#F8F7FB` |
+| Muted text | `#A7A5B3` |
+| Orchid | `#A78BFA` |
+| Coral | `#FF786B` |
+| Mint | `#3DD6A5` |
+| Amber | `#F6C453` |
+| Rose | `#F472B6` |
+| Plum | `#C084FC` |
+| Danger | `#FF5D73` |
 
-The old green/lime-dominant visual identity is no longer the primary UI language.
+Colour is used in compact information cues—KPI top rules, navigation markers, chart series, statuses and the PRISM mark—rather than saturating large enterprise surfaces.
 
 ## Remaining external release blockers
 
