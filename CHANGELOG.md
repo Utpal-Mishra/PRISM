@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.12.0 — Original Enterprise Phase 1–8 Completion
+
+- Completed the application-side implementation of the original Enterprise Phase 1–8 programme while preserving organisation-specific cloud/identity/vendor activation as an explicit deployment step.
+- Added versioned Dataset Registry, Metric Registry, Strategy, Decision, Outcome and Governance APIs backed by tenant/workspace PostgreSQL and immutable `ArtifactVersion` history.
+- Expanded governed connectors to Snowflake SQL API, Databricks SQL, Azure/GCS HTTPS objects and presigned S3, with OAuth2 client-credentials support and existing encrypted credential/egress controls.
+- Added tenant-scoped query caching, race-safe workspace concurrency ceilings, cache-aware materialisation provenance and streamed byte-bounded cloud-object ingestion.
+- Added Processing Activity/ROPA, DPIA, DPA, data-residency, incident and legal-hold records; Restricted materialisation now requires approved privacy controls and residency gates can block data assets.
+- Added versioned AES keyring support and audited re-encryption of connector/provider ciphertext during key rotation.
+- Added Prometheus alert rules, incident runbook and recurring worker/retention/cache/AI failure drills; DR validation now covers the Phase 2–8 schema.
+- Added governed live AI gateway with model registry/evaluations, provider/data-class policy, prompt-injection checks across question/evidence context, redaction, EVD citation validation, causal-status validation, quotas and AI-call audit.
+- Added controlled enterprise pilot records, security/UAT gates, evidence-backed measurements, blocking findings and readiness assessment.
+- Replaced the previous green/lime-heavy public theme with a restrained navy/slate/cobalt enterprise palette and added browser-gate token validation.
+
 ## 1.11.0 — Enterprise P2 Governed Data & AI Control Plane
 
 - Added enterprise `DATA-*` assets tied to governed P1 connector sources.
