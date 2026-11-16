@@ -211,6 +211,60 @@ def _content_hash(rows: list[dict]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _oauth_bearer_token(
+    connector: Connector,
+    secret: dict,
+    settings: EnterpriseSettings,
+) -> str:
+    token_url = str(connector.configuration.get("oauth_token_url", "")).strip()
+    if not token_url:
+        return str(secret.get("bearer_token", ""))
+
+    parsed = urlparse(token_url)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or not host_allowed(parsed.hostname, settings)
+    ):
+        raise ConnectorError(
+            "OAuth token endpoint must use HTTPS and an approved connector host."
+        )
+    client_id = str(secret.get("client_id", ""))
+    client_secret = str(secret.get("client_secret", ""))
+    if not client_id or not client_secret:
+        raise ConnectorError(
+            "OAuth client-credentials flow requires client_id and client_secret."
+        )
+
+    token_data = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+    scope = str(connector.configuration.get("oauth_scope", "")).strip()
+    if scope:
+        token_data["scope"] = scope
+    audience = str(connector.configuration.get("oauth_audience", "")).strip()
+    if audience:
+        token_data["audience"] = audience
+
+    with httpx.Client(
+        timeout=settings.connector_timeout_seconds,
+        follow_redirects=False,
+    ) as client:
+        response = client.post(
+            token_url,
+            headers={"Accept": "application/json"},
+            data=token_data,
+        )
+        response.raise_for_status()
+        body = response.json()
+    token = body.get("access_token")
+    if not isinstance(token, str) or not token:
+        raise ConnectorError("OAuth token endpoint did not return access_token.")
+    return token
+
+
 def execute_rest_get(
     connector: Connector,
     secret: dict,
@@ -222,7 +276,7 @@ def execute_rest_get(
         raise ConnectorError("REST operation path must be relative to the configured base URL.")
 
     headers = {"Accept": "application/json"}
-    token = secret.get("bearer_token")
+    token = _oauth_bearer_token(connector, secret, settings)
     if token:
         headers["Authorization"] = f"Bearer {token}"
     extra_headers = secret.get("headers", {})
@@ -309,7 +363,7 @@ def execute_snowflake_sql_api(
     operation: dict,
     settings: EnterpriseSettings,
 ) -> list[dict]:
-    token = str(secret.get("bearer_token", ""))
+    token = _oauth_bearer_token(connector, secret, settings)
     statement = str(operation.get("query", "")).strip()
     if not token or not statement:
         raise ConnectorError("Snowflake SQL API requires bearer_token and query.")
@@ -364,7 +418,7 @@ def execute_databricks_sql(
     operation: dict,
     settings: EnterpriseSettings,
 ) -> list[dict]:
-    token = str(secret.get("bearer_token", ""))
+    token = _oauth_bearer_token(connector, secret, settings)
     statement = str(operation.get("query", "")).strip()
     if not token or not statement:
         raise ConnectorError("Databricks SQL requires bearer_token and query.")
@@ -424,7 +478,7 @@ def execute_object_https(
         raise ConnectorError("Object path must be relative to the configured host.")
 
     headers = {"Accept": "application/json,text/csv;q=0.9,*/*;q=0.1"}
-    token = str(secret.get("bearer_token", ""))
+    token = _oauth_bearer_token(connector, secret, settings)
     if token:
         headers["Authorization"] = f"Bearer {token}"
     if connector.connector_type == "azure_blob_https":
