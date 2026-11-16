@@ -4,7 +4,7 @@ import socket
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session
 
 from enterprise.config import EnterpriseSettings, get_settings
@@ -27,23 +27,24 @@ def enqueue_job(
     run_after: datetime | None = None,
 ) -> JobRecord:
     settings = settings or get_settings()
-    active_jobs = db.scalar(
-        select(JobRecord)
-        .where(
-            JobRecord.tenant_id == tenant_id,
-            JobRecord.workspace_id == workspace_id,
-            JobRecord.status.in_(["queued", "running", "retrying"]),
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        db.execute(
+            text("SELECT pg_advisory_xact_lock(hashtext(:scope))"),
+            {"scope": f"job-quota:{tenant_id}:{workspace_id}"},
         )
-        .with_for_update()
+    active_count = int(
+        db.scalar(
+            select(func.count())
+            .select_from(JobRecord)
+            .where(
+                JobRecord.tenant_id == tenant_id,
+                JobRecord.workspace_id == workspace_id,
+                JobRecord.status.in_(["queued", "running", "retrying"]),
+            )
+        )
+        or 0
     )
-    active_count = len(db.scalars(
-        select(JobRecord.id).where(
-            JobRecord.tenant_id == tenant_id,
-            JobRecord.workspace_id == workspace_id,
-            JobRecord.status.in_(["queued", "running", "retrying"]),
-        )
-    ).all())
-    if active_jobs is not None and active_count >= settings.workload_max_concurrent_jobs:
+    if active_count >= settings.workload_max_concurrent_jobs:
         raise WorkloadLimitExceeded(
             "Workspace concurrent job limit has been reached."
         )
