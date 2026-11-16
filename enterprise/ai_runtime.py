@@ -218,7 +218,7 @@ def invoke_model(
     if len(user_text) > settings.ai_provider_max_input_chars:
         raise AIGatewayError("AI request exceeds the configured input limit.")
 
-    injection_flag = prompt_injection_detected(question)
+    injection_flag = prompt_injection_detected(user_text)
     prompt_hash = _prompt_hash(system_text, user_text)
     if injection_flag:
         _record_audit(
