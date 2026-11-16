@@ -1,46 +1,73 @@
 # PRISM Design System
 
-PRISM uses a restrained enterprise visual language designed for reporting, analytics, strategy and governance work. The interface should feel calm, precise and business-oriented rather than decorative or consumer-oriented.
+PRISM uses a dark, business-oriented visual system with a controlled multi-accent palette. The design should feel serious enough for enterprise reporting and strategy work, while still being memorable, energetic and easy to scan.
+
+The principle is **neutral workspace + purposeful colour**. Large surfaces remain graphite/charcoal; colour is reserved for navigation cues, KPI identity, charts, semantic states and high-value actions.
 
 ## Canonical dark palette
 
+### Foundation
+
 | Token | Value | Use |
 | --- | --- | --- |
-| Canvas | `#0B1220` | Application background |
-| Sidebar | `#0F172A` | Navigation / utility rail |
-| Surface | `#111827` | Primary cards and panels |
-| Surface 2 | `#172033` | Elevated controls and table headers |
-| Border | `#263247` | Dividers, card and input borders |
-| Text | `#F8FAFC` | Primary content |
-| Muted | `#94A3B8` | Secondary labels and metadata |
-| Soft text | `#CBD5E1` | Body/supporting copy |
-| Cobalt | `#60A5FA` | Primary interaction/accent |
-| Blue | `#3B82F6` | Strong analytical emphasis |
-| Action blue | `#2563EB` | Primary action depth |
-| Soft blue | `#93C5FD` | Brand/highlight support |
-| Success | `#2DD4BF` | Positive/success state only |
-| Warning | `#F59E0B` | Warning state |
-| Danger | `#F87171` | Error/high-risk state |
+| Canvas | `#121217` | Application background |
+| Sidebar | `#17171E` | Navigation / utility rail |
+| Surface | `#1D1D26` | Primary cards and panels |
+| Surface 2 | `#242431` | Elevated controls / table headers |
+| Surface 3 | `#16161D` | Deep inputs / recessed areas |
+| Border | `#353545` | Dividers, card and input borders |
+| Text | `#F8F7FB` | Primary content |
+| Muted | `#A7A5B3` | Secondary labels and metadata |
+| Soft text | `#D7D5DE` | Supporting content |
+
+### Brand and information accents
+
+| Token | Value | Use |
+| --- | --- | --- |
+| Orchid | `#A78BFA` | Primary PRISM accent, focus, primary analytical emphasis |
+| Deep violet | `#7C3AED` | Primary action depth |
+| Coral | `#FF786B` | Secondary brand accent, category/group contrast |
+| Mint | `#3DD6A5` | Positive/success state and one chart family |
+| Amber | `#F6C453` | Attention, warning/highlight and one chart family |
+| Rose | `#F472B6` | Tertiary/category accent |
+| Plum | `#C084FC` | Additional analytical/category accent |
+| Danger | `#FF5D73` | Error/high-risk state |
 
 ## Visual principles
 
-1. **Professional and restrained.** Navy/slate neutrals dominate; accent colour is used to guide attention, not decorate large surfaces.
-2. **Clear hierarchy before effects.** Typography, spacing, borders and data density carry the design. Blur/shadow are subtle supporting treatments.
-3. **Cobalt carries interaction.** Active navigation, links, focus states and analytical emphasis use the blue family.
-4. **Semantic colour stays semantic.** Teal is reserved for positive/success states, amber for warning, red for danger/risk.
-5. **No lime/green brand wash.** The previous green/lime-heavy identity is deprecated for PRISM.
-6. **Compact enterprise geometry.** Cards generally use 10–14 px corner radii; pills are reserved for status/tags.
-7. **Quiet typography.** Inter/system UI stacks, strong hierarchy, restrained heading tracking and muted secondary copy.
-8. **Charts inherit the enterprise palette.** Use cobalt/sky/slate series by default; semantic warning/danger colours appear only when the data meaning requires them.
-9. **Accessibility is a release gate.** Focus visibility and contrast must remain strong across desktop/mobile; serious/critical axe violations block release.
+1. **No single-colour wash.** PRISM should not read as “the blue app” or “the green app.”
+2. **Neutral surfaces dominate.** Graphite and charcoal provide a stable analytical canvas.
+3. **Colour has a job.** Orchid, coral, mint, amber, rose and plum identify categories, metrics, chart series and states.
+4. **Primary actions stay coherent.** Deep violet/magenta carries the highest-priority action treatment instead of rotating button colours.
+5. **Status colours remain semantic.** Mint means positive/success, amber means attention/warning and danger red is reserved for risk/error.
+6. **Multi-colour accents stay small.** KPI top rules, nav dots, chart series and brand marks can be colourful; large card backgrounds remain neutral.
+7. **Charts use the shared six-colour sequence.** Orchid → Coral → Mint → Amber → Rose → Plum.
+8. **Compact enterprise geometry.** Cards generally use 10–14 px corner radii; pills are for statuses/tags.
+9. **Accessibility is a release gate.** Colour is never the only signal; focus visibility and contrast must remain strong on desktop/mobile.
+
+## Component behaviour
+
+### Navigation
+Each analytical view receives a small colour cue. The active view uses that cue on its edge while retaining a neutral/tinted background.
+
+### KPI cards
+Metric cards use a 2 px coloured top rule. Repeating metric grids cycle through the six accent colours rather than tinting the whole card.
+
+### Charts
+Charts use the common six-colour palette. Forecast confidence areas use transparent orchid while actual values remain neutral so projected data is visually distinct.
+
+### Brand mark
+The PRISM mark uses an amber → coral → rose → orchid gradient with a mint inner detail. It is the most colourful single element in the shell.
 
 ## Implementation
 
-- `assets/styles.css` is the canonical browser-native design-token source.
-- `assets/mobile.css` extends those tokens into the mobile shell.
-- `assets/compact-metrics.css` uses the same palette for compact KPI/semantic layouts.
-- `assets/app.js` applies the chart/notice palette.
-- `.github/workflows/browser-e2e.yml` verifies canonical palette tokens and runs Chromium/axe acceptance tests.
-- `index.html` uses `#0B1220` as the browser theme colour and versioned stylesheet URLs to avoid stale cached themes.
+- `assets/styles.css` is the canonical browser design-token source.
+- `assets/mobile.css` inherits the same palette for mobile surfaces.
+- `assets/compact-metrics.css` retains the same semantic colours at phone widths.
+- `assets/theme.js` exposes `PRISM_DESIGN_TOKENS` and the chart palette.
+- `assets/app.js` applies the chart and notice palette.
+- `assets/prism.svg` carries the multi-colour brand treatment.
+- `.github/workflows/browser-e2e.yml` verifies the no-blue palette contract and runs Chromium/axe acceptance tests.
+- `index.html` and `manifest.webmanifest` use `#121217` as the browser/PWA theme colour.
 
-When adding a new PRISM component, reuse these semantic tokens before introducing a new colour or visual pattern.
+When adding a new component, reuse one of these semantic colours before introducing another hue.
