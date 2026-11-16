@@ -393,7 +393,14 @@ def list_strategies(
         )
         .order_by(StrategyRecord.created_at.desc())
     ).all()
-    return [{"strategy_id": row.id, "payload": row.payload, "created_at": row.created_at} for row in rows]
+    return [
+        {
+            "strategy_id": row.id,
+            "payload": row.payload,
+            "created_at": row.created_at,
+        }
+        for row in rows
+    ]
 
 
 @router.post(
