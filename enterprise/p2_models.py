@@ -18,6 +18,8 @@ class DataAsset(TenantScopedRecord, Base):
     owner: Mapped[str] = mapped_column(String(255), nullable=False)
     classification: Mapped[str] = mapped_column(String(32), nullable=False, default="internal")
     handling_note: Mapped[str] = mapped_column(String(1000), nullable=False, default="")
+    processing_activity_id: Mapped[str | None] = mapped_column(String(96), index=True)
+    residency_region: Mapped[str | None] = mapped_column(String(100))
     source_connector_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")
     latest_snapshot_id: Mapped[str | None] = mapped_column(String(96))
