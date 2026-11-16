@@ -31,6 +31,7 @@ class EnterpriseSettings(BaseSettings):
     audit_hmac_key: SecretStr = SecretStr("")
     data_encryption_key_b64: SecretStr = SecretStr("")
     data_encryption_key_version: str = "v1"
+    data_encryption_keys_json: SecretStr = SecretStr("")
 
     connector_allowed_hosts: str = ""
     connector_timeout_seconds: int = 15
