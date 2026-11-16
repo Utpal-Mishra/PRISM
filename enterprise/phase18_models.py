@@ -2,7 +2,17 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from enterprise.db import Base
@@ -172,7 +182,11 @@ class DPIAAssessment(TenantScopedRecord, Base):
     __tablename__ = "dpia_assessments"
 
     id: Mapped[str] = mapped_column(String(96), primary_key=True)
-    processing_activity_id: Mapped[str] = mapped_column(String(96), nullable=False, index=True)
+    processing_activity_id: Mapped[str] = mapped_column(
+        String(96),
+        nullable=False,
+        index=True,
+    )
     risk_level: Mapped[str] = mapped_column(String(32), nullable=False)
     necessity: Mapped[str] = mapped_column(Text, nullable=False)
     proportionality: Mapped[str] = mapped_column(Text, nullable=False)
@@ -330,8 +344,8 @@ class PilotMeasurement(TenantScopedRecord, Base):
     id: Mapped[str] = mapped_column(String(96), primary_key=True)
     pilot_id: Mapped[str] = mapped_column(String(96), nullable=False, index=True)
     metric: Mapped[str] = mapped_column(String(160), nullable=False)
-    target: Mapped[float | None]
-    actual: Mapped[float | None]
+    target: Mapped[float | None] = mapped_column(Float)
+    actual: Mapped[float | None] = mapped_column(Float)
     unit: Mapped[str] = mapped_column(String(64), nullable=False, default="")
     evidence_id: Mapped[str | None] = mapped_column(String(96), index=True)
     measured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
