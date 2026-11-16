@@ -12,6 +12,7 @@ from enterprise.audit import append_audit_event
 from enterprise.config import get_settings
 from enterprise.db import get_db
 from enterprise.models import EvidenceRecord
+from enterprise.observability import PILOT_EVENTS
 from enterprise.phase18_models import EnterprisePilot, PilotMeasurement, UATFinding
 from enterprise.tenancy import WorkspaceAccess, require_role
 
@@ -118,6 +119,7 @@ def create_pilot(
         uat_status="pending",
     )
     db.add(pilot)
+    PILOT_EVENTS.labels(event="created").inc()
     append_audit_event(
         db,
         access,
@@ -160,6 +162,7 @@ def update_pilot_gates(
         and body.uat_status == "passed"
     ):
         pilot.status = "active"
+    PILOT_EVENTS.labels(event="gates_updated").inc()
     append_audit_event(
         db,
         access,
@@ -219,6 +222,7 @@ def record_pilot_measurement(
         **body.model_dump(),
     )
     db.add(measurement)
+    PILOT_EVENTS.labels(event="measurement_recorded").inc()
     db.commit()
     return {"pilot_measurement_id": measurement.id}
 
@@ -252,6 +256,7 @@ def create_uat_finding(
         status="open",
     )
     db.add(finding)
+    PILOT_EVENTS.labels(event="uat_finding_recorded").inc()
     if body.severity in {"critical", "high"}:
         pilot.uat_status = "failed"
     db.commit()
