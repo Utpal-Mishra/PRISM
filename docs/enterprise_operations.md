@@ -1,6 +1,6 @@
-# PRISM Enterprise P1/P2 Operations
+# PRISM Enterprise Operations — Phase 1–8
 
-P1 turns the P0 security boundary into an operational runtime; P2 adds governed data materialisation and the first evidence-grounded AI Control Plane. This document describes both layers and the production activations still required outside source control.
+The original Phase 1–8 programme is implemented as one governed enterprise runtime: identity/tenancy, authoritative persistence, connectors, workers/cache, privacy/governance, reliability, model-gateway controls and controlled-pilot records. Organisation-specific cloud/vendor activation remains outside source control.
 
 ## Runtime topology
 
@@ -32,10 +32,16 @@ The API and workers use the same application image. Workers run `python -m enter
 
 ## Connector execution
 
-P1 supports two production connector adapters:
+The governed connector catalogue includes:
 
-- `rest_https` — HTTPS GET only, redirects disabled, explicit host allowlist, bounded JSON rows.
-- `postgresql` — connection through an allowlisted host and credential with the session forced to `default_transaction_read_only=on`.
+- `rest_https` — HTTPS GET, redirect refusal, explicit host allowlist and bounded JSON rows;
+- `postgresql` — allowlisted host with session forced to `default_transaction_read_only=on`;
+- `snowflake_sql_api` — SQL pushdown through Snowflake's HTTPS API;
+- `databricks_sql` — SQL Statements API with bounded inline results;
+- `azure_blob_https` and `gcs_https` — streamed/bounded object reads;
+- `s3_presigned_https` — encrypted presigned URL with approved host validation.
+
+REST/cloud adapters can use encrypted bearer credentials or OAuth2 client-credentials with an independently HTTPS/allowlisted token endpoint.
 
 Connector credentials are submitted separately from connector configuration, encrypted with AES-256-GCM, versioned and rotated. Previous connector credentials are revoked when a new version becomes active. Connector configuration rejects credential-like fields to prevent accidental plaintext secret persistence.
 
@@ -132,6 +138,12 @@ Initial P1 objectives:
 
 The repository does not claim those objectives are achieved in production until a real staging/production environment is measured.
 
+## Phase 5 privacy/compliance controls
+
+The enterprise API now persists Processing Activity/ROPA records, DPIAs, DPAs, residency policies, incidents and legal holds. Restricted data assets require a processing activity and approved DPIA before materialisation. Active residency policies gate data-asset regions/classifications. Connectors explicitly marked as external processors require an active DPA record. Active legal holds override retention deletion.
+
+Encryption key rotation uses a versioned AES keyring. Historical key versions remain available during controlled re-encryption, and the Admin rotation endpoint rewrites connector/provider ciphertext to the configured current key version with an audit event.
+
 ## Backup and disaster recovery
 
 See [disaster_recovery.md](disaster_recovery.md).
@@ -151,9 +163,7 @@ Supported targets include individual evidence, connectors (including credentials
 
 ## AI-provider governance
 
-P1 registers future AI providers without enabling arbitrary model calls.
-
-Provider configurations are disabled by default. Enablement requires:
+Provider configurations remain disabled by default. Provider enablement requires:
 
 - provider host in `PRISM_AI_PROVIDER_ALLOWED_HOSTS`;
 - encrypted provider credential;
@@ -163,7 +173,11 @@ Provider configurations are disabled by default. Enablement requires:
 
 No provider API key is exposed to the public browser application.
 
-P2 deliberately does not invoke providers. A later model-enabled Control Plane release must call providers through this governed server boundary and enforce the selected provider's exact request/response contract, classification policy and evidence-grounding rules.
+The model-enabled gateway is now implemented. A registered model still cannot be enabled without a passing evaluation and an enabled approved provider. Runtime requests enforce data-class ceilings, input/output bounds, injection/redaction checks, valid supplied `EVD-*` citations, causal-status validation, AI-call auditing and human review for Decision Case synthesis.
+
+## Phase 8 controlled pilot
+
+The pilot framework stores bounded organisation/user/data-domain scope, security-review/UAT gates, success criteria, evidence-backed measurements and UAT findings. Readiness refuses completion if security/UAT is not passed, blocking findings remain, or required success measurements are missing. A real organisation/pilot is never inferred from the presence of these controls.
 
 ## Browser and staging acceptance
 
