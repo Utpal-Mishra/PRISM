@@ -73,7 +73,7 @@ def _classification_allows(ceiling: str, classification: str) -> bool:
 
 def _prompt_hash(system_text: str, user_text: str) -> str:
     return hashlib.sha256(
-        f"{system_text}\n---\n{user_text}".encode("utf-8")
+        f"{system_text}\n---\n{user_text}".encode()
     ).hexdigest()
 
 
